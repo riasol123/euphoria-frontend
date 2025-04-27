@@ -1,0 +1,25 @@
+#root { 
+  width: 100vw;
+  height: 100vh;
+  margin: 0px;
+  padding: 0px;
+}
+
+body { 
+  margin: 0;
+  padding: 0px;
+  background-image: url('./assets/body_background.png');
+  background-size: 260px 240px;
+}
+
+.appContainer { 
+  width: 1140px;
+  height: 100%;
+  margin: auto;
+}
+
+.ant-picker-header-view button {
+  font-family: "Montserrat Alternates", sans-serif;
+  font-style: normal;
+  color: #393939;
+}
