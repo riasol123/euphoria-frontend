@@ -14,7 +14,6 @@ body {
 
 .appContainer { 
   width: 1140px;
-  height: 100%;
   margin: auto;
 }
 
@@ -22,4 +21,9 @@ body {
   font-family: "Montserrat Alternates", sans-serif;
   font-style: normal;
   color: #393939;
+}
+
+.pageWrapper {
+  padding-top: 64px;
+  width: 100%;
 }

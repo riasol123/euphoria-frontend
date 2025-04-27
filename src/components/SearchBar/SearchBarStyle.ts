@@ -1,3 +1,5 @@
+import backgroundImage from '../../assets/body_background.png';
+
 const textStyle = {
   fontFamily: '"Montserrat Alternates", sans-serif',
   fontStyle: 'normal',
@@ -5,13 +7,23 @@ const textStyle = {
 };
 
 export const searchStyles = {
+  barWrapper: {
+    width: '1140px',
+    height: 'fit-content',
+    paddingTop: '20px',
+    backgroundImage: `url(${backgroundImage})`,
+    backgroundSize: '260px 240px',
+    position: 'fixed',
+    zIndex: '1',
+    borderRadius: '0px 0px 20px 20px',
+  },
   mainContainer: {
     display: 'flex',
     height: '70px',
     gap: '30px',
     padding: '10px',
     boxSizing: 'border-box',
-    width: '100%',
+    width: '1005',
     backgroundColor: '#fff',
     borderRadius: '20px',
     alignItems: 'center',

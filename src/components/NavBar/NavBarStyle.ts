@@ -4,18 +4,16 @@ export const navbarStyles = {
   box: {
     flexGrow: 1,
     paddingTop: 0,
-    position: 'sticky',
+    position: 'fixed',
     backgroundImage: `url(${backgroundImage})`,
     backgroundSize: '260px 240px',
-    top: '0',
-    left: '0',
-    zIndex: '1',
+    zIndex: 10,
   },
   appBar: {
     border: 'none',
     background: 'none',
     height: '64px',
-    width: '100%',
+    width: '1140px',
     '& div': {
       padding: '0px',
       display: 'flex',

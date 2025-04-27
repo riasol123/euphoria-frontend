@@ -1,6 +1,9 @@
 import * as mui from '@mui/material';
 
 const theme = mui.createTheme({
+  typography: {
+    fontFamily: '"Montserrat Alternates", sans-serif',
+  },
   palette: {
     primary: {
       main: '#FF5722',

@@ -62,92 +62,94 @@ export const SearchBar = () => {
   };
 
   return (
-    <Box sx={searchStyles.mainContainer}>
-      <FormControl variant="outlined" className="barItem">
-        <OutlinedInput
-          type="text"
-          placeholder="Место"
-          value={place}
-          onChange={handlePlaceChange}
-          sx={searchStyles.input}
-          startAdornment={
-            <InputAdornment position="start">
-              <img src={SearchIcon} alt="search" />
-            </InputAdornment>
-          }
-        />
-      </FormControl>
+    <Box sx={searchStyles.barWrapper}>
+      <Box sx={searchStyles.mainContainer}>
+        <FormControl variant="outlined" className="barItem">
+          <OutlinedInput
+            type="text"
+            placeholder="Место"
+            value={place}
+            onChange={handlePlaceChange}
+            sx={searchStyles.input}
+            startAdornment={
+              <InputAdornment position="start">
+                <img src={SearchIcon} alt="search" />
+              </InputAdornment>
+            }
+          />
+        </FormControl>
 
-      <Divider orientation="vertical" />
+        <Divider orientation="vertical" />
 
-      <ConfigProvider locale={ruRU} theme={searchStyles.datePickerTheme}>
-        <RangePicker
-          format="dd, D MMM"
-          placeholder={['Заезд', 'Отъезд']}
-          disabledDate={(current) => current && current < dayjs().startOf('day')}
-          prefix={<img src={DateIcon} alt="date" />}
-          suffixIcon={null}
-          style={searchStyles.input}
-          inputReadOnly
-          value={dateRange}
-          onChange={handleDateChange}
-          className="barItem"
-        />
-      </ConfigProvider>
+        <ConfigProvider locale={ruRU} theme={searchStyles.datePickerTheme}>
+          <RangePicker
+            format="dd, D MMM"
+            placeholder={['Заезд', 'Отъезд']}
+            disabledDate={(current) => current && current < dayjs().startOf('day')}
+            prefix={<img src={DateIcon} alt="date" />}
+            suffixIcon={null}
+            style={searchStyles.input}
+            inputReadOnly
+            value={dateRange}
+            onChange={handleDateChange}
+            className="barItem"
+          />
+        </ConfigProvider>
 
-      <Divider orientation="vertical" />
+        <Divider orientation="vertical" />
 
-      <Box sx={searchStyles.peopleWrapper} className="barItem">
+        <Box sx={searchStyles.peopleWrapper} className="barItem">
+          <Button
+            id="people-count"
+            aria-controls={open ? 'people-count-menu' : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? 'true' : undefined}
+            onClick={handleClick}
+          >
+            <img src={PeopleIcon} alt="people"/>
+            {adults} взрослых · {children} детей
+            <img src={DropDown} alt="dropdown" />
+          </Button>
+          <Menu
+            id="people-count-menu"
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            sx={searchStyles.menu}
+            MenuListProps={{ 'aria-labelledby': 'people-count' }}
+          >
+            <MenuItem>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '200px' }}>
+                <Typography>Взрослые</Typography>
+                <Box>
+                  <IconButton size="small" onClick={() => updateCount('adults', false)}><RemoveIcon /></IconButton>
+                  <Typography component="span" sx={{ mx: 1 }}>{adults}</Typography>
+                  <IconButton size="small" onClick={() => updateCount('adults', true)}><AddIcon /></IconButton>
+                </Box>
+              </Box>
+            </MenuItem>
+            <MenuItem>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '200px' }}>
+                <Typography>Дети</Typography>
+                <Box>
+                  <IconButton size="small" onClick={() => updateCount('children', false)}><RemoveIcon /></IconButton>
+                  <Typography component="span" sx={{ mx: 1 }}>{children}</Typography>
+                  <IconButton size="small" onClick={() => updateCount('children', true)}><AddIcon /></IconButton>
+                </Box>
+              </Box>
+            </MenuItem>
+          </Menu>
+        </Box>
+
         <Button
-          id="people-count"
-          aria-controls={open ? 'people-count-menu' : undefined}
-          aria-haspopup="true"
-          aria-expanded={open ? 'true' : undefined}
-          onClick={handleClick}
+          variant="contained"
+          className="searchButton"
+          disableElevation
+          onClick={handleSearch}
         >
-          <img src={PeopleIcon} alt="people"/>
-          {adults} взрослых · {children} детей
-          <img src={DropDown} alt="dropdown" />
+          Найти
         </Button>
-        <Menu
-          id="people-count-menu"
-          anchorEl={anchorEl}
-          open={open}
-          onClose={handleClose}
-          sx={searchStyles.menu}
-          MenuListProps={{ 'aria-labelledby': 'people-count' }}
-        >
-          <MenuItem>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '200px' }}>
-              <Typography>Взрослые</Typography>
-              <Box>
-                <IconButton size="small" onClick={() => updateCount('adults', false)}><RemoveIcon /></IconButton>
-                <Typography component="span" sx={{ mx: 1 }}>{adults}</Typography>
-                <IconButton size="small" onClick={() => updateCount('adults', true)}><AddIcon /></IconButton>
-              </Box>
-            </Box>
-          </MenuItem>
-          <MenuItem>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '200px' }}>
-              <Typography>Дети</Typography>
-              <Box>
-                <IconButton size="small" onClick={() => updateCount('children', false)}><RemoveIcon /></IconButton>
-                <Typography component="span" sx={{ mx: 1 }}>{children}</Typography>
-                <IconButton size="small" onClick={() => updateCount('children', true)}><AddIcon /></IconButton>
-              </Box>
-            </Box>
-          </MenuItem>
-        </Menu>
       </Box>
-
-      <Button
-        variant="contained"
-        className="searchButton"
-        disableElevation
-        onClick={handleSearch}
-      >
-        Найти
-      </Button>
     </Box>
   );
 };
