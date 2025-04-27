@@ -11,12 +11,16 @@ const removeArrows = {
 export const itemStyles = {
   container: {
     width: '270px',
-    height: '400px',
+    height: 'calc(100vh - 220px)',
     backgroundColor: '#fff',
     padding: '20px',
     borderRadius: '20px',
     display: 'flex',
     flexDirection: 'column',
+    flex: 'none',
+    alignSelf: 'stretch',
+    position: 'fixed',
+    zIndex: 1,
     gap: '10px',
     '& p, label, input, span.MuiTypography-root, div.MuiInputAdornment-root p': {
       fontFamily: '"Montserrat Alternates", sans-serif',

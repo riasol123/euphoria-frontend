@@ -3,7 +3,12 @@ export const searchPageStyles = {
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
-    gap: '30px',
-    padding: '20px 0px'
+    paddingBottom: '20px'
+  },
+  main: {
+    display: 'flex',
+    gap: '20px',
+    justifyContent: 'flex-end',
+    paddingTop: '120px',
   },
 };
