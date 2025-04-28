@@ -7,7 +7,7 @@ const textStyle = {
 export const authPageStyles = {
   container: {
     width: '100%',
-    height: 'calc(100% - 64px)',
+    height: 'calc(100vh - 64px - 30px)',
     display: 'flex',
     borderRadius: '20px',
     overflow: 'hidden',

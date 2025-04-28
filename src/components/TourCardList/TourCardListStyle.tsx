@@ -6,6 +6,5 @@ export const styles = {
     gap: '20px',
     width: '850',
     marginLeft: '290px',
-    // justifyContent: 'flex-end',
   },
 };

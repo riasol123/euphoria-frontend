@@ -1,7 +1,7 @@
 export const itemStyles = {
   card: {
-    width: '210px',
-    height: '150px',
+    width: '272px',
+    height: '180px',
     flexDirection: 'column',
     gap: '10px',
     padding: '20px 30px',
