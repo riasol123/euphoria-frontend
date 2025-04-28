@@ -13,30 +13,29 @@ import SearchIcon from '../../assets/search.svg';
 import DateIcon from '../../assets/date.svg';
 
 import { searchStyles } from './SmallSearchFormStyle';
+import { setSearchData } from '../../redux/actions/search';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 export const SmallSearchForm = () => {
   const { RangePicker } = DatePicker;
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  // Состояния для хранения значений инпута и DatePicker
   const [place, setPlace] = useState('');
-  const [dateRange, setDateRange] = useState(null);
+  const [dateRange, setDateRange] = useState<any>(null);
 
-  // Функция для обработки изменений в инпуте
   const handlePlaceChange = (event: ChangeEvent<HTMLInputElement>) => {
     setPlace(event.target.value);
   };
 
-  // Функция для обработки изменений в DatePicker
   const handleDateChange = (dates: any) => {
     setDateRange(dates);
   };
 
-  // Функция для обработки клика по кнопке
   const handleSearch = () => {
-    // Здесь можно использовать собранные данные для дальнейших действий
-    console.log('Место:', place);
-    console.log('Даты:', dateRange);
-    // Например, можно отправить их на сервер или в другой компонент
+    dispatch(setSearchData({ place, dateRange })); // ✅ экшен
+    navigate('/search'); // ✅ редирект
   };
 
   return (

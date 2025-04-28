@@ -1,4 +1,5 @@
 import { ChangeEvent, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux'; // Путь для правильной типизации стейта
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputAdornment from '@mui/material/InputAdornment';
 import FormControl from '@mui/material/FormControl';
@@ -7,52 +8,69 @@ import { ConfigProvider, DatePicker } from 'antd';
 import ruRU from 'antd/locale/ru_RU';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
-
 import SearchIcon from '../../assets/search.svg';
 import DateIcon from '../../assets/date.svg';
 import DropDown from '../../assets/dropdown.svg';
 import PeopleIcon from '../../assets/people.svg';
-
-import { searchStyles } from './SearchBarStyle';
-import React from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+import { searchStyles } from './SearchBarStyle';
+import { RootState } from '../../hooks/getTypedSelector';
 
 dayjs.locale('ru');
 
+// Компонент SearchBar
 export const SearchBar = () => {
   const { RangePicker } = DatePicker;
 
-  const [place, setPlace] = useState('');
-  const [dateRange, setDateRange] = useState(null);
-  const [adults, setAdults] = useState(2);
-  const [children, setChildren] = useState(0);
+  // Получаем данные из Redux Store
+  const { place, dateRange } = useSelector((state: RootState) => state.search);
+
+  // Локальные состояния для инпутов
+  const [placeInput, setPlace] = useState(place || '');  // Место
+  const [dateRangeInput, setDateRange] = useState(dateRange || null);  // Даты
+  const [adults, setAdults] = useState(2);  // Количество взрослых
+  const [children, setChildren] = useState(0);  // Количество детей
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
+  const dispatch = useDispatch();
+
+  // Обработчик изменения поля "Место"
   const handlePlaceChange = (event: ChangeEvent<HTMLInputElement>) => {
     setPlace(event.target.value);
   };
 
+  // Обработчик изменения дат
   const handleDateChange = (dates: any) => {
     setDateRange(dates);
   };
 
+  // Функция для отправки данных (например, в Redux Store или на сервер)
   const handleSearch = () => {
-    console.log('Место:', place);
-    console.log('Даты:', dateRange);
+    console.log('Место:', placeInput);
+    console.log('Даты:', dateRangeInput);
     console.log('Взрослые:', adults, 'Дети:', children);
+
+    // Здесь можно отправить данные в Redux с помощью dispatch
+    dispatch({
+      type: 'SET_SEARCH_DATA',
+      payload: { place: placeInput, dateRange: dateRangeInput },
+    });
   };
 
+  // Обработчик клика по кнопке для изменения количества людей
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
+  // Закрытие меню выбора людей
   const handleClose = () => {
     setAnchorEl(null);
   };
 
+  // Функция для обновления количества людей (взрослых и детей)
   const updateCount = (type: 'adults' | 'children', increment: boolean) => {
     if (type === 'adults') {
       setAdults((prev) => Math.max(1, prev + (increment ? 1 : -1)));
@@ -64,12 +82,13 @@ export const SearchBar = () => {
   return (
     <Box sx={searchStyles.barWrapper}>
       <Box sx={searchStyles.mainContainer}>
+        {/* Поле для ввода места */}
         <FormControl variant="outlined" className="barItem">
           <OutlinedInput
             type="text"
             placeholder="Место"
-            value={place}
-            onChange={handlePlaceChange}
+            value={placeInput}  // Значение инпута из локального состояния
+            onChange={handlePlaceChange}  // Обработчик изменений
             sx={searchStyles.input}
             startAdornment={
               <InputAdornment position="start">
@@ -81,6 +100,7 @@ export const SearchBar = () => {
 
         <Divider orientation="vertical" />
 
+        {/* Поле для выбора дат */}
         <ConfigProvider locale={ruRU} theme={searchStyles.datePickerTheme}>
           <RangePicker
             format="dd, D MMM"
@@ -90,14 +110,15 @@ export const SearchBar = () => {
             suffixIcon={null}
             style={searchStyles.input}
             inputReadOnly
-            value={dateRange}
-            onChange={handleDateChange}
+            value={dateRangeInput}  // Значение для дат из локального состояния
+            onChange={handleDateChange}  // Обработчик изменения дат
             className="barItem"
           />
         </ConfigProvider>
 
         <Divider orientation="vertical" />
 
+        {/* Меню для выбора количества людей */}
         <Box sx={searchStyles.peopleWrapper} className="barItem">
           <Button
             id="people-count"
@@ -106,7 +127,7 @@ export const SearchBar = () => {
             aria-expanded={open ? 'true' : undefined}
             onClick={handleClick}
           >
-            <img src={PeopleIcon} alt="people"/>
+            <img src={PeopleIcon} alt="people" />
             {adults} взрослых · {children} детей
             <img src={DropDown} alt="dropdown" />
           </Button>
@@ -141,11 +162,12 @@ export const SearchBar = () => {
           </Menu>
         </Box>
 
+        {/* Кнопка поиска */}
         <Button
           variant="contained"
           className="searchButton"
           disableElevation
-          onClick={handleSearch}
+          onClick={handleSearch}  // Обработчик клика по кнопке
         >
           Найти
         </Button>

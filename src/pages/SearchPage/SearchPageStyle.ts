@@ -8,7 +8,7 @@ export const searchPageStyles = {
   main: {
     display: 'flex',
     gap: '20px',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between  ',
     paddingTop: '120px',
   },
 };

@@ -1,15 +1,41 @@
 import { FC, useState } from 'react';
 import { Box, Button, TextField, Typography } from '@mui/material';
+import axios from 'axios'; // Импортируем axios
 
 import image from '../../assets/auth_img.jpg';
-
 import { authPageStyles } from './AuthPageStyle';
 
 const AuthPage: FC = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [surname, setSurname] = useState('');
+  const [token, setToken] = useState(localStorage.getItem('token')); // Сохраняем токен из localStorage
 
   const toggleForm = () => {
     setIsLogin(prev => !prev);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const url = isLogin ? 'https://82grrc2b-3001.euw.devtunnels.ms/auth/login' : 'https://82grrc2b-3001.euw.devtunnels.ms/auth/registration';
+    const payload = isLogin
+      ? { email, password }
+      : { email, name, surname, password };
+
+    try {
+      const response = await axios.post(url, payload);
+
+      if (response.data.token) {
+        // Сохраняем токен в localStorage
+        localStorage.setItem('token', response.data.token);
+        setToken(response.data.token); // Обновляем состояние токена
+      }
+    } catch (error) {
+      console.error('Ошибка при отправке запроса:', error);
+    }
   };
 
   return (
@@ -30,22 +56,41 @@ const AuthPage: FC = () => {
             name="name"
             fullWidth
             sx={authPageStyles.input}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
         )}
+        {!isLogin && (
+          <TextField
+            label="Фамилия"
+            name="surname"
+            fullWidth
+            sx={authPageStyles.input}
+            value={surname}
+            onChange={(e) => setSurname(e.target.value)}
+          />
+        )}
+
         <TextField
           label="Почта"
           name="email"
           type="email"
           fullWidth
           sx={authPageStyles.input}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
+
         <TextField
           label="Пароль"
           name="password"
           type="password"
           fullWidth
           sx={authPageStyles.input}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
+
         {!isLogin && (
           <TextField
             label="Подтвердите пароль"
@@ -67,6 +112,7 @@ const AuthPage: FC = () => {
           fullWidth
           disableElevation
           sx={authPageStyles.button}
+          onClick={handleSubmit}
         >
           {isLogin ? 'Войти' : 'Зарегистрироваться'}
         </Button>
