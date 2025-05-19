@@ -6,6 +6,7 @@ import AuthPage from './pages/AuthPage/AuthPage';
 import SearchPage from './pages/SearchPage/SearchPage';
 import { Box } from '@mui/material';
 import TourPage from './pages/TourPage/TourPage';
+import ProfilePage from './pages/ProfilePage/ProfilePage';
 
 const Layout: FC = () => {
   return (
@@ -28,6 +29,7 @@ const App: FC = () => {
           <Route path="search" element={<SearchPage />} />
           <Route path="auth" element={<AuthPage />} />
           <Route path="/tour/:id" element={<TourPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Routes>
     </Router>

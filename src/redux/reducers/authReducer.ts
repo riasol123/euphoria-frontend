@@ -5,7 +5,6 @@ import {
   AUTH_LOGOUT,
   AUTH_REQUESTED,
   AUTH_SUCCESS,
-  CHANGE_MODAL_PROPS,
 } from '../actionTypes';
 
 interface AuthAction {
@@ -44,7 +43,6 @@ export default function authReducer(state = initialState, action: AuthAction) {
         authUser: action.payload,
         error: null,
       };
-
     case AUTH_FAILED:
       return {
         ...state,
@@ -53,12 +51,6 @@ export default function authReducer(state = initialState, action: AuthAction) {
         authUser: null,
         error: action.error,
       };
-
-    case CHANGE_MODAL_PROPS:
-      return {
-        ...state,
-        error: null,
-      }
     default:
       return state;
   }

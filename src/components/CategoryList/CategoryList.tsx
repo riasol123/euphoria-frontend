@@ -16,61 +16,64 @@ import arrowLeft from '../../assets/arrow_left.svg';
 import arrowRight from '../../assets/arrow_right.svg';
 
 const ITEMS_PER_PAGE = 4;
+const ITEM_WIDTH = 290; // 270px width + 20px gap
 
 export const CategoryList = () => {
   const [startIndex, setStartIndex] = useState(0);
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-
+  
+  const maxStartIndex = Math.max(0, itemData.length - ITEMS_PER_PAGE);
   const canGoBack = startIndex > 0;
-  const canGoForward = endIndex < itemData.length;
+  const canGoForward = startIndex < maxStartIndex;
 
   const handlePrev = () => {
     if (canGoBack) {
-      setStartIndex(prev => Math.max(prev - 1, 0));
+      setStartIndex(prev => Math.max(0, prev - 1));
     }
   };
   
   const handleNext = () => {
     if (canGoForward) {
-      setStartIndex(prev => prev + 1);
+      setStartIndex(prev => Math.min(maxStartIndex, prev + 1));
     }
-  };  
+  };
 
   return (
-    <Box
-      sx={categoryListStyles.container}
-    >
+    <Box sx={categoryListStyles.container}>
+      <Box sx={categoryListStyles.visibleContainer}>
+        <Box
+          sx={{
+            ...categoryListStyles.sliderContainer,
+            transform: `translateX(-${startIndex * ITEM_WIDTH}px)`,
+          }}
+        >
+          {itemData.map((item, index) => (
+            <CategoryListItem
+              key={index}
+              icon={item.icon}
+              title={item.title}
+              description={item.description}
+            />
+          ))}
+        </Box>
+      </Box>
+
       {canGoBack && (
         <IconButton
           onClick={handlePrev}
           sx={categoryListStyles.arrowRight}
+          className="arrow-button"
         >
-          <img src={arrowLeft}/>
+          <img src={arrowLeft} alt="Previous"/>
         </IconButton>
       )}
-
-      <Box
-        sx={{
-          display: 'flex',
-          gap: '20px',
-        }}
-      >
-        {itemData.slice(startIndex, endIndex).map((item, index) => (
-          <CategoryListItem
-            key={index}
-            icon={item.icon}
-            title={item.title}
-            description={item.description}
-          />
-        ))}
-      </Box>
 
       {canGoForward && (
         <IconButton
           onClick={handleNext}
           sx={categoryListStyles.arrowLeft}
+          className="arrow-button"
         >
-          <img src={arrowRight}/>
+          <img src={arrowRight} alt="Next"/>
         </IconButton>
       )}
     </Box>
@@ -120,7 +123,7 @@ const itemData = [
   },
   {
     icon: steak,
-    title: 'Эко-гастро',
+    title: 'Мясной пир',
     description: 'Всё о гриле и барбекю: аргентинский асадо, американский BBQ, грузинский шашлык.',
   },
 ];

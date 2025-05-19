@@ -31,7 +31,7 @@ export const getAuthUser = (payload: AuthDate) => ({
   payload,
 });
 
-export const authReceived = (payload: AuthUserAction): AuthReceivedAction => ({
+export const authReceived = (payload: any): AuthReceivedAction => ({
   type: AUTH_SUCCESS,
   payload,
 });

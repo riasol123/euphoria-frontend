@@ -3,8 +3,10 @@ export interface AuthInformation {
   user: {
     id: number;
     email: string;
-    login: string;
-    avatarPath: string;
+    name: string;
+    surname: string;
+    patronymic?: string;
+    avatarPath?: string;
   };
 }
 
