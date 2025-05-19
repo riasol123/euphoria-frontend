@@ -14,10 +14,10 @@ export const mainPageStyles = {
   },
   categories: {
     width: '100%',
-    '& div': {
+    '& > div': {
       display: 'flex',
       alignItems: 'center',
-      gap: '15px',
+      gap: '20px',
     },
     '& hr': {
       flexGrow: 1,

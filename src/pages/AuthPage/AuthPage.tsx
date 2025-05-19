@@ -4,6 +4,10 @@ import axios from 'axios'; // Импортируем axios
 
 import image from '../../assets/auth_img.jpg';
 import { authPageStyles } from './AuthPageStyle';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../hooks/getTypedSelector';
+import { authReceived } from '../../redux/actions/auth';
+import { useNavigate } from 'react-router-dom';
 
 const AuthPage: FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -11,7 +15,10 @@ const AuthPage: FC = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [surname, setSurname] = useState('');
-  const [token, setToken] = useState(localStorage.getItem('token')); // Сохраняем токен из localStorage
+  const [token, setToken] = useState(localStorage.getItem('token'));
+  const dispatch: AppDispatch = useDispatch();
+  const navigate = useNavigate();
+
 
   const toggleForm = () => {
     setIsLogin(prev => !prev);
@@ -29,10 +36,12 @@ const AuthPage: FC = () => {
       const response = await axios.post(url, payload);
 
       if (response.data.token) {
-        // Сохраняем токен в localStorage
         localStorage.setItem('token', response.data.token);
-        setToken(response.data.token); // Обновляем состояние токена
+        setToken(response.data.token);
       }
+
+      dispatch(authReceived(response.data));
+      navigate('/');
     } catch (error) {
       console.error('Ошибка при отправке запроса:', error);
     }

@@ -25,9 +25,9 @@ export const TourCard = ({
   description: string,
   location: string,
   duration: number,
-  price: string,
+  price: string | number,
   img: string,
-  rate: number,
+  rate: string,
 }) => {
   return (
     <Card sx={styles.cardContainer} elevation={0}>
@@ -35,10 +35,10 @@ export const TourCard = ({
         <CardMedia
           component="img"
           height="246"
-          image={img}
+          image={'https://82grrc2b-3001.euw.devtunnels.ms/'+ img}
           alt="tour image"
         />
-        <CardContent sx={{ flexGrow: 1 }}>
+        <CardContent sx={{ height: '181px' }}>
           <Box sx={styles.topTextContainer}>
           <img src={StarIcon} style={styles.ratingIcon}></img>
             <Typography>

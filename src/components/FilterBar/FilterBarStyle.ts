@@ -11,7 +11,7 @@ const removeArrows = {
 export const itemStyles = {
   container: {
     width: '270px',
-    height: 'calc(100vh - 220px)',
+    height: 'calc(100vh - 205px)',
     backgroundColor: '#fff',
     padding: '20px',
     borderRadius: '20px',

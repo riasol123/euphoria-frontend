@@ -1,15 +1,13 @@
 import { combineReducers } from 'redux';
 
-import postReducer from './postReducer';
-import modalReducer from './modalReducer';
 import authReducer from './authReducer';
 import { searchReducer } from './searchReducer';
+import { tourReducer } from './tourReducer';
 
 const rootReducer = combineReducers({
-  posts: postReducer,
-  modal: modalReducer,
   auth: authReducer,
   search: searchReducer,
+  tour: tourReducer,
 });
 
 export default rootReducer;

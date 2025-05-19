@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux'; // Путь для правильной типизации стейта
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -16,6 +16,9 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { searchStyles } from './SearchBarStyle';
 import { RootState } from '../../hooks/getTypedSelector';
+import { setSearchData } from '../../redux/actions/search';
+import axios from 'axios';
+import { setTours } from '../../redux/actions/tour';
 
 dayjs.locale('ru');
 
@@ -24,10 +27,11 @@ export const SearchBar = () => {
   const { RangePicker } = DatePicker;
 
   // Получаем данные из Redux Store
-  const { place, dateRange } = useSelector((state: RootState) => state.search);
+  const { city, dateRange } = useSelector((state: RootState) => state.search);
+  const searchData = useSelector((state: RootState) => state.search);
 
   // Локальные состояния для инпутов
-  const [placeInput, setPlace] = useState(place || '');  // Место
+  const [placeInput, setPlace] = useState(city || '');  // Место
   const [dateRangeInput, setDateRange] = useState(dateRange || null);  // Даты
   const [adults, setAdults] = useState(2);  // Количество взрослых
   const [children, setChildren] = useState(0);  // Количество детей
@@ -40,25 +44,38 @@ export const SearchBar = () => {
   // Обработчик изменения поля "Место"
   const handlePlaceChange = (event: ChangeEvent<HTMLInputElement>) => {
     setPlace(event.target.value);
+    dispatch(setSearchData({ city: placeInput }))
   };
 
   // Обработчик изменения дат
   const handleDateChange = (dates: any) => {
     setDateRange(dates);
+    dispatch(setSearchData({ dateRange }))
   };
 
   // Функция для отправки данных (например, в Redux Store или на сервер)
-  const handleSearch = () => {
-    console.log('Место:', placeInput);
-    console.log('Даты:', dateRangeInput);
-    console.log('Взрослые:', adults, 'Дети:', children);
-
-    // Здесь можно отправить данные в Redux с помощью dispatch
-    dispatch({
-      type: 'SET_SEARCH_DATA',
-      payload: { place: placeInput, dateRange: dateRangeInput },
-    });
+  const handleSearch = async () => {
+    try {
+      const params = new URLSearchParams();
+  
+      if (searchData.city) params.append('city', searchData.city);
+      if (searchData.dateRange?.[0]) params.append('startDate', searchData.dateRange[0].format('YYYY-MM-DD'));
+      if (searchData.dateRange?.[1]) params.append('endDate', searchData.dateRange[1].format('YYYY-MM-DD'));
+      if (searchData.durationFrom) params.append('durationFrom', String(searchData.durationFrom));
+      if (searchData.durationTo) params.append('durationTo', String(searchData.durationTo));
+      if (searchData.isAccomodation !== undefined) params.append('isAccomodation', String(searchData.isAccomodation));
+  
+      const response = await axios.get(`https://82grrc2b-3001.euw.devtunnels.ms/tour`, {
+        params: Object.fromEntries(params),
+      });
+  
+      console.log('Результат поиска:', response.data);
+      dispatch(setTours(response.data));
+    } catch (error) {
+      console.error('Ошибка при поиске:', error);
+    }
   };
+  
 
   // Обработчик клика по кнопке для изменения количества людей
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -78,6 +95,10 @@ export const SearchBar = () => {
       setChildren((prev) => Math.max(0, prev + (increment ? 1 : -1)));
     }
   };
+
+  useEffect(() => {
+    handleSearch();
+  }, []);
 
   return (
     <Box sx={searchStyles.barWrapper}>

@@ -73,7 +73,8 @@ export const searchStyles = {
     '& .barItem': {
       flexGrow: 1,
       justifyContent: 'center',
-    },
+      width: '300px',
+    },  
   },
   datePickerTheme: {
     token: {

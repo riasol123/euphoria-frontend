@@ -1,13 +1,21 @@
-import { SET_SEARCH_DATA, SetSearchDataPayload } from '../actions/search';
+import { SET_SEARCH_DATA } from '../actions/search';
 
-interface SearchState {
-  place: string;
-  dateRange: any; // уточнить тип если нужно
+export interface SearchState {
+  city?: string;
+  dateRange?: any;
+  isAccommodation?: boolean;
+  categoryIds?: any;
+  durationFrom?: number;
+  durationTo?: number;
 }
 
 const initialState: SearchState = {
-  place: '',
+  city: '',
   dateRange: null,
+  isAccommodation: false,
+  categoryIds: null,
+  durationFrom: 1,
+  durationTo: 30,
 };
 
 export const searchReducer = (state = initialState, action: any): SearchState => {
@@ -15,8 +23,7 @@ export const searchReducer = (state = initialState, action: any): SearchState =>
     case SET_SEARCH_DATA:
       return {
         ...state,
-        place: action.payload.place,
-        dateRange: action.payload.dateRange,
+        ...action.payload,
       };
     default:
       return state;

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Box,
   Slider,
@@ -12,45 +13,52 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { itemStyles } from "./FilterBarStyle";
-
-const cuisineOptions = [
-  "Итальянская",
-  "Французская",
-  "Японская",
-  "Мексиканская",
-  "Вегетарианская"
-];
+import { useDispatch } from "react-redux";
+import { setSearchData } from "../../redux/actions/search";
 
 export function FilterBar() {
-  const [duration, setDuration] = useState<[number, number]>([3, 10]);
+  const [duration, setDuration] = useState<[number, number]>([1, 30]);
   const [accommodation, setAccommodation] = useState(false);
   const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
+  const [cuisineOptions, setCuisineOptions] = useState<string[]>([]);
+  const dispatch = useDispatch();
 
   const [durationInput, setDurationInput] = useState<[string, string]>([
     String(duration[0]),
     String(duration[1])
   ]);
-  
+
+  // Запрос списка типов кухни
+  useEffect(() => {
+    axios.get("https://82grrc2b-3001.euw.devtunnels.ms/categories")
+      .then(response => {
+        setCuisineOptions(response.data); // предполагаем, что это массив строк
+      })
+      .catch(error => {
+        console.error("Ошибка загрузки типов кухни:", error);
+      });
+  }, []);
+
   const handleSliderChange = (_: any, newValue: number | number[]) => {
     setDuration(newValue as [number, number]);
     setDurationInput([
       String((newValue as [number, number])[0]),
       String((newValue as [number, number])[1])
     ]);
+    dispatch(setSearchData({ durationFrom: newValue[0], durationTo: newValue[1] }));
   };
-  
+
   const handleInputChange = (index: number, value: string) => {
     const newInputs = [...durationInput] as [string, string];
     newInputs[index] = value;
     setDurationInput(newInputs);
   };
-  
+
   const handleInputBlur = (index: number) => {
     const newInputs = [...durationInput] as [string, string];
     let val = parseInt(newInputs[index], 10);
-  
     if (isNaN(val) || val < 1) val = 1;
-  
+
     const newDuration = [...duration] as [number, number];
     newDuration[index] = val;
 
@@ -58,15 +66,22 @@ export function FilterBar() {
       newDuration[1] = newDuration[0];
       newInputs[1] = String(newDuration[0]);
     }
-  
+
     if (index === 0 && val > newDuration[1]) {
       newDuration[0] = newDuration[1];
       newInputs[0] = String(newDuration[1]);
     }
-  
+
     newInputs[index] = String(newDuration[index]);
     setDuration(newDuration);
     setDurationInput(newInputs);
+    dispatch(setSearchData({ durationFrom: newDuration[0], durationTo: newDuration[1] }));
+  };
+
+  const handleCheck = (e) => {
+    const checked = e.target.checked;
+    setAccommodation(checked);
+    dispatch(setSearchData({ isAccommodation: checked }));
   };
 
   return (
@@ -80,48 +95,48 @@ export function FilterBar() {
         step={1}
         size="small"
       />
+
       <Box sx={itemStyles.durabilityTextFieldContainer}>
-      <TextField
-        label="От"
-        type="number"
-        value={durationInput[0]}
-        onChange={(e) => handleInputChange(0, e.target.value)}
-        onBlur={() => handleInputBlur(0)}
-        InputProps={{
-          endAdornment: <InputAdornment position="end">дней</InputAdornment>,
-        }}
-        inputProps={{
-          inputMode: 'numeric',
-          pattern: '[0-9]*',
-          style: {
-            appearance: 'textfield',
-          },
-        }}
-        sx={itemStyles.textFieldFrom}
-      />
+        <TextField
+          label="От"
+          type="number"
+          value={durationInput[0]}
+          onChange={(e) => handleInputChange(0, e.target.value)}
+          onBlur={() => handleInputBlur(0)}
+          InputProps={{
+            endAdornment: <InputAdornment position="end">дней</InputAdornment>,
+          }}
+          inputProps={{
+            inputMode: 'numeric',
+            pattern: '[0-9]*',
+            style: {
+              appearance: 'textfield',
+            },
+          }}
+          sx={itemStyles.textFieldFrom}
+        />
 
-      <TextField
-        label="До"
-        type="number"
-        value={durationInput[1]}
-        onChange={(e) => handleInputChange(1, e.target.value)}
-        onBlur={() => handleInputBlur(1)}
-        InputProps={{
-          endAdornment: <InputAdornment position="end">дней</InputAdornment>,
-        }}
-        inputProps={{
-          inputMode: 'numeric',
-          pattern: '[0-9]*',
-          style: {
-            appearance: 'textfield',
-          },
-        }}
-        sx={itemStyles.textFieldTo}
-
-      />
+        <TextField
+          label="До"
+          type="number"
+          value={durationInput[1]}
+          onChange={(e) => handleInputChange(1, e.target.value)}
+          onBlur={() => handleInputBlur(1)}
+          InputProps={{
+            endAdornment: <InputAdornment position="end">дней</InputAdornment>,
+          }}
+          inputProps={{
+            inputMode: 'numeric',
+            pattern: '[0-9]*',
+            style: {
+              appearance: 'textfield',
+            },
+          }}
+          sx={itemStyles.textFieldTo}
+        />
       </Box>
 
-      <Divider sx={itemStyles.divider}/>
+      <Divider sx={itemStyles.divider} />
 
       <FormControlLabel
         label="Проживание включено"
@@ -131,25 +146,25 @@ export function FilterBar() {
           <Switch
             checked={accommodation}
             size="small"
-            onChange={(e) => setAccommodation(e.target.checked)}
+            onChange={handleCheck}
           />
         }
       />
 
-      <Divider sx={itemStyles.divider}/>
+      <Divider sx={itemStyles.divider} />
       <Typography>Тип кухни</Typography>
       <Autocomplete
         multiple
         options={cuisineOptions}
         disableCloseOnSelect
         value={selectedCuisines}
-        onChange={(_, value) => setSelectedCuisines(value)}
+        onChange={(_, value) => { setSelectedCuisines(value)}}
         getOptionLabel={(option) => option}
         sx={itemStyles.popper}
         renderOption={(props, option, { selected }) => (
           <li {...props} style={itemStyles.popper}>
             <Checkbox checked={selected} />
-            {option}
+            {option.title}
           </li>
         )}
         renderInput={(params) => (

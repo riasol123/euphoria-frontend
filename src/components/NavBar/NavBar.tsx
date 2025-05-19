@@ -1,63 +1,101 @@
 import { ReactNode, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppBar, Box, Button, Divider, Toolbar } from '@mui/material';
-import { useNavigate } from 'react-router-dom'; // ✅ Импорт навигации
+import { AppBar, Box, Button, Divider, IconButton, Toolbar } from '@mui/material';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import { AppDispatch, RootState } from '../../hooks/getTypedSelector';
-import { userLogOut, verificationUser } from '../../redux/actions/auth';
 import LogoSvg from '../../assets/logo.svg';
+import UserIcon from '../../assets/user.svg';
 
 import { navbarStyles } from './NavBarStyle';
+import axios from 'axios';
+import { authReceived } from '../../redux/actions/auth';
 
-const token = localStorage.getItem('authToken');
 
 export const NavBar = (): ReactNode => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const dispatch: AppDispatch = useDispatch();
-  const navigate = useNavigate(); // ✅ Хук для переходов
+
+  const { isLogged } = useSelector((state: RootState) => state.auth);
+  const { authUser } = useSelector((state: RootState) => state.auth);
+
+  const whoami = async () => {
+
+    const url = 'https://82grrc2b-3001.euw.devtunnels.ms/auth/whoami';
+    const token = localStorage.getItem('token');
+
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      dispatch(authReceived(response.data));
+    } catch (error) {
+      console.error('Ошибка при отправке запроса:', error);
+    }
+  };
 
   useEffect(() => {
-    if (token !== null) {
-      dispatch(verificationUser());
-    }
+    whoami();
   }, []);
 
-  const { authUser, isLogged } = useSelector((state: RootState) => state.auth);
-
-  const tapLogout = () => {
-    localStorage.removeItem('authToken');
-    dispatch(userLogOut());
-  };
+  console.log(authUser)
 
   return (
     <Box sx={navbarStyles.box}>
       <AppBar position="static" sx={navbarStyles.appBar} elevation={0}>
         <Toolbar>
           <img src={LogoSvg} alt="Logo" style={{ cursor: 'pointer' }} onClick={() => navigate('/')} />
-          {!isLogged && (
-            <Box sx={{ height: '100%', display: 'flex', alignItems: 'center' }}>
-              <Button sx={navbarStyles.button} onClick={() => navigate('/')}>
-                Главная
-              </Button>
-              <Button sx={navbarStyles.button} onClick={() => navigate('/search')}>
-                Поиск
-              </Button>
-              <Divider orientation="vertical" flexItem sx={{ margin: '10px 2px' }} />
+
+          <Box sx={{ height: '100%', display: 'flex', alignItems: 'center' }}>
+            <Button 
+              sx={{
+                ...navbarStyles.button,
+                fontWeight: location.pathname === '/' ? '700' : '500'
+              }} 
+              onClick={() => navigate('/')}
+            >
+              Главная
+            </Button>
+            <Button 
+              sx={{
+                ...navbarStyles.button,
+                fontWeight: location.pathname === '/search' ? '700' : '500'
+              }}
+              onClick={() => navigate('/search')}
+            >
+              Поиск
+            </Button>
+            <Divider orientation="vertical" flexItem sx={{ margin: '10px 2px' }} />
+            {!isLogged && (
               <Button
-                sx={navbarStyles.button}
-                onClick={() => navigate('/auth')} // ✅ Перенаправление на страницу авторизации
+                sx={{
+                  ...navbarStyles.button,
+                  fontWeight: location.pathname === '/auth' ? '700' : '500',
+                }}
+                onClick={() => navigate('/auth')}
               >
                 Войти
               </Button>
-            </Box>
-          )}
-          {isLogged && (
-            <>
-              <Button sx={navbarStyles.button}>{authUser?.email}</Button>
-              <Button sx={navbarStyles.button} onClick={tapLogout}>
-                Logout
-              </Button>
-            </>
-          )}
+            )}
+            {isLogged && (
+              <>
+                <IconButton 
+                  sx={{
+                    ...navbarStyles.userIcon,
+                    '& img': {
+                      border: location.pathname === '/profile' ? '2px solid #393939' : 'none'
+                    }
+                  }} 
+                  onClick={() => navigate('/profile')}
+                > 
+                  <img src={authUser.avatarPath ? 'https://82grrc2b-3001.euw.devtunnels.ms/' + authUser.avatarPath : UserIcon} style={{ width: '30px', height: '30px', borderRadius: '20px', }}></img>
+                </IconButton>
+              </>
+            )}
+          </Box>
         </Toolbar>
       </AppBar>
     </Box>

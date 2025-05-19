@@ -1,9 +1,10 @@
 export const itemStyles = {
   card: {
-    width: '272px',
-    height: '180px',
+    width: '270px',
+    height: '190px',
+    display: 'flex',
     flexDirection: 'column',
-    gap: '10px',
+    gap: '15px',
     padding: '20px 30px',
     borderRadius: '20px',
     '& span, p': {
@@ -31,6 +32,8 @@ export const itemStyles = {
   header: {
     width: '100%',
     justify: 'left',
+    display: 'flex',
+    gap: '10px',
     '& div': {
       width: 'fit-content',
       margin: '0px',

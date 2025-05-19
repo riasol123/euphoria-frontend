@@ -22,11 +22,11 @@ export const SmallSearchForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [place, setPlace] = useState('');
+  const [city, setCity] = useState('');
   const [dateRange, setDateRange] = useState<any>(null);
 
   const handlePlaceChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setPlace(event.target.value);
+    setCity(event.target.value);
   };
 
   const handleDateChange = (dates: any) => {
@@ -34,8 +34,8 @@ export const SmallSearchForm = () => {
   };
 
   const handleSearch = () => {
-    dispatch(setSearchData({ place, dateRange })); // ✅ экшен
-    navigate('/search'); // ✅ редирект
+    dispatch(setSearchData({ city, dateRange }));
+    navigate('/search');
   };
 
   return (
@@ -50,7 +50,7 @@ export const SmallSearchForm = () => {
             id="outlined-adornment-password"
             type='text'
             placeholder='Место'
-            value={place}
+            value={city}
             onChange={handlePlaceChange}  // Обработчик изменения
             sx={searchStyles.input}
             startAdornment={

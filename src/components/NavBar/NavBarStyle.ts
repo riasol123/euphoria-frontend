@@ -3,17 +3,20 @@ import backgroundImage from '../../assets/body_background.png';
 export const navbarStyles = {
   box: {
     flexGrow: 1,
+    left: 0,
     paddingTop: 0,
     position: 'fixed',
     backgroundImage: `url(${backgroundImage})`,
     backgroundSize: '260px 240px',
     zIndex: 10,
+    width: '100%',
   },
   appBar: {
     border: 'none',
     background: 'none',
     height: '64px',
     width: '1140px',
+    margin: 'auto',
     '& div': {
       padding: '0px',
       display: 'flex',
@@ -35,5 +38,8 @@ export const navbarStyles = {
       fontWeight: '700',
       background: 'none',
     },
+  },
+  userIcon: {
+    marginLeft: '20px',
   },
 };

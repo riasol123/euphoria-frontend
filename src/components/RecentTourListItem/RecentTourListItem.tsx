@@ -18,7 +18,6 @@ export const RecentTourListItem = ({
   month: string;
   featured: boolean;
   onMouseEnter: () => void;
-  tourId: number; // ID тура
 }) => {
   const navigate = useNavigate(); // Инициализируем navigate
 
