@@ -7,6 +7,7 @@ import { styles } from './ProfilePageStyle';
 import { EditUserForm } from '../../components/EditUserForm/EditUserForm';
 import { AccountSetting } from '../../components/AccountSetting/AccountSetting';
 import { BookingHistory } from '../../components/BookingHistory/BookingHistory';
+import { OrganizerForm } from '../../components/OrganizerForm/OrganizerForm';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -65,7 +66,7 @@ export default function ProfilePage() {
       <Box sx={styles.panel}>
         <TabPanel value={value} index={0}><EditUserForm /></TabPanel>
         <TabPanel value={value} index={1}><BookingHistory /></TabPanel>
-        <TabPanel value={value} index={2}></TabPanel>
+        <TabPanel value={value} index={2}><OrganizerForm /></TabPanel>
         <TabPanel value={value} index={3}><AccountSetting /></TabPanel>
       </Box>
     </Box>
