@@ -25,6 +25,7 @@ export const styles = {
     },
     '& .MuiTableCell-head': {
       fontWeight: 500,
+      paddingTop: '0px',
     },
     '& .tour-name-column': {
       width: '200px',

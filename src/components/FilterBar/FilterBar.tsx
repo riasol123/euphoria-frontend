@@ -16,11 +16,16 @@ import { itemStyles } from "./FilterBarStyle";
 import { useDispatch } from "react-redux";
 import { setSearchData } from "../../redux/actions/search";
 
+interface CuisineType {
+  id: number;
+  title: string;
+}
+
 export function FilterBar() {
   const [duration, setDuration] = useState<[number, number]>([1, 30]);
   const [accommodation, setAccommodation] = useState(false);
-  const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
-  const [cuisineOptions, setCuisineOptions] = useState<string[]>([]);
+  const [selectedCuisines, setSelectedCuisines] = useState<CuisineType[]>([]);
+  const [cuisineOptions, setCuisineOptions] = useState<CuisineType[]>([]);
   const dispatch = useDispatch();
 
   const [durationInput, setDurationInput] = useState<[string, string]>([
@@ -32,7 +37,7 @@ export function FilterBar() {
   useEffect(() => {
     axios.get("https://82grrc2b-3001.euw.devtunnels.ms/categories")
       .then(response => {
-        setCuisineOptions(response.data); // предполагаем, что это массив строк
+        setCuisineOptions(response.data);
       })
       .catch(error => {
         console.error("Ошибка загрузки типов кухни:", error);
@@ -82,6 +87,13 @@ export function FilterBar() {
     const checked = e.target.checked;
     setAccommodation(checked);
     dispatch(setSearchData({ isAccommodation: checked }));
+  };
+
+  const handleCuisineChange = (_, newValue: CuisineType[]) => {
+    setSelectedCuisines(newValue);
+    dispatch(setSearchData({ 
+      cuisineTypes: newValue.map(cuisine => cuisine.id)
+    }));
   };
 
   return (
@@ -158,11 +170,12 @@ export function FilterBar() {
         options={cuisineOptions}
         disableCloseOnSelect
         value={selectedCuisines}
-        onChange={(_, value) => { setSelectedCuisines(value)}}
-        getOptionLabel={(option) => option}
+        onChange={handleCuisineChange}
+        getOptionLabel={(option) => option.title}
+        isOptionEqualToValue={(option, value) => option.id === value.id}
         sx={itemStyles.popper}
         renderOption={(props, option, { selected }) => (
-          <li {...props} style={itemStyles.popper}>
+          <li {...props}>
             <Checkbox checked={selected} />
             {option.title}
           </li>
