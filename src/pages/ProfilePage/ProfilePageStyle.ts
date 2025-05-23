@@ -4,6 +4,7 @@ export const styles = {
     borderRadius: '20px',
     width: '290px',
     padding: '20px',
+    minWidth: '290px',
     '& .MuiTabs-indicator': {
       left: '0',
     },
@@ -19,11 +20,21 @@ export const styles = {
     flexGrow: 1,
     backgroundColor: '#fff',
     borderRadius: '20px',
+    '& div[role="tabpanel"]': {
+      height: '100%',
+    },
   },
   container: {
     display: 'flex',
     gap: '20px',
     padding: '20px 0px',
     height: 'calc(100vh - 64px)',
+  },
+  tabPanelBox: {
+    p: 3,
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: 0,
   },
 };

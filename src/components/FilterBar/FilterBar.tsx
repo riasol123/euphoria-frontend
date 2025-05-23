@@ -15,6 +15,7 @@ import {
 import { itemStyles } from "./FilterBarStyle";
 import { useDispatch } from "react-redux";
 import { setSearchData } from "../../redux/actions/search";
+import DropDown from "../../assets/dropdown.svg";
 
 interface CuisineType {
   id: number;
@@ -174,6 +175,7 @@ export function FilterBar() {
         getOptionLabel={(option) => option.title}
         isOptionEqualToValue={(option, value) => option.id === value.id}
         sx={itemStyles.popper}
+        popupIcon={<img src={DropDown} alt="dropdown" className="custom-dropdown-icon" style={{ width: 20, height: 20, opacity: 0.7, transition: 'transform 0.2s' }} />}
         renderOption={(props, option, { selected }) => (
           <li {...props}>
             <Checkbox checked={selected} />

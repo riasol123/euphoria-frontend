@@ -47,6 +47,18 @@ export const itemStyles = {
     fontStyle: 'normal',
     color: '#393939',
     fontSize: '14px',
+    '& .MuiAutocomplete-popupIndicator': {
+      background: 'none',
+    },
+    '& .MuiAutocomplete-popupIndicator:hover, .MuiAutocomplete-popupIndicator:hover *': {
+      background: 'none',
+    },
+    '& .MuiTouchRipple-root *': {
+      background: 'none',
+    },
+    '& .MuiAutocomplete-popupIndicator[aria-expanded="true"] .custom-dropdown-icon': {
+      transform: 'rotate(180deg)',
+    },
   },
   textField: {
     '& fieldset': {

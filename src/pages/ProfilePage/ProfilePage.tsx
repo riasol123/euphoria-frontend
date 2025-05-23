@@ -1,13 +1,14 @@
 import * as React from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { styles } from './ProfilePageStyle';
 import { EditUserForm } from '../../components/EditUserForm/EditUserForm';
 import { AccountSetting } from '../../components/AccountSetting/AccountSetting';
 import { BookingHistory } from '../../components/BookingHistory/BookingHistory';
 import { OrganizerForm } from '../../components/OrganizerForm/OrganizerForm';
+import { OrganizerTours } from '../../components/OrganizerTours/OrganizerTours';
+import { CreateTourForm } from '../../components/CreateTourForm/CreateTourForm';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -27,8 +28,8 @@ function TabPanel(props: TabPanelProps) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
+        <Box sx={styles.tabPanelBox}>
+          {children}
         </Box>
       )}
     </div>
@@ -44,6 +45,8 @@ function a11yProps(index: number) {
 
 export default function ProfilePage() {
   const [value, setValue] = React.useState(0);
+  // TODO: Replace with actual user role check from your auth system
+  const isOrganizer = true; // This should come from your auth context/state
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -60,14 +63,26 @@ export default function ProfilePage() {
       >
         <Tab label="Личные данные" {...a11yProps(0)} />
         <Tab label="История бронирования" {...a11yProps(1)} />
-        <Tab label="Стать организатором" {...a11yProps(2)} />
-        <Tab label="Настройки аккаунта" {...a11yProps(3)} />
+        {isOrganizer ? (
+            <Tab label="Мои туры" {...a11yProps(2)} />
+        ) : (
+          <Tab label="Стать организатором" {...a11yProps(2)} />
+        )}
+        {isOrganizer && <Tab label="Создать тур" {...a11yProps(3)} />}
+        <Tab label="Настройки аккаунта" {...a11yProps(isOrganizer ? 4 : 3)} />
       </Tabs>
       <Box sx={styles.panel}>
         <TabPanel value={value} index={0}><EditUserForm /></TabPanel>
         <TabPanel value={value} index={1}><BookingHistory /></TabPanel>
-        <TabPanel value={value} index={2}><OrganizerForm /></TabPanel>
-        <TabPanel value={value} index={3}><AccountSetting /></TabPanel>
+        <TabPanel value={value} index={2}>
+          {isOrganizer ? <OrganizerTours /> : <OrganizerForm />}
+        </TabPanel>
+        {isOrganizer && (
+          <TabPanel value={value} index={3}>
+            <CreateTourForm />
+          </TabPanel>
+        )}
+        <TabPanel value={value} index={isOrganizer ? 4 : 3}><AccountSetting /></TabPanel>
       </Box>
     </Box>
   );
