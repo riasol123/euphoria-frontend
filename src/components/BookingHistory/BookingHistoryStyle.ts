@@ -15,9 +15,9 @@ export const styles = {
     '& .MuiTableCell-root': {
       fontSize: '14px',
       color: '#393939',
-      textAlign: 'center',
+      textAlign: 'left',
       verticalAlign: 'middle',
-      padding: '16px 10px',
+      padding: '16px',
       maxWidth: '200px',
       whiteSpace: 'nowrap',
       overflow: 'hidden',

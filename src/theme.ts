@@ -40,7 +40,11 @@ const theme = mui.createTheme({
       styleOverrides: {
         root: {
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#FFA999',
+            border: '1px solid #FF5333'
+          },
+          '&:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#FF5333',
+            borderWidth: '1px',
           },
         },
       },

@@ -150,7 +150,16 @@ export const SearchBar = () => {
           >
             <img src={PeopleIcon} alt="people" />
             {adults} взрослых · {children} детей
-            <img src={DropDown} alt="dropdown" />
+            <img
+              src={DropDown}
+              alt="dropdown"
+              style={{
+                // transition: 'transform 0.2s',
+                transform: open ? 'rotate(180deg)' : 'none',
+                width: '16px',
+                height: '16px',
+              }}
+            />
           </Button>
           <Menu
             id="people-count-menu"

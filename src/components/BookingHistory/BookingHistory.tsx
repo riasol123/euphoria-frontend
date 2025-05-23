@@ -86,7 +86,7 @@ export const BookingHistory: FC = () => {
         <Table sx={styles.table}>
           <TableHead>
             <TableRow>
-              <TableCell className="tour-name-column">Название тура</TableCell>
+              <TableCell className="tour-name-column">Тур</TableCell>
               <TableCell className="dates-column">Даты</TableCell>
               <TableCell>Участники</TableCell>
               <TableCell>Стоимость</TableCell>
