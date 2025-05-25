@@ -4,5 +4,6 @@ export const recentTourListStyles = {
     display: 'flex',
     margin: '0px',
     width: '100%',
+    overflow: 'hidden',
   },
 };

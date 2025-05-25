@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import { styles } from './OrganizerFormStyle';
 import { useState } from 'react';
-import axios from 'axios';
+import { api } from '../../utils/api';
 
 export const OrganizerForm = () => {
   const [values, setValues] = useState({
@@ -31,21 +31,11 @@ export const OrganizerForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-
     try {
-      await axios.post(
-        'https://82grrc2b-3001.euw.devtunnels.ms/organizer/request',
-        values,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-      // Handle success
+      const response = await api.post('/organizer/request', values);
+      console.log('Ответ сервера:', response.data);
     } catch (error) {
-      console.error('Ошибка:', error);
+      console.error('Ошибка при отправке формы:', error);
     }
   };
 

@@ -35,7 +35,8 @@ export const TourCard = ({
         <CardMedia
           component="img"
           height="246"
-          image={'https://82grrc2b-3001.euw.devtunnels.ms/'+ img}
+          image={img}
+          // image={'https://82grrc2b-3001.euw.devtunnels.ms/'+ img}
           alt="tour image"
         />
         <CardContent sx={{ height: '181px' }}>

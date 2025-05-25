@@ -4,6 +4,11 @@ import {
   SET_TOURS_LOADING,
   SET_TOURS_ERROR,
 } from '../actions/tour';
+import {
+  FETCH_TOURS_REQUEST,
+  FETCH_TOURS_SUCCESS,
+  FETCH_TOURS_FAILURE,
+} from '../actionTypes';
 
 // types.ts
 export interface Tour {
@@ -37,7 +42,10 @@ const initialState: TourState = {
 type Action =
   | { type: typeof SET_TOURS; payload: Tour[] }
   | { type: typeof SET_TOURS_LOADING; payload: boolean }
-  | { type: typeof SET_TOURS_ERROR; payload: string };
+  | { type: typeof SET_TOURS_ERROR; payload: string }
+  | { type: typeof FETCH_TOURS_REQUEST }
+  | { type: typeof FETCH_TOURS_SUCCESS; payload: Tour[] }
+  | { type: typeof FETCH_TOURS_FAILURE; payload: string };
 
 export const tourReducer = (state = initialState, action: Action): TourState => {
   switch (action.type) {
@@ -46,6 +54,12 @@ export const tourReducer = (state = initialState, action: Action): TourState => 
     case SET_TOURS_LOADING:
       return { ...state, loading: action.payload };
     case SET_TOURS_ERROR:
+      return { ...state, error: action.payload, loading: false };
+    case FETCH_TOURS_REQUEST:
+      return { ...state, loading: true, error: null };
+    case FETCH_TOURS_SUCCESS:
+      return { ...state, tours: action.payload, loading: false, error: null };
+    case FETCH_TOURS_FAILURE:
       return { ...state, error: action.payload, loading: false };
     default:
       return state;

@@ -2,7 +2,7 @@ import { ChangeEvent, useState } from 'react';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputAdornment from '@mui/material/InputAdornment';
 import FormControl from '@mui/material/FormControl';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, Tooltip } from '@mui/material';
 import { ConfigProvider, DatePicker } from 'antd';
 import ruRU from 'antd/locale/ru_RU';
 import dayjs from 'dayjs';
@@ -24,9 +24,19 @@ export const SmallSearchForm = () => {
 
   const [city, setCity] = useState('');
   const [dateRange, setDateRange] = useState<any>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  // Только буквы (русские, латинские), пробелы и дефисы
+  const allowedPattern = /^[a-zA-Zа-яА-ЯёЁ\-\s]*$/;
 
   const handlePlaceChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setCity(event.target.value);
+    const value = event.target.value;
+    if (allowedPattern.test(value)) {
+      setCity(value);
+      if (value.trim()) {
+        setShowTooltip(false);
+      }
+    }
   };
 
   const handleDateChange = (dates: any) => {
@@ -34,6 +44,11 @@ export const SmallSearchForm = () => {
   };
 
   const handleSearch = () => {
+    if (!city.trim()) {
+      setShowTooltip(true);
+      return;
+    }
+    setShowTooltip(false);
     dispatch(setSearchData({ city, dateRange }));
     navigate('/search');
   };
@@ -46,19 +61,26 @@ export const SmallSearchForm = () => {
       </Box>
       <Box sx={searchStyles.inputContainer}>
         <FormControl sx={searchStyles.formControl} variant="outlined">
-          <OutlinedInput
-            id="outlined-adornment-password"
-            type='text'
-            placeholder='Место'
-            value={city}
-            onChange={handlePlaceChange}  // Обработчик изменения
-            sx={searchStyles.input}
-            startAdornment={
-              <InputAdornment position="start">
-                <img src={SearchIcon} alt="search"/>
-              </InputAdornment>
-            }
-          />
+          <Tooltip
+            title={showTooltip ? 'Место не может быть пустым' : ''}
+            open={showTooltip}
+            arrow
+            placement="top"
+          >
+            <OutlinedInput
+              id="outlined-adornment-password"
+              type='text'
+              placeholder='Место'
+              value={city}
+              onChange={handlePlaceChange}
+              sx={searchStyles.input}
+              startAdornment={
+                <InputAdornment position="start">
+                  <img src={SearchIcon} alt="search"/>
+                </InputAdornment>
+              }
+            />
+          </Tooltip>
         </FormControl>
         <ConfigProvider 
           locale={ruRU}
@@ -71,15 +93,15 @@ export const SmallSearchForm = () => {
             suffixIcon={null}
             style={searchStyles.input}
             inputReadOnly
-            value={dateRange}  // Установка значения для диапазона дат
-            onChange={handleDateChange}  // Обработчик изменения
+            value={dateRange}
+            onChange={handleDateChange}
           />
         </ConfigProvider>
         <Button
           variant="contained"
           color="primary"
           disableElevation
-          onClick={handleSearch}  // Обработчик клика по кнопке
+          onClick={handleSearch}
         >
           Найти туры
         </Button>

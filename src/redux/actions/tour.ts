@@ -1,4 +1,5 @@
 import { Tour } from "../reducers/tourReducer";
+import { FETCH_TOURS_REQUEST, FETCH_TOURS_SUCCESS, FETCH_TOURS_FAILURE } from '../actionTypes';
 
 // actions.ts
 export const SET_TOURS = 'SET_TOURS';
@@ -17,5 +18,19 @@ export const setToursLoading = (loading: boolean) => ({
 
 export const setToursError = (error: string) => ({
   type: SET_TOURS_ERROR,
+  payload: error,
+});
+
+export const fetchToursRequest = () => ({
+  type: FETCH_TOURS_REQUEST,
+});
+
+export const fetchToursSuccess = (tours: Tour[]) => ({
+  type: FETCH_TOURS_SUCCESS,
+  payload: tours,
+});
+
+export const fetchToursFailure = (error: string) => ({
+  type: FETCH_TOURS_FAILURE,
   payload: error,
 });

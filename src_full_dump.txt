@@ -1,0 +1,3615 @@
+// src/App.tsx - Главный компонент приложения
+import { Suspense } from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import MainPage from './pages/MainPage/MainPage';
+import SearchPage from './pages/SearchPage/SearchPage';
+import TourPage from './pages/TourPage/TourPage';
+import OrganizerPage from './pages/OrganizerPage/OrganizerPage';
+import OrganizerTours from './components/OrganizerTours/OrganizerTours';
+import NavBar from './components/NavBar/NavBar';
+import AccountSetting from './components/AccountSetting/AccountSetting';
+import EditUserForm from './components/EditUserForm/EditUserForm';
+
+function App() {
+  return (
+    <BrowserRouter>
+      <NavBar />
+      <Suspense fallback={<div>Loading...</div>}>
+        <Routes>
+          <Route path="/" element={<MainPage />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/tour/:id" element={<TourPage />} />
+          <Route path="/organizer" element={<OrganizerPage />} />
+          <Route path="/organizer/tours" element={<OrganizerTours />} />
+          <Route path="/account" element={<AccountSetting />} />
+          <Route path="/account/edit" element={<EditUserForm />} />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
+  );
+}
+
+export default App;
+
+// src/main.tsx - Точка входа приложения
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import { Provider } from 'react-redux';
+import { store } from './redux/store';
+import './style.css';
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </React.StrictMode>
+);
+
+// src/theme.ts - Тема оформления MUI
+import { createTheme } from '@mui/material/styles';
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#FF5333',
+    },
+    secondary: {
+      main: '#393939',
+    },
+    background: {
+      default: '#F0ECEB',
+    },
+  },
+  typography: {
+    fontFamily: '"Montserrat Alternates", sans-serif',
+    h1: { fontWeight: 700 },
+    h2: { fontWeight: 700 },
+    h3: { fontWeight: 700 },
+    h4: { fontWeight: 700 },
+    h5: { fontWeight: 700 },
+    h6: { fontWeight: 700 },
+    body1: { fontWeight: 400 },
+    body2: { fontWeight: 400 },
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 20,
+          textTransform: 'none',
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          borderRadius: 20,
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          borderRadius: 20,
+        },
+      },
+    },
+  },
+});
+
+export default theme;
+
+// src/style.css - Глобальные стили
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Montserrat Alternates', sans-serif;
+  background: #F0ECEB;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: #F0ECEB;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #FF5333;
+  border-radius: 4px;
+}
+
+// src/vite-env.d.ts - Типы для Vite
+/// <reference types="vite/client" />
+
+// src/components/FilterBar/FilterBar.tsx - React-компонент фильтрации туров
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { api } from '../../utils/api';
+import {
+  Box,
+  Slider,
+  TextField,
+  Typography,
+  Divider,
+  Switch,
+  FormControlLabel,
+  Autocomplete,
+  Checkbox,
+  InputAdornment,
+} from "@mui/material";
+import { itemStyles } from "./FilterBarStyle";
+import { setSearchData } from "../../redux/actions/search";
+import DropDown from "../../assets/dropdown.svg";
+import { fetchFoodCategoriesRequest } from '../../redux/actions/foodCategories';
+
+interface CuisineType {
+  id: number;
+  title: string;
+}
+
+interface CategoryType {
+  id: number;
+  title: string;
+}
+
+export function FilterBar() {
+  const [duration, setDuration] = useState<[number, number]>([1, 30]);
+  const [accommodation, setAccommodation] = useState(false);
+  const [selectedCuisines, setSelectedCuisines] = useState<CuisineType[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<CategoryType[]>([]);
+  const [categoryOptions, setCategoryOptions] = useState<CategoryType[]>([]);
+  const dispatch = useDispatch();
+
+  const foodCategories = useSelector((state: any) => state.foodCategories.items);
+
+  const [durationInput, setDurationInput] = useState<[string, string]>([
+    String(duration[0]),
+    String(duration[1])
+  ]);
+
+  // Запрос списка категорий (НЕ кухни)
+  useEffect(() => {
+    dispatch(fetchFoodCategoriesRequest());
+    api.get("/categories")
+      .then(response => {
+        setCategoryOptions(response.data);
+      })
+      .catch(error => {
+        console.error("Ошибка загрузки категорий:", error);
+      });
+  }, [dispatch]);
+
+  const handleSliderChange = (_: any, newValue: number | number[]) => {
+    setDuration(newValue as [number, number]);
+    setDurationInput([
+      String((newValue as [number, number])[0]),
+      String((newValue as [number, number])[1])
+    ]);
+    dispatch(setSearchData({ durationFrom: (newValue as [number, number])[0], durationTo: (newValue as [number, number])[1] }));
+  };
+
+  const handleInputChange = (index: number, value: string) => {
+    const newInputs = [...durationInput] as [string, string];
+    newInputs[index] = value;
+    setDurationInput(newInputs);
+  };
+
+  const handleInputBlur = (index: number) => {
+    const newInputs = [...durationInput] as [string, string];
+    let val = parseInt(newInputs[index], 10);
+    if (isNaN(val) || val < 1) val = 1;
+
+    const newDuration = [...duration] as [number, number];
+    newDuration[index] = val;
+
+    if (index === 1 && val < newDuration[0]) {
+      newDuration[1] = newDuration[0];
+      newInputs[1] = String(newDuration[0]);
+    }
+
+    if (index === 0 && val > newDuration[1]) {
+      newDuration[0] = newDuration[1];
+      newInputs[0] = String(newDuration[1]);
+    }
+
+    newInputs[index] = String(newDuration[index]);
+    setDuration(newDuration);
+    setDurationInput(newInputs);
+    dispatch(setSearchData({ durationFrom: newDuration[0], durationTo: newDuration[1] }));
+  };
+
+  const handleCheck = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    setAccommodation(checked);
+    dispatch(setSearchData({ isAccommodation: checked }));
+  };
+
+  const handleCuisineChange = (_: any, newValue: CuisineType[]) => {
+    if (newValue.length <= 3) {
+      setSelectedCuisines(newValue);
+      dispatch(setSearchData({ cuisineTypes: newValue.map(cuisine => cuisine.id) } as any));
+    }
+  };
+
+  const handleCategoryChange = (_: any, newValue: CategoryType[]) => {
+    if (newValue.length <= 5) {
+      setSelectedCategories(newValue);
+      dispatch(setSearchData({ categoryTypes: newValue.map(category => category.id) } as any));
+    }
+  };
+
+  return (
+    <Box sx={itemStyles.container}>
+      <Typography>Длительность</Typography>
+      <Slider
+        value={duration}
+        onChange={handleSliderChange}
+        min={1}
+        max={30}
+        step={1}
+        size="small"
+      />
+
+      <Box sx={itemStyles.durabilityTextFieldContainer}>
+        <TextField
+          label="От"
+          type="number"
+          value={durationInput[0]}
+          onChange={(e) => handleInputChange(0, e.target.value)}
+          onBlur={() => handleInputBlur(0)}
+          InputProps={{
+            endAdornment: <InputAdornment position="end">дней</InputAdornment>,
+          }}
+          inputProps={{
+            inputMode: 'numeric',
+            pattern: '[0-9]*',
+            style: {
+              appearance: 'textfield',
+            },
+          }}
+          sx={itemStyles.textFieldFrom}
+        />
+
+        <TextField
+          label="До"
+          type="number"
+          value={durationInput[1]}
+          onChange={(e) => handleInputChange(1, e.target.value)}
+          onBlur={() => handleInputBlur(1)}
+          InputProps={{
+            endAdornment: <InputAdornment position="end">дней</InputAdornment>,
+          }}
+          inputProps={{
+            inputMode: 'numeric',
+            pattern: '[0-9]*',
+            style: {
+              appearance: 'textfield',
+            },
+          }}
+          sx={itemStyles.textFieldTo}
+        />
+      </Box>
+
+      <Divider sx={itemStyles.divider} />
+
+      <FormControlLabel
+        label="Проживание включено"
+        labelPlacement="start"
+        sx={itemStyles.accommodation}
+        control={
+          <Switch
+            checked={accommodation}
+            size="small"
+            onChange={handleCheck}
+          />
+        }
+      />
+
+      <Divider sx={itemStyles.divider} />
+      <Typography>Тип кухни</Typography>
+      <Autocomplete
+        multiple
+        options={foodCategories}
+        disableCloseOnSelect
+        value={selectedCuisines}
+        onChange={handleCuisineChange}
+        getOptionLabel={(option) => option.title}
+        isOptionEqualToValue={(option, value) => option.id === value.id}
+        sx={itemStyles.popper}
+        popupIcon={<img src={DropDown} alt="dropdown" className="custom-dropdown-icon" style={{ width: 20, height: 20, opacity: 0.7, transition: 'transform 0.2s' }} />}
+        renderOption={(props, option, { selected }) => (
+          <li {...props}>
+            <Checkbox checked={selected} />
+            {option.title}
+          </li>
+        )}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            sx={itemStyles.textField}
+            placeholder={selectedCuisines.length === 0 ? "Не выбран" : ""}
+          />
+        )}
+      />
+
+      <Divider sx={itemStyles.divider} />
+      <Typography>Категории</Typography>
+      <Autocomplete
+        multiple
+        options={categoryOptions}
+        disableCloseOnSelect
+        value={selectedCategories}
+        onChange={handleCategoryChange}
+        getOptionLabel={(option) => option.title}
+        isOptionEqualToValue={(option, value) => option.id === value.id}
+        sx={itemStyles.popper}
+        popupIcon={<img src={DropDown} alt="dropdown" className="custom-dropdown-icon" style={{ width: 20, height: 20, opacity: 0.7, transition: 'transform 0.2s' }} />}
+        renderOption={(props, option, { selected }) => (
+          <li {...props}>
+            <Checkbox checked={selected} />
+            {option.title}
+          </li>
+        )}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            sx={itemStyles.textField}
+            placeholder={selectedCategories.length === 0 ? "Не выбран" : ""}
+          />
+        )}
+      />
+    </Box>
+  );
+}
+
+import backgroundImage from '../../assets/body_background.png';
+
+const textStyle = {
+  fontFamily: '"Montserrat Alternates", sans-serif',
+  fontStyle: 'normal',
+  color: '#393939',
+};
+
+export const searchStyles = {
+  barWrapper: {
+    width: '1140px',
+    height: 'fit-content',
+    paddingTop: '20px',
+    backgroundImage: `url(${backgroundImage})`,
+    backgroundSize: '260px 240px',
+    position: 'fixed',
+    zIndex: '1',
+    borderRadius: '0px 0px 20px 20px',
+  },
+  mainContainer: {
+    display: 'flex',
+    height: '70px',
+    gap: '30px',
+    padding: '10px',
+    boxSizing: 'border-box',
+    width: '1005',
+    backgroundColor: '#fff',
+    borderRadius: '20px',
+    alignItems: 'center',
+    '& img': { margin: '0px 10px' },
+    '& .MuiInputAdornment-root': { margin: '0px', width: 'fit-content' },
+    '& .searchButton': {
+      borderRadius: '20px',
+      height: '50px',
+      backgroundColor: '#FF5333',
+      ...textStyle,
+      color: '#fff',
+      textTransform: 'none',
+      fontWeight: 600,
+      fontSize: '16px',
+      width: '126px',
+      padding: '0px 20px',
+    },
+    '& .searchButton:hover': {
+      backgroundColor: '#FFBEB2',
+      color: '#393939',
+    },
+    '& .ant-picker-input': { width: 'fit-content' },
+    '& div.ant-picker': { boxShadow: 'none' },
+    '& #people-count': {
+      ...textStyle,
+      fontSize: '14px',
+      textTransform: 'none',
+      backgroundColor: 'transparent',
+      boxShadow: 'none',
+      outline: 'none',
+      padding: '0px',
+      fontWeight: '400',
+    },
+    '& #people-count span:first-child': {
+      backgroundColor: 'transparent',
+      boxShadow: 'none',
+    },
+    '& .barItem': {
+      flexGrow: 1,
+      justifyContent: 'center',
+      width: '300px',
+    },
+  },
+  datePickerTheme: {
+    token: {
+      colorPrimary: '#FF5333',
+      ...textStyle,
+    },
+  },
+  input: {
+    height: '50px',
+    borderRadius: '20px',
+    border: 'none',
+    padding: '5px 0px',
+    backgroundColor: 'none',
+    '& fieldset': { border: 'none' },
+    fontSize: '14px',
+    ...textStyle,
+  },
+  peopleWrapper: { display: 'flex' },
+  menu: {
+    '& li div p, li div span': {
+      ...textStyle,
+      fontSize: '14px',
+    },
+    '.MuiPaper-root': {
+      borderRadius: '8px',
+      boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
+      padding: '8px 0',
+      marginTop: '24px',
+    },
+  },
+};
+
+import { useEffect, useState } from 'react';
+import ImageList from '@mui/material/ImageList';
+import { RecentTourListItem } from '../RecentTourListItem/RecentTourListItem';
+import { recentTourListStyles } from './RecentTourListStyle';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchToursRequest } from '../../redux/actions/tour';
+
+export const RecentTourList = () => {
+  const dispatch = useDispatch();
+  const { tours, loading } = useSelector((state: any) => state.tour);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [loadedImages, setLoadedImages] = useState<{ [key: string]: boolean }>({});
+
+  useEffect(() => {
+    dispatch(fetchToursRequest());
+  }, [dispatch]);
+
+  // Оставляем только 3 ближайших тура по дате flows[0].startDate
+  const sortedTours = (tours || [])
+    .filter((tour: any) => Array.isArray(tour.flows) && tour.flows.length > 0)
+    .sort((a: any, b: any) => new Date(a.flows[0].startDate).getTime() - new Date(b.flows[0].startDate).getTime())
+    .slice(0, 3);
+
+  const handleImageLoad = (tourId: string) => {
+    setLoadedImages(prev => ({
+      ...prev,
+      [tourId]: true
+    }));
+  };
+
+  const allImagesLoaded = sortedTours.length > 0 &&
+    sortedTours.every((tour: any) => loadedImages[tour.id]);
+
+  if (loading || sortedTours.length === 0) {
+    return (
+      <ImageList cols={3} gap={20} sx={recentTourListStyles.imageList}>
+        {[0, 1, 2].map((_, index) => (
+          <RecentTourListItem
+            key={index}
+            img=""
+            title=""
+            day={0}
+            month=""
+            featured={index === 0}
+            onMouseEnter={() => {}}
+            onImageLoad={() => {}}
+            showSkeleton={true}
+          />
+        ))}
+      </ImageList>
+    );
+  }
+
+  return (
+    <ImageList cols={3} gap={20} sx={recentTourListStyles.imageList}>
+      {sortedTours.map((tour: any, index: number) => {
+        const flow = tour.flows[0];
+        const date = new Date(flow.startDate);
+        const day = date.getDate();
+        const month = date.toLocaleString('ru-RU', { month: 'long' });
+        return (
+          <RecentTourListItem
+            key={tour.id}
+            img={tour.photos?.[0] ? (process.env.VITE_API_BASE_URL + '/' + tour.photos[0]) : ''}
+            title={tour.title}
+            day={day}
+            month={month}
+            featured={activeIndex === index}
+            onMouseEnter={() => setActiveIndex(index)}
+            onImageLoad={() => handleImageLoad(tour.id)}
+            showSkeleton={!allImagesLoaded}
+          />
+        );
+      })}
+    </ImageList>
+  );
+};
+
+export const itemStyles = {
+  imageListItemBar: {
+    background: 'linear-gradient(0deg,rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 25%, rgba(0,0,0,0) 50%)',
+    height: '100%',
+    alignItems: 'flex-end',
+    '& div > div': {
+      gap: '40px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      width: '100%',
+    },
+    '& p': {
+      fontFamily: '"Montserrat Alternates", sans-serif',
+      fontWeight: 200,
+      fontStyle: 'normal',
+      fontSize: '24px',
+      color: '#fff',
+    },
+  },
+  title: {
+    flexGrow: 1,
+    overflow: 'hidden',
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'normal',
+  },
+  verticalDate: {
+    position: 'absolute',
+    bottom: '70px',
+    left: '50%',
+    transform: 'translateX(-50%) rotate(-90deg)',
+    transformOrigin: 'center',
+    whiteSpace: 'nowrap',
+    '& p': {
+      fontSize: '20px',
+      fontWeight: 300,
+      color: '#fff',
+      lineHeight: 1.2,
+    },
+  },
+  featured: {
+    height: '407px',
+    width: '100%',
+    position: 'relative',
+    overflow: 'hidden',
+    borderRadius: '25px',
+    transition: 'all 1s ease',
+    margin: 0,
+    padding: 0,
+    '& img': {
+      objectFit: 'cover',
+      height: '100%',
+      width: '100%',
+      margin: 0,
+      padding: 0,
+    },
+  },
+  default: {
+    height: '407px',
+    width: '126px',
+    position: 'relative',
+    overflow: 'hidden',
+    borderRadius: '25px',
+    transition: 'all 1s ease',
+    margin: 0,
+    padding: 0,
+    '& img': {
+      objectFit: 'cover',
+      height: '100%',
+      width: '100%',
+      margin: 0,
+      padding: 0,
+    },
+  },
+};
+
+export const POSTS_REQUESTED = 'POSTS_REQUESTED';
+export const POSTS_RECEIVED = 'POSTS_RECEIVED';
+export const POSTS_FAILED = 'POSTS_FAILED';
+
+export const CHANGE_MODAL_PROPS = 'CHANGE_MODAL_PROPS';
+
+export const AUTH_SUCCESS = 'AUTH_SUCCESS';
+export const AUTH_FAILED = 'AUTH_FAILED';
+export const AUTH_REQUESTED = 'AUTH_REQUESTED';
+
+export const AUTH_VERIFY_REQUESTED = 'AUTH_VERIFY_REQUESTED';
+
+export const AUTH_LOGOUT = 'AUTH_LOGOUT';
+
+// Categories
+export const FETCH_CATEGORIES_REQUEST = 'FETCH_CATEGORIES_REQUEST';
+export const FETCH_CATEGORIES_SUCCESS = 'FETCH_CATEGORIES_SUCCESS';
+export const FETCH_CATEGORIES_FAILURE = 'FETCH_CATEGORIES_FAILURE';
+
+export const FETCH_TOURS_REQUEST = 'FETCH_TOURS_REQUEST';
+export const FETCH_TOURS_SUCCESS = 'FETCH_TOURS_SUCCESS';
+export const FETCH_TOURS_FAILURE = 'FETCH_TOURS_FAILURE';
+
+export const FETCH_FOOD_CATEGORIES_REQUEST = 'FETCH_FOOD_CATEGORIES_REQUEST';
+export const FETCH_FOOD_CATEGORIES_SUCCESS = 'FETCH_FOOD_CATEGORIES_SUCCESS';
+export const FETCH_FOOD_CATEGORIES_FAILURE = 'FETCH_FOOD_CATEGORIES_FAILURE';
+
+const initialState = {
+  items: [],
+  loading: false,
+  error: null,
+};
+
+export const foodCategoriesReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case 'FETCH_FOOD_CATEGORIES_REQUEST':
+      return { ...state, loading: true, error: null };
+    case 'FETCH_FOOD_CATEGORIES_SUCCESS':
+      return { ...state, loading: false, items: action.payload };
+    case 'FETCH_FOOD_CATEGORIES_FAILURE':
+      return { ...state, loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+// src/components/SearchBar/SearchBar.tsx
+// Основной компонент поиска с валидацией поля "Место" и выбором дат/людей
+import { ChangeEvent, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import InputAdornment from '@mui/material/InputAdornment';
+import FormControl from '@mui/material/FormControl';
+import { Box, Button, Divider, IconButton, Menu, MenuItem, Typography, Tooltip } from '@mui/material';
+import { ConfigProvider, DatePicker } from 'antd';
+import ruRU from 'antd/locale/ru_RU';
+import dayjs from 'dayjs';
+import 'dayjs/locale/ru';
+import SearchIcon from '../../assets/search.svg';
+import DateIcon from '../../assets/date.svg';
+import DropDown from '../../assets/dropdown.svg';
+import PeopleIcon from '../../assets/people.svg';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
+import { searchStyles } from './SearchBarStyle';
+import { RootState } from '../../hooks/getTypedSelector';
+import { setSearchData } from '../../redux/actions/search';
+import { api } from '../../utils/api';
+import { setTours } from '../../redux/actions/tour';
+
+dayjs.locale('ru');
+
+export const SearchBar = () => {
+  const { RangePicker } = DatePicker;
+  const { city, dateRange } = useSelector((state: RootState) => state.search);
+  const searchData = useSelector((state: RootState) => state.search);
+  const [placeInput, setPlace] = useState(city || '');
+  const [dateRangeInput, setDateRange] = useState(dateRange || null);
+  const [adults, setAdults] = useState(2);
+  const [children, setChildren] = useState(0);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const dispatch = useDispatch();
+  const allowedPattern = /^[a-zA-Zа-яА-ЯёЁ\-\s]*$/;
+
+  const handlePlaceChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    if (allowedPattern.test(value)) {
+      setPlace(value);
+      dispatch(setSearchData({ city: value }));
+      if (value.trim()) {
+        setShowTooltip(false);
+      }
+    }
+  };
+
+  const handleDateChange = (dates: any) => {
+    setDateRange(dates);
+    dispatch(setSearchData({ dateRange: dates }));
+  };
+
+  const handleSearch = async () => {
+    if (!placeInput.trim()) {
+      setShowTooltip(true);
+      return;
+    }
+    setShowTooltip(false);
+    try {
+      const params = new URLSearchParams();
+      if (searchData.city) params.append('city', searchData.city);
+      if (searchData.dateRange?.[0]) params.append('startDate', searchData.dateRange[0].format('YYYY-MM-DD'));
+      if (searchData.dateRange?.[1]) params.append('endDate', searchData.dateRange[1].format('YYYY-MM-DD'));
+      if (searchData.durationFrom) params.append('durationFrom', String(searchData.durationFrom));
+      if (searchData.durationTo) params.append('durationTo', String(searchData.durationTo));
+      if (searchData.isAccomodation !== undefined) params.append('isAccomodation', String(searchData.isAccomodation));
+
+      const response = await api.get('/tour', {
+        params: Object.fromEntries(params),
+      });
+      dispatch(setTours(response.data));
+    } catch (error) {
+      console.error('Ошибка при поиске:', error);
+    }
+  };
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const updateCount = (type: 'adults' | 'children', increment: boolean) => {
+    if (type === 'adults') {
+      setAdults((prev) => Math.max(1, prev + (increment ? 1 : -1)));
+    } else {
+      setChildren((prev) => Math.max(0, prev + (increment ? 1 : -1)));
+    }
+  };
+
+  useEffect(() => {
+    handleSearch();
+  }, []);
+
+  return (
+    <Box sx={searchStyles.barWrapper}>
+      <Box sx={searchStyles.mainContainer}>
+        <FormControl variant="outlined" className="barItem">
+          <Tooltip
+            title={showTooltip ? 'Место не может быть пустым' : ''}
+            open={showTooltip}
+            arrow
+            placement="bottom"
+          >
+            <OutlinedInput
+              type="text"
+              placeholder="Место"
+              value={placeInput}
+              onChange={handlePlaceChange}
+              sx={{
+                ...searchStyles.input,
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+              }}
+              startAdornment={
+                <InputAdornment position="start">
+                  <img src={SearchIcon} alt="search" />
+                </InputAdornment>
+              }
+            />
+          </Tooltip>
+        </FormControl>
+
+        <Divider orientation="vertical" />
+
+        <ConfigProvider locale={ruRU} theme={searchStyles.datePickerTheme}>
+          <RangePicker
+            format="dd, D MMM"
+            placeholder={['Заезд', 'Отъезд']}
+            disabledDate={(current) => current && current < dayjs().startOf('day')}
+            prefix={<img src={DateIcon} alt="date" />}
+            suffixIcon={null}
+            style={searchStyles.input}
+            inputReadOnly
+            value={dateRangeInput}
+            onChange={handleDateChange}
+            className="barItem"
+          />
+        </ConfigProvider>
+
+        <Divider orientation="vertical" />
+
+        <Box sx={searchStyles.peopleWrapper} className="barItem">
+          <Button
+            id="people-count"
+            aria-controls={open ? 'people-count-menu' : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? 'true' : undefined}
+            onClick={handleClick}
+          >
+            <img src={PeopleIcon} alt="people" />
+            {adults} взрослых · {children} детей
+            <img
+              src={DropDown}
+              alt="dropdown"
+              style={{
+                transform: open ? 'rotate(180deg)' : 'none',
+                width: '16px',
+                height: '16px',
+              }}
+            />
+          </Button>
+          <Menu
+            id="people-count-menu"
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            sx={searchStyles.menu}
+            MenuListProps={{ 'aria-labelledby': 'people-count' }}
+          >
+            <MenuItem>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '200px' }}>
+                <Typography>Взрослые</Typography>
+                <Box>
+                  <IconButton size="small" onClick={() => updateCount('adults', false)}><RemoveIcon /></IconButton>
+                  <Typography component="span" sx={{ mx: 1 }}>{adults}</Typography>
+                  <IconButton size="small" onClick={() => updateCount('adults', true)}><AddIcon /></IconButton>
+                </Box>
+              </Box>
+            </MenuItem>
+            <MenuItem>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '200px' }}>
+                <Typography>Дети</Typography>
+                <Box>
+                  <IconButton size="small" onClick={() => updateCount('children', false)}><RemoveIcon /></IconButton>
+                  <Typography component="span" sx={{ mx: 1 }}>{children}</Typography>
+                  <IconButton size="small" onClick={() => updateCount('children', true)}><AddIcon /></IconButton>
+                </Box>
+              </Box>
+            </MenuItem>
+          </Menu>
+        </Box>
+
+        <Button
+          variant="contained"
+          className="searchButton"
+          disableElevation
+          onClick={handleSearch}
+        >
+          Найти
+        </Button>
+      </Box>
+    </Box>
+  );
+};
+
+// src/components/SmallSearchForm/SmallSearchForm.tsx
+// Компонент малой формы поиска с валидацией поля "Место"
+import { ChangeEvent, useState } from 'react';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import InputAdornment from '@mui/material/InputAdornment';
+import FormControl from '@mui/material/FormControl';
+import { Box, Typography, Button, Tooltip } from '@mui/material';
+import { ConfigProvider, DatePicker } from 'antd';
+import ruRU from 'antd/locale/ru_RU';
+import dayjs from 'dayjs';
+import 'dayjs/locale/ru';
+import SearchIcon from '../../assets/search.svg';
+import DateIcon from '../../assets/date.svg';
+import { searchStyles } from './SmallSearchFormStyle';
+import { setSearchData } from '../../redux/actions/search';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+
+dayjs.locale('ru');
+
+export const SmallSearchForm = () => {
+  const { RangePicker } = DatePicker;
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [city, setCity] = useState('');
+  const [dateRange, setDateRange] = useState<any>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const allowedPattern = /^[a-zA-Zа-яА-ЯёЁ\-\s]*$/;
+
+  const handlePlaceChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    if (allowedPattern.test(value)) {
+      setCity(value);
+      if (value.trim()) {
+        setShowTooltip(false);
+      }
+    }
+  };
+
+  const handleDateChange = (dates: any) => {
+    setDateRange(dates);
+  };
+
+  const handleSearch = () => {
+    if (!city.trim()) {
+      setShowTooltip(true);
+      return;
+    }
+    setShowTooltip(false);
+    dispatch(setSearchData({ city, dateRange }));
+    navigate('/search');
+  };
+
+  return (
+    <Box sx={searchStyles.mainContainer}>
+      <Box sx={searchStyles.textContainer}>
+        <Typography variant='h6'>Путешествуй со вкусом!</Typography>
+        <Typography>А мы поможем тебе с выбором</Typography>
+      </Box>
+      <Box sx={searchStyles.inputContainer}>
+        <FormControl sx={searchStyles.formControl} variant="outlined">
+          <Tooltip
+            title={showTooltip ? 'Место не может быть пустым' : ''}
+            open={showTooltip}
+            arrow
+            placement="top"
+          >
+            <OutlinedInput
+              id="outlined-adornment-password"
+              type='text'
+              placeholder='Место'
+              value={city}
+              onChange={handlePlaceChange}
+              sx={searchStyles.input}
+              startAdornment={
+                <InputAdornment position="start">
+                  <img src={SearchIcon} alt="search"/>
+                </InputAdornment>
+              }
+            />
+          </Tooltip>
+        </FormControl>
+        <ConfigProvider 
+          locale={ruRU}
+          theme={searchStyles.datePickerTheme}>
+          <RangePicker
+            format="dd, D MMM"
+            placeholder={['Заезд', 'Отъезд']}
+            disabledDate={(current) => current && current < dayjs().startOf('day')}
+            prefix={<img src={DateIcon} alt="date"/>}
+            suffixIcon={null}
+            style={searchStyles.input}
+            inputReadOnly
+            value={dateRange}
+            onChange={handleDateChange}
+          />
+        </ConfigProvider>
+        <Button
+          variant="contained"
+          color="primary"
+          disableElevation
+          onClick={handleSearch}
+        >
+          Найти туры
+        </Button>
+      </Box>
+    </Box>
+  );
+};
+
+// src/components/SmallSearchForm/SmallSearchFormStyle.ts
+// Стили для малой формы поиска
+const textStyle = {
+  fontFamily: '"Montserrat Alternates", sans-serif',
+  fontStyle: 'normal',
+  color: '#393939',
+};
+
+export const searchStyles = {
+  formControl: { width: '100%' },
+  mainContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '407px',
+    justifyContent: 'space-between',
+    '& img': {
+      marginRight: '5px',
+      marginLeft: '10px',
+    },
+    '& .MuiInputAdornment-root': {
+      margin: '0px',
+      width: 'fit-content',
+    },
+    '& button': {
+      width: '100%',
+      borderRadius: '20px',
+      height: '50px',
+      backgroundColor: '#FF5333',
+      ...textStyle,
+      color: '#fff',
+      textTransform: 'none',
+      fontWeight: 600,
+      fontSize: '16px',
+    },
+    '& button:hover': {
+      backgroundColor: '#FFBEB2',
+      color: '#393939',
+    },
+    '& .ant-picker-input': { width: '100px' },
+    '& div.ant-picker': { boxShadow: 'none' },
+  },
+  datePickerTheme: {
+    token: {
+      colorPrimary: '#FF5333',
+      backgroundColor: '#F0ECEB',
+      ...textStyle,
+    },
+  },
+  input: {
+    height: '50px',
+    width: '100%',
+    borderRadius: '20px',
+    border: 'none',
+    padding: '5px 0px',
+    backgroundColor: '#F0ECEB',
+    '& fieldset': { border: 'none' },
+    fontSize: '14px',
+    ...textStyle,
+  },
+  inputContainer: {
+    backgroundColor: '#fff',
+    height: 'fit-content',
+    width: '321px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    padding: '30px',
+    borderRadius: '20px',
+    gap: '20px',
+  },
+  textContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '15px',
+    '& p, h6, input': {
+      lineHeight: '1.3',
+      ...textStyle,
+    },
+    '& p': {
+      fontWeight: 200,
+      fontSize: '18px',
+    },
+    '& h6': {
+      fontWeight: 400,
+      fontSize: '30px',
+    },
+  },
+};
+
+// src/components/TourCard/TourCard.tsx
+// Компонент карточки тура с изображением, рейтингом, описанием и ценой
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardMedia from '@mui/material/CardMedia';
+import Typography from '@mui/material/Typography';
+import CardActionArea from '@mui/material/CardActionArea';
+import { Box } from '@mui/material';
+import StarIcon from '../../assets/star.svg';
+import { styles } from './TourCardStyle';
+import getDaysAmountLiteral from '../../utils/getDaysAmountLiteral';
+import formatMoney from '../../utils/formatMoney';
+
+export const TourCard = ({
+  title,
+  description,
+  location,
+  duration,
+  price,
+  img,
+  rate,
+}: { 
+  title: string,
+  description: string,
+  location: string,
+  duration: number,
+  price: string | number,
+  img: string,
+  rate: string,
+}) => {
+  return (
+    <Card sx={styles.cardContainer} elevation={0}>
+      <CardActionArea>
+        <CardMedia
+          component="img"
+          height="246"
+          image={img}
+          alt="tour image"
+        />
+        <CardContent sx={{ height: '181px' }}>
+          <Box sx={styles.topTextContainer}>
+            <img src={StarIcon} style={styles.ratingIcon}></img>
+            <Typography>
+              {rate}
+            </Typography>
+            <Typography>{location}</Typography>
+          </Box>
+          <Typography sx={styles.title}>
+            {title}
+          </Typography>
+          <Typography sx={styles.description}>
+            {description}
+          </Typography>
+          <Box sx={styles.bottomTextContainer}>
+            <Typography>
+              {formatMoney(price)} ₽
+            </Typography>
+            <Typography>
+              / {duration} {getDaysAmountLiteral(duration)}
+            </Typography>
+          </Box>
+        </CardContent>
+      </CardActionArea>
+    </Card>
+  );
+}
+
+// src/components/TourCard/TourCardStyle.tsx
+// Стили для карточки тура
+export const styles = {
+  ratingIcon: {
+    marginRight: '2px',
+  },
+  topTextContainer: {
+    display: 'flex',
+    justifyContent: 'left',
+    alignContent: 'center',
+    '& p': {
+      fontSize: '13px',
+    },
+    '& p + p': {
+      marginLeft: '15px',
+      color: '#8a8a8a',
+      flexGrow: '1',
+      textAlign: 'right',
+      overflow: 'hidden',
+      display: '-webkit-box',
+      WebkitLineClamp: 1,
+      WebkitBoxOrient: 'vertical',
+      textOverflow: 'ellipsis',
+    },
+  },
+  cardContainer: {
+    width: '270px',
+    borderRadius: '20px',
+    backgroundColor: '#fff',
+  },
+  title: {
+    fontSize: '15px',
+    margin: '5px 0px'
+  },
+  description: {
+    fontSize: '13px',
+    color: '#8a8a8a',
+    flexGrow: 1,
+    overflow: 'hidden',
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'normal',
+  },
+  bottomTextContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    flexGrow: '1',
+    marginTop: '10px',
+    gap: '5px',
+    '& p': {
+      fontSize: '17px',
+    },
+    '& p + p': {
+      color: '#8a8a8a',
+      fontSize: '14px',
+    },
+  },
+};
+
+// src/components/TourCardList/TourCardList.tsx
+// Компонент списка карточек туров
+import { Box } from '@mui/system';
+import { TourCard } from '../TourCard/TourCard';
+import { styles } from './TourCardListStyle';
+import { useSelector } from 'react-redux';
+
+export const TourCardList = () => {
+  const { tours } = useSelector((state: any) => state.tour);
+
+  if (!tours || tours.length === 0) {
+    return null;
+  }
+
+  return (
+    <Box sx={styles.container}>
+      {tours.map((tour) => (
+        <TourCard
+          key={tour.id}
+          title={tour.title}
+          description={tour.description}
+          location={tour.city}
+          duration={tour.duration}
+          price={tour.flows?.[0]?.currentPrice || ''}
+          img={tour.photos?.[0] ? (process.env.VITE_API_BASE_URL + '/' + tour.photos[0]) : ''}
+          rate={tour.rate || '—'}
+        />
+      ))}
+    </Box>
+  );
+};
+
+// src/components/TourCardList/TourCardListStyle.tsx
+// Стили для списка карточек туров
+export const styles = {
+  container: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    flexGrow: 0,
+    gap: '20px',
+    width: '850',
+    marginLeft: '290px',
+  },
+};
+
+// src/components/OrganizerTours/OrganizerTours.tsx
+// Компонент для отображения и управления турами организатора
+import * as React from 'react';
+import {
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  Typography,
+  Select,
+  MenuItem,
+  FormControl,
+  Collapse,
+  Divider,
+} from '@mui/material';
+import { styles } from './OrganizerToursStyle';
+import { useState } from 'react';
+import DropDown from '../../assets/dropdown.svg';
+import EditTourIcon from '../../assets/edit-tour.png';
+import DeleteIconImg from '../../assets/delete.png';
+
+interface Tour {
+  id: string;
+  name: string;
+  dates: string[];
+  bookings: number;
+  totalCapacity: number;
+  status: 'active' | 'paused';
+}
+
+export const OrganizerTours = () => {
+  const [tours, setTours] = useState<Tour[]>([
+    {
+      id: '1',
+      name: 'Тур по Кавказу',
+      dates: [
+        '15.03.2024 - 20.03.2024',
+        '22.03.2024 - 27.03.2024',
+        '29.03.2024 - 03.04.2024',
+      ],
+      bookings: 12,
+      totalCapacity: 30,
+      status: 'active',
+    },
+  ]);
+
+  const [expandedTours, setExpandedTours] = useState<{ [key: string]: boolean }>({});
+
+  const handleEdit = (tourId: string) => {
+    console.log('Edit tour:', tourId);
+  };
+
+  const handleDelete = (tourId: string) => {
+    console.log('Delete tour:', tourId);
+  };
+
+  const handleStatusChange = (tourId: string, newStatus: 'active' | 'paused') => {
+    setTours(tours.map(tour => 
+      tour.id === tourId ? { ...tour, status: newStatus } : tour
+    ));
+  };
+
+  const toggleDates = (tourId: string) => {
+    setExpandedTours(prev => ({
+      ...prev,
+      [tourId]: !prev[tourId]
+    }));
+  };
+
+  return (
+    <Box sx={styles.container}>
+      <Typography variant="h5" sx={styles.title}>
+        Мои туры
+      </Typography>
+      <TableContainer component={Paper} sx={styles.tableContainer}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Тур</TableCell>
+              <TableCell>Даты</TableCell>
+              <TableCell>Брони</TableCell>
+              <TableCell>Статус</TableCell>
+              <TableCell>Действия</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {tours.map((tour) => (
+              <React.Fragment key={tour.id}>
+                <TableRow>
+                  <TableCell className="tour-name-column">{tour.name}</TableCell>
+                  <TableCell>
+                    <Box sx={styles.datesCell}>
+                      <Box sx={styles.datesHeader} onClick={() => toggleDates(tour.id)}>
+                        <Typography>{tour.dates[0]}</Typography>
+                        <Typography sx={styles.datesCount}>
+                          {tour.dates.length > 1 ? `+${tour.dates.length - 1}` : ''}
+                        </Typography>
+                      </Box>
+                      <Collapse in={expandedTours[tour.id]} timeout="auto" unmountOnExit>
+                        <Box sx={styles.datesList}>
+                          {tour.dates.slice(1).map((date, index) => (
+                            <>
+                              <Divider></Divider>
+                              <Typography key={index} sx={styles.dateItem}>
+                                {date}
+                              </Typography>
+                            </>
+                          ))}
+                        </Box>
+                      </Collapse>
+                    </Box>
+                  </TableCell>
+                  <TableCell>{`${tour.bookings}/${tour.totalCapacity}`}</TableCell>
+                  <TableCell className="status-cell">
+                    <FormControl size="small" sx={{ minWidth: 120 }}>
+                      <Select
+                        value={tour.status}
+                        onChange={(e) => handleStatusChange(tour.id, e.target.value as 'active' | 'paused')}
+                        sx={styles.statusSelect(tour.status)}
+                        IconComponent={(props) => (
+                          <img
+                            {...props}
+                            src={DropDown}
+                            alt="dropdown"
+                            style={{
+                              width: 16,
+                              height: 16,
+                              opacity: 0.7,
+                              transition: 'transform 0.2s',
+                              transform: props.className?.includes('MuiSelect-iconOpen') ? 'rotate(180deg)' : 'none',
+                            }}
+                          />
+                        )}
+                      >
+                        <MenuItem value="active" sx={styles.menuItem}>Активен</MenuItem>
+                        <MenuItem value="paused" sx={styles.menuItem}>Остановлен</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </TableCell>
+                  <TableCell>
+                    <IconButton onClick={() => handleEdit(tour.id)} color="primary">
+                      <img src={EditTourIcon} alt="edit" style={{ width: 22, height: 22, opacity: 0.7 }} />
+                    </IconButton>
+                    <IconButton onClick={() => handleDelete(tour.id)} color="error">
+                      <img src={DeleteIconImg} alt="delete" style={{ width: 22, height: 22, opacity: 0.7 }} />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              </React.Fragment>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
+  );
+};
+
+// src/components/OrganizerTours/OrganizerToursStyle.ts
+// Стили для компонента OrganizerTours
+export const styles = {
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px',
+    padding: '0px 0px',
+  },
+  title: {
+    fontSize: '24px',
+    fontWeight: '500',
+    margin: '10px 0px',
+    color: '#393939',
+    textAlign: 'center'
+  },
+  tableContainer: {
+    boxShadow: 'none',
+    backgroundColor: 'transparent',
+    '& .MuiTableCell-root': {
+      fontSize: '14px',
+      color: '#393939',
+      textAlign: 'left',
+      verticalAlign: 'baseline',
+      padding: '16px',
+      maxWidth: '200px',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+    },
+    '& .MuiTableCell-head': {
+      fontWeight: 500,
+      paddingTop: '0px',
+    },
+    '& .tour-name-column': {
+      width: '200px',
+      whiteSpace: 'normal',
+      overflow: 'visible',
+      textOverflow: 'clip',
+    },
+    '& .status-cell': {
+      width: '120px',
+      minWidth: '120px',
+    },
+  },
+  statusSelect: (status: 'active' | 'paused') => ({
+    width: '127px',
+    '& .MuiSelect-select': {
+      color: status === 'active' ? '#4CAF50' : '#FFA726',
+      fontWeight: 500,
+      fontSize: '14px',
+      padding: '0px',
+      display: 'flex',
+      alignItems: 'baseline',
+    },
+    '& .MuiOutlinedInput-notchedOutline': {
+      border: 'none',
+    },
+    '&:hover .MuiOutlinedInput-notchedOutline': {
+      border: 'none',
+    },
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      border: 'none',
+    },
+  }),
+  menuItem: {
+    fontSize: '14px',
+  },
+  datesCell: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+    '& .MuiTypography-root': {
+      fontSize: '14px',
+    },
+  },
+  datesHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    cursor: 'pointer',
+  },
+  datesCount: {
+    color: '#666',
+    fontWeight: 500,
+  },
+  datesList: {
+    padding: '8px 0',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  dateItem: {
+    color: '#666',
+    height: '34px',
+    display: 'flex',
+    alignItems: 'center',
+  },
+};
+
+// src/components/BookingHistory/BookingHistory.tsx
+// Компонент для отображения истории бронирований
+import { FC } from 'react';
+import {
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+  Paper,
+} from '@mui/material';
+import { styles } from './BookingHistoryStyle';
+
+interface BookingStatus {
+  status: 'confirmed' | 'cancelled' | 'completed' | 'upcoming';
+  label: string;
+}
+
+const statusMap: Record<string, BookingStatus> = {
+  confirmed: { status: 'confirmed', label: 'Забронирован' },
+  cancelled: { status: 'cancelled', label: 'Отменён' },
+  completed: { status: 'completed', label: 'Завершён' },
+  upcoming: { status: 'upcoming', label: 'Предстоящий' },
+};
+
+// Временные данные для примера
+const mockBookings = [
+  {
+    id: 1,
+    checkIn: '2024-03-15',
+    checkOut: '2024-03-20',
+    guests: 2,
+    price: 25000,
+    status: 'confirmed',
+    tourName: 'Винный тур по Тоскане',
+  },
+  {
+    id: 2,
+    checkIn: '2024-02-10',
+    checkOut: '2024-02-15',
+    guests: 4,
+    price: 45000,
+    status: 'cancelled',
+    tourName: 'Гастротур по Испании',
+  },
+  {
+    id: 3,
+    checkIn: '2024-01-01',
+    checkOut: '2024-01-05',
+    guests: 2,
+    price: 30000,
+    status: 'completed',
+    tourName: 'Сырный тур по Франции',
+  },
+  {
+    id: 4,
+    checkIn: '2024-04-20',
+    checkOut: '2024-04-25',
+    guests: 3,
+    price: 35000,
+    status: 'upcoming',
+    tourName: 'Морской гастротур',
+  },
+];
+
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString('ru-RU');
+};
+
+const formatDateRange = (checkIn: string, checkOut: string) => {
+  return `${formatDate(checkIn)} - ${formatDate(checkOut)}`;
+};
+
+const formatPrice = (price: number) => {
+  return price.toLocaleString('ru-RU') + ' ₽';
+};
+
+export const BookingHistory: FC = () => {
+  return (
+    <Box sx={styles.container}>
+      <Typography sx={styles.title}>
+        История бронирования
+      </Typography>
+      <TableContainer component={Paper} elevation={0}>
+        <Table sx={styles.table}>
+          <TableHead>
+            <TableRow>
+              <TableCell className="tour-name-column">Тур</TableCell>
+              <TableCell className="dates-column">Даты</TableCell>
+              <TableCell>Участники</TableCell>
+              <TableCell>Стоимость</TableCell>
+              <TableCell>Статус</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {mockBookings.map((booking) => (
+              <TableRow key={booking.id}>
+                <TableCell className="tour-name-column">{booking.tourName}</TableCell>
+                <TableCell className="dates-column">{formatDateRange(booking.checkIn, booking.checkOut)}</TableCell>
+                <TableCell>{booking.guests}</TableCell>
+                <TableCell>{formatPrice(booking.price)}</TableCell>
+                <TableCell>
+                  <Box 
+                    sx={{
+                      ...styles.statusChip,
+                      ...styles[statusMap[booking.status].status],
+                    }}
+                  >
+                    {statusMap[booking.status].label}
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
+  );
+};
+
+// src/components/BookingHistory/BookingHistoryStyle.ts
+// Стили для компонента BookingHistory
+export const styles = {
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px',
+    padding: '0px 0px',
+  },
+  title: {
+    fontSize: '24px',
+    fontWeight: '500',
+    margin: '10px auto',
+    color: '#393939',
+  },
+  table: {
+    '& .MuiTableCell-root': {
+      fontSize: '14px',
+      color: '#393939',
+      textAlign: 'left',
+      verticalAlign: 'middle',
+      padding: '16px',
+      maxWidth: '200px',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+    },
+    '& .MuiTableCell-head': {
+      fontWeight: 500,
+      paddingTop: '0px',
+    },
+    '& .tour-name-column': {
+      width: '200px',
+      whiteSpace: 'normal',
+      overflow: 'visible',
+      textOverflow: 'clip',
+    },
+    '& .dates-column': {
+      width: '200px',
+    },
+  },
+  statusChip: {
+    borderRadius: '16px',
+    padding: '6px 12px',
+    fontWeight: 500,
+    width: 'fit-content',
+    margin: '0 auto',
+  },
+  confirmed: {
+    backgroundColor: '#E3F5FF',
+    color: '#0184E6',
+  },
+  cancelled: {
+    backgroundColor: '#FFE9E9',
+    color: '#E60101',
+  },
+  completed: {
+    backgroundColor: '#E9FFE9',
+    color: '#01E601',
+  },
+  upcoming: {
+    backgroundColor: '#FFF3E3',
+    color: '#E67F01',
+  },
+};
+
+// src/components/CreateTourForm/CreateTourForm.tsx
+// Компонент формы создания тура с пошаговым процессом
+import React, { useState, useRef } from 'react';
+import { Box, Button, TextField, Typography, Stepper, Step, StepLabel, Divider, InputAdornment, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import TitleIcon from '@mui/icons-material/Title';
+import SubtitleIcon from '@mui/icons-material/Subtitles';
+import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
+import { styles } from './CreateTourFormStyle';
+import { ConfigProvider, Calendar, Upload } from 'antd';
+import type { GetProp, UploadFile, UploadProps } from 'antd';
+import ruRU from 'antd/locale/ru_RU';
+import dayjs, { Dayjs } from 'dayjs';
+import isBetween from 'dayjs/plugin/isBetween';
+dayjs.extend(isBetween);
+import 'dayjs/locale/ru';
+dayjs.locale('ru');
+import { Input as MuiInput } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
+
+const steps = ['Основная информация', 'Описание', 'Даты'];
+
+type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
+
+export const CreateTourForm = () => {
+  const [activeStep, setActiveStep] = useState(0);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [capacity, setCapacity] = useState('');
+  const [duration, setDuration] = useState('1');
+  const [dateRanges, setDateRanges] = useState<{ start: Dayjs; end: Dayjs }[]>([]);
+  const [price, setPrice] = useState('');
+  const [cuisines, setCuisines] = useState<string[]>([]);
+  const [categories, setCategories] = useState<{ title: string; category: string }[]>([]);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
+
+  const onChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
+    setFileList(newFileList.slice(0, 10));
+  };
+
+  const onPreview = async (file: UploadFile) => {
+    let src = file.url as string;
+    if (!src) {
+      src = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file.originFileObj as FileType);
+        reader.onload = () => resolve(reader.result as string);
+      });
+    }
+    const image = new window.Image();
+    image.src = src;
+    const imgWindow = window.open(src);
+    imgWindow?.document.write(image.outerHTML);
+  };
+
+  const handleDateSelect = (date: Dayjs) => {
+    const days = parseInt(duration, 10);
+    if (!isNaN(days) && days > 0) {
+      const end = date.clone().add(days - 1, 'day');
+      setDateRanges([...dateRanges, { start: date, end }]);
+    }
+  };
+
+  const handleRemoveDateRange = (idx: number) => {
+    setDateRanges(dateRanges.filter((_, i) => i !== idx));
+  };
+
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '0') {
+      return;
+    }
+    const formattedValue = formatPrice(value);
+    setPrice(formattedValue);
+  };
+
+  const handleCapacityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '');
+    if (value === '' || Number(value) > 0) {
+      setCapacity(value);
+    }
+  };
+
+  const isStepValid = () => {
+    switch (activeStep) {
+      case 0:
+        return (
+          fileList.length > 0 &&
+          name.trim() !== '' &&
+          capacity.trim() !== '' &&
+          Number(capacity) > 0 &&
+          price.trim() !== '' &&
+          Number(price.replace(/\s/g, '')) > 0
+        );
+      case 1:
+        return description.trim() !== '';
+      case 2:
+        return dateRanges.length > 0;
+      default:
+        return false;
+    }
+  };
+
+  const handleNext = () => {
+    if (isStepValid()) {
+      setActiveStep((prev) => prev + 1);
+    }
+  };
+
+  const handleBack = () => setActiveStep((prev) => prev - 1);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isStepValid()) {
+      alert('Тур создан!');
+    }
+  };
+
+  const formatText = (format: 'title' | 'subtitle' | 'list') => {
+    const textarea = descriptionRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = description.substring(start, end);
+    const textBefore = description.substring(0, start);
+    const textAfter = description.substring(end);
+    
+    const isOnNewLine = (text: string) => {
+      const lastChar = text[text.length - 1];
+      return lastChar === '\n' || text.length === 0;
+    };
+    
+    const needsNewLineBefore = !isOnNewLine(textBefore);
+    const needsNewLineAfter = textAfter.length > 0 && textAfter[0] !== '\n';
+
+    let newText = '';
+    const beforeNewLine = needsNewLineBefore ? '\n' : '';
+    const afterNewLine = needsNewLineAfter ? '\n' : '';
+
+    if (format === 'title') {
+      newText = textBefore + beforeNewLine + '***' + selectedText + '***' + afterNewLine + textAfter;
+    } else if (format === 'subtitle') {
+      newText = textBefore + beforeNewLine + '**' + selectedText + '**' + afterNewLine + textAfter;
+    } else if (format === 'list') {
+      const lines = selectedText.split('\n');
+      const formattedLines = lines.map(line => '· ' + line).join('\n');
+      newText = textBefore + beforeNewLine + formattedLines + afterNewLine + textAfter;
+    }
+
+    setDescription(newText);
+  };
+
+  const formatPrice = (value: string) => {
+    const numericValue = value.replace(/\D/g, '');
+    const cleanValue = numericValue.startsWith('0') ? numericValue.slice(1) : numericValue;
+    return new Intl.NumberFormat('ru-RU').format(Number(cleanValue));
+  };
+
+  const cuisineOptions = [
+    'Итальянская', 'Французская', 'Японская', 'Грузинская', 'Русская', 'Тайская', 'Мексиканская', 'Китайская', 'Индийская', 'Испанская',
+  ];
+  const categoryOptions = [
+    { title: 'Активный отдых', category: 'Активности' },
+    { title: 'Экскурсии', category: 'Культура' },
+    { title: 'Гастрономия', category: 'Еда' },
+    { title: 'Культура', category: 'Культура' },
+    { title: 'Природа', category: 'Природа' },
+    { title: 'Мастер-классы', category: 'Обучение' },
+    { title: 'Велопрогулки', category: 'Активности' },
+    { title: 'Пляжный отдых', category: 'Природа' },
+    { title: 'История', category: 'Культура' },
+  ];
+
+  return (
+    <Box component="form" onSubmit={handleSubmit} sx={styles.outerContainer}>
+      <Box sx={styles.headerBox}>
+        <Typography sx={styles.title}>Создание тура</Typography>
+        <Stepper activeStep={activeStep} alternativeLabel sx={styles.stepper}>
+          {steps.map((label) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+      </Box>
+      <Box sx={styles.mainBox}>
+        {activeStep === 0 && (
+          <Box sx={styles.stepBox}>
+            <Box sx={styles.photoUploadRow}>
+              <Box sx={styles.photoUploadColumn}>
+                <Box sx={styles.photoCount}>{fileList.length} / 10 фото</Box>
+                <ConfigProvider locale={ruRU} theme={styles.datePickerTheme}>
+                  <Upload
+                    action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
+                    listType="picture-card"
+                    fileList={fileList}
+                    onChange={onChange}
+                    onPreview={onPreview}
+                    maxCount={10}
+                  >
+                    {fileList.length < 10 && '+ Загрузить'}
+                  </Upload>
+                </ConfigProvider>
+              </Box>
+            </Box>
+            <Box sx={styles.formColumns}>
+              <Box sx={{ ...styles.formColumn, ...styles.formColumnCentered}}>
+                <TextField
+                  label="Название тура"
+                  name="name"
+                  fullWidth
+                  sx={{ ...styles.input, ...styles.inputAdaptive }}
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                />
+                <Box sx={styles.textFieldContainer}>
+                  <TextField
+                    label="Кол-во участников"
+                    name="capacity"
+                    type="text"
+                    value={capacity}
+                    onChange={handleCapacityChange}
+                    inputProps={{
+                      inputMode: 'numeric',
+                      pattern: '[0-9]*',
+                      style: { appearance: 'textfield' }
+                    }}
+                    sx={{ ...styles.textFieldLeft }}
+                  />
+                  <TextField
+                    label="Цена"
+                    name="price"
+                    type="text"
+                    value={price}
+                    onChange={handlePriceChange}
+                    InputProps={{
+                      endAdornment: <InputAdornment position="end">₽</InputAdornment>,
+                    }}
+                    inputProps={{
+                      inputMode: 'numeric',
+                      pattern: '[0-9]*',
+                      style: { appearance: 'textfield' }
+                    }}
+                    sx={{ ...styles.textFieldRight }}
+                  />
+                </Box>
+                <TextField
+                  label="Длительность"
+                  name="duration"
+                  type="text"
+                  value={duration}
+                  onChange={e => setDuration(e.target.value)}
+                  inputProps={{
+                    inputMode: 'numeric',
+                    pattern: '[0-9]*',
+                    style: { appearance: 'textfield' }
+                  }}
+                  sx={{ ...styles.input, ...styles.inputAdaptive }}
+                />
+                <Autocomplete
+                  multiple
+                  options={cuisineOptions}
+                  value={cuisines}
+                  onChange={(_, newValue) => setCuisines(newValue)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Тип кухни"
+                      sx={{ ...styles.input, ...styles.inputAdaptive }}
+                    />
+                  )}
+                />
+                <Autocomplete
+                  multiple
+                  options={categoryOptions}
+                  value={categories}
+                  onChange={(_, newValue) => setCategories(newValue)}
+                  getOptionLabel={(option) => option.title}
+                  groupBy={(option) => option.category}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Категории"
+                      sx={{ ...styles.input, ...styles.inputAdaptive }}
+                    />
+                  )}
+                />
+              </Box>
+            </Box>
+          </Box>
+        )}
+        {activeStep === 1 && (
+          <Box sx={styles.stepBox}>
+            <Box sx={styles.formattingButtons}>
+              <IconButton onClick={() => formatText('title')} sx={styles.formatButton}>
+                <TitleIcon />
+              </IconButton>
+              <IconButton onClick={() => formatText('subtitle')} sx={styles.formatButton}>
+                <SubtitleIcon />
+              </IconButton>
+              <IconButton onClick={() => formatText('list')} sx={styles.formatButton}>
+                <FormatListNumberedIcon />
+              </IconButton>
+            </Box>
+            <TextField
+              multiline
+              rows={10}
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              inputRef={descriptionRef}
+              sx={styles.descriptionInput}
+            />
+          </Box>
+        )}
+        {activeStep === 2 && (
+          <Box sx={styles.stepBox}>
+            <Box sx={styles.calendarSmallBox}>
+              <ConfigProvider locale={ruRU} theme={styles.datePickerTheme}>
+                <Calendar
+                  fullscreen={false}
+                  onSelect={handleDateSelect}
+                  disabledDate={(date) => {
+                    const days = parseInt(duration, 10);
+                    if (isNaN(days) || days <= 0) return true;
+                    const end = date.clone().add(days - 1, 'day');
+                    return dateRanges.some(range => 
+                      date.isBetween(range.start, range.end, 'day', '[]') ||
+                      end.isBetween(range.start, range.end, 'day', '[]')
+                    );
+                  }}
+                />
+              </ConfigProvider>
+            </Box>
+            <Box sx={styles.datesListBox}>
+              {dateRanges.length === 0 ? (
+                <Typography sx={styles.noDatesText}>
+                  Выберите даты в календаре
+                </Typography>
+              ) : (
+                dateRanges.map((range, idx) => (
+                  <React.Fragment key={idx}>
+                    <Box sx={styles.dateListItemBox}>
+                      <Button
+                        sx={styles.dateListItemText}
+                        onClick={() => handleRemoveDateRange(idx)}
+                      >
+                        {range.start.format('DD.MM.YYYY')} - {range.end.format('DD.MM.YYYY')}
+                      </Button>
+                      <IconButton
+                        className="removeDateBtn"
+                        onClick={() => handleRemoveDateRange(idx)}
+                        size="small"
+                      >
+                        <CloseIcon />
+                      </IconButton>
+                    </Box>
+                    {idx < dateRanges.length - 1 && <Divider sx={styles.dateListDivider} />}
+                  </React.Fragment>
+                ))
+              )}
+            </Box>
+          </Box>
+        )}
+      </Box>
+      <Box sx={styles.buttonsBox}>
+        <Button
+          disabled={activeStep === 0}
+          onClick={handleBack}
+          sx={styles.backButton}
+        >
+          Назад
+        </Button>
+        {activeStep === steps.length - 1 ? (
+          <Button
+            variant="contained"
+            type="submit"
+            disabled={!isStepValid()}
+            sx={styles.submitButton}
+          >
+            Создать тур
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            onClick={handleNext}
+            disabled={!isStepValid()}
+            sx={styles.nextButton}
+          >
+            Далее
+          </Button>
+        )}
+      </Box>
+    </Box>
+  );
+};
+
+// src/components/CreateTourForm/CreateTourFormStyle.ts
+// Стили для компонента CreateTourForm
+const textButton =  {
+  borderRadius: '20px',
+  minWidth: 100,
+  border: 'none',
+  color: 'rgba(57, 57, 57, 0.7)',
+  background: 'none',
+  boxShadow: 'none',
+  fontWeight: 500,
+  fontSize: '15px',
+  textTransform: 'none',
+  transition: 'color 0.2s',
+  '&:hover': {
+    color: 'rgba(57, 57, 57, 1)',
+    background: 'none',
+    border: 'none',
+    boxShadow: 'none',
+  },
+};
+
+export const styles = {
+  title: {
+    fontSize: '24px',
+    fontWeight: '500',
+    margin: '10px auto',
+    color: '#393939',
+  },
+  input: {
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    width: '400px',
+    gap: '20px',
+    '& fieldset': {
+      borderRadius: '20px',
+    },
+    '& input, label:not(.MuiInputLabel-shrink)': {
+      fontSize: '14px',
+    },
+  },
+  addPhotoIconButton: {
+    background: 'none !important',
+    boxShadow: 'none',
+    padding: '0px',
+    '&:hover *, &:active *': {
+      background: 'none !important',
+      boxShadow: 'none',
+    },
+    '&:hover img': {
+      opacity: 0.7,
+    },
+    '& img': {
+      opacity: 0.4,
+      width: '60px',
+      height: '60px',
+    },
+  },
+  photoCount: {
+    fontSize: '14px',
+    color: '#888',
+  },
+  photoUploadRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: '16px',
+    width: '100%',
+  },
+  photoUploadColumn: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+    width: '100%',
+    alignItems: 'flex-start',
+    marginBottom: '20px',
+    '& .ant-upload-list-picture-card': {
+      gap: '11.3px !important',
+      display: 'flex !important',
+      flexWrap: 'wrap',
+    },
+    '& .ant-upload.ant-upload-select, .ant-upload-list-item.ant-upload-list-item-error': {
+      borderRadius: '20px !important',
+    },
+  },
+  formColumns: {
+    display: 'flex',
+    gap: '32px',
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    minHeight: 0,
+    overflow: 'visible',
+  },
+  formColumn: {
+    flex: 1,
+    minWidth: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '15px',
+    minHeight: 0,
+    overflow: 'visible',
+    height: '100%',
+  },
+  formColumnCentered: {
+    alignItems: 'center',
+  },
+  hiddenInput: {
+    display: 'none',
+  },
+  datePickerTheme: {
+    token: {
+      colorPrimary: '#FF5333',
+      fontFamily: '"Montserrat Alternates", sans-serif',
+      fontStyle: 'normal',
+      color: '#393939',
+    },
+  },
+  calendarSmallBox: {
+    width: '100%',
+    overflow: 'visible',
+    '& .ant-picker-calendar': {
+      minWidth: '0',
+      width: '100%',
+      fontSize: '13px',
+      borderBottom: '1px solid #E0E0E0',
+    },
+    '& .ant-picker-calendar-date': {
+      height: '50px !important',
+      minHeight: '50px !important',
+      padding: 0,
+      fontSize: '13px',
+      lineHeight: 1,
+    },
+    '& .ant-picker-calendar-date-value': {
+      height: '100% !important',
+      minHeight: '100% !important',
+      lineHeight: 1,
+      padding: 0,
+      fontSize: '13px',
+    },
+    '& td.ant-picker-cell': {
+      padding: 0,
+      minWidth: '24px',
+      height: '50px !important',
+      lineHeight: 1,
+    },
+    '& .ant-picker-calendar-header': {
+      marginBottom: '4px',
+      padding: '0 4px',
+    },
+    '& .ant-picker-body': {
+      padding: '0 4px',
+    },
+    '& .ant-picker-content th, & .ant-picker-content td': {
+      fontSize: '13px',
+      padding: '0',
+    },
+    '& .ant-picker-calendar-date-content': {
+      height: '0px !important',
+      minHeight: '0px !important',
+    },
+  },
+  stepper: {
+    width: '100%',
+    maxWidth: 600,
+    mb: 3,
+  },
+  stepContentBox: {
+    width: '100%',
+    minHeight: 420,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  stepBox: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  buttonsBox: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    mt: 2,
+    width: '100%',
+  },
+  backButton: textButton,
+  deleteAllButton: {
+    ...textButton,
+    flexGrow: 0,
+  },
+  datesListBox: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0',
+    mt: 1,
+    maxHeight: '400px',
+    overflowY: 'auto',
+    flexGrow: 1,
+    minHeight: 0,
+    justifyContent: 'top',
+  },
+  noDatesText: {
+    color: '#888',
+    fontSize: 14,
+    textAlign: 'center',
+    margin: 'auto',
+    mt: 2,
+    mb: 2,
+  },
+  dateListItemBox: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '6px 0',
+    '&:hover .removeDateBtn': {
+      opacity: 1,
+    },
+  },
+  dateListItemText: {
+    fontSize: '15px',
+    color: '#393939',
+    fontWeight: 400,
+    background: 'none',
+    padding: 0,
+  },
+  removeDateBtn: {
+    minWidth: 0,
+    fontSize: '13px',
+    padding: '7px',
+    background: 'none',
+    boxShadow: 'none',
+    opacity: 0.3,
+    transition: 'opacity 0.2s',
+    '&:hover': {
+      background: 'rgba(255,83,51,0.08)',
+      opacity: 1,
+    },
+  },
+  dateListDivider: {
+    my: 0,
+    borderColor: '#eee',
+  },
+  durationInput: {
+    background: '#fff',
+    borderRadius: '20px',
+    fontSize: '16px',
+    fontWeight: 500,
+  },
+  outerContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px',
+    padding: '20px',
+    maxWidth: '1200px',
+    margin: '0 auto',
+  },
+  headerBox: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '20px',
+  },
+  mainBox: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px',
+    minHeight: '600px',
+  },
+  textFieldContainer: {
+    display: 'flex',
+    gap: '16px',
+    width: '100%',
+  },
+  textFieldLeft: {
+    flex: 1,
+    '& fieldset': {
+      borderRadius: '20px',
+    },
+  },
+  textFieldRight: {
+    flex: 1,
+    '& fieldset': {
+      borderRadius: '20px',
+    },
+  },
+  inputAdaptive: {
+    width: '100%',
+  },
+  formattingButtons: {
+    display: 'flex',
+    gap: '8px',
+    marginBottom: '16px',
+  },
+  formatButton: {
+    padding: '8px',
+    '&:hover': {
+      backgroundColor: 'rgba(255,83,51,0.08)',
+    },
+  },
+  descriptionInput: {
+    flex: 1,
+    '& .MuiInputBase-root': {
+      height: '100%',
+      '& textarea': {
+        height: '100% !important',
+      },
+    },
+    '& fieldset': {
+      borderRadius: '20px',
+    },
+  },
+  submitButton: {
+    backgroundColor: '#FF5333',
+    color: '#fff',
+    '&:hover': {
+      backgroundColor: '#FFBEB2',
+      color: '#393939',
+    },
+  },
+  nextButton: {
+    backgroundColor: '#FF5333',
+    color: '#fff',
+    '&:hover': {
+      backgroundColor: '#FFBEB2',
+      color: '#393939',
+    },
+  },
+};
+
+// src/components/OrganizerForm/OrganizerForm.tsx
+// Компонент формы для регистрации организатора туров
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Paper,
+  FormControl,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+  FormLabel,
+} from '@mui/material';
+import { styles } from './OrganizerFormStyle';
+import { useState } from 'react';
+import { api } from '../../utils/api';
+
+export const OrganizerForm = () => {
+  const [values, setValues] = useState({
+    organizationName: '',
+    documentType: 'inn',
+    documentNumber: '',
+    address: '',
+    phone: '',
+    email: '',
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setValues((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await api.post('/organizer/request', values);
+      console.log('Ответ сервера:', response.data);
+    } catch (error) {
+      console.error('Ошибка при отправке формы:', error);
+    }
+  };
+
+  return (
+    <Box component="form" onSubmit={handleSubmit} sx={styles.container}>
+      <Typography sx={styles.title}>
+        Стать организатором туров
+      </Typography>
+      <Typography sx={styles.subtitle}>
+        Хотите размещать собственные туры и управлять ими?
+      </Typography>
+      <Typography sx={styles.subtitle}>
+        Заполните форму ниже и подтвердите данные вашей организации.
+      </Typography>
+
+      <Typography sx={styles.sectionTitle}>
+        Для регистрации в качестве организатора, укажите один из реквизитов:
+      </Typography>
+      <Typography sx={styles.listItem}>• ИНН (Идентификационный номер налогоплательщика)</Typography>
+      <Typography sx={styles.listItem}>• ОГРН (Основной государственный регистрационный номер)</Typography>
+
+      <Typography sx={styles.sectionTitle}>
+        После подтверждения вы получите доступ к следующим функциям:
+      </Typography>
+      <Typography sx={styles.listItem}>• Создание, редактирование и удаление собственных туров</Typography>
+      <Typography sx={styles.listItem}>• Просмотр и управление заявками на бронирование</Typography>
+      <Typography sx={styles.listItem}>• Отслеживание статуса заявок и взаимодействие с туристами</Typography>
+
+      <Typography sx={styles.warning}>
+        Важно: Указанные данные будут проверены. Убедитесь в корректности введённой информации.
+      </Typography>
+
+      <TextField
+        label={'ИНН или ОГРН'}
+        name="documentNumber"
+        fullWidth
+        required
+        sx={styles.input}
+        value={values.documentNumber}
+        onChange={handleChange}
+      />
+
+      <Button type="submit" variant="contained" sx={styles.submitButton} disableElevation>
+        Отправить заявку
+      </Button>
+    </Box>
+  );
+};
+
+// src/components/OrganizerForm/OrganizerFormStyle.ts
+// Стили для компонента OrganizerForm
+export const styles = {
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+    alignItems: 'left',
+    flexWrap: 'wrap',
+    padding: '0px 60px',
+  },
+  title: {
+    fontSize: '24px',
+    fontWeight: '500',
+    margin: '10px auto',
+    color: '#393939',
+  },
+  subtitle: {
+    fontSize: '16px',
+    color: '#666',
+  },
+  sectionTitle: {
+    fontSize: '16px',
+    fontWeight: '500',
+    color: '#393939',
+    marginTop: '10px',
+  },
+  listItem: {
+    fontSize: '16px',
+    color: '#666',
+    marginLeft: '20px',
+  },
+  warning: {
+    fontSize: '14px',
+    color: '#FF5722',
+    marginTop: '20px',
+    fontWeight: '500',
+    whiteSpace: 'normal',
+    overflow: 'visible',
+    textOverflow: 'clip',
+  },
+  input: {
+    backgroundColor: '#ffffff',
+    '& fieldset': {
+      borderRadius: '20px',
+    },
+    margin: '10px 0px'
+  },
+  submitButton: {
+    borderRadius: '20px',
+    fontSize: '18px',
+    textTransform: 'none',
+    fontWeight: '600',
+    height: '56px',
+    marginTop: '20px',
+    '&:hover': {
+      backgroundColor: '#FFBEB2',
+    },
+  },
+};
+
+// src/components/ImageGallery/ImageGallery.tsx
+// Компонент галереи изображений с предпросмотром
+import { FC } from 'react';
+import { ConfigProvider, Image } from 'antd';
+import ru_RU from 'antd/locale/ru_RU';
+import { Box } from '@mui/material';
+import { EyeOutlined } from '@ant-design/icons';
+
+import TourImg from '../../assets/tour.jpg';
+import First from '../../assets/first_temp.jpg';
+import Second from '../../assets/second_temp.jpg';
+import Third from '../../assets/third_temp.jpg';
+
+import { styles } from './ImageGalleryStyles';
+
+const mask = <p><EyeOutlined style={{ marginRight: '5px' }}/>Просмотр</p>;
+
+const ImageGallery: FC = () => {
+  return (
+    <ConfigProvider locale={ru_RU}>
+      <Box sx={styles.container}>
+        <Image.PreviewGroup
+          items={[TourImg, First, Second, Third]}
+        >
+          <Image src={TourImg} className='firstImg' preview={{ mask }}/>
+          <Image src={First} className='secondImg' preview={{ mask }}/>
+          <Image src={Second} className='thirdImg' preview={{ mask: <p>+ 1 фото</p>}}/>
+        </Image.PreviewGroup>
+      </Box>
+    </ConfigProvider>
+  );
+};
+
+export default ImageGallery;
+
+// src/components/ImageGallery/ImageGalleryStyles.ts
+// Стили для компонента ImageGallery
+export const styles = {
+  container: {
+    display: 'grid',
+    overflow: 'hidden',
+    width: 'fit-content',
+    height: '464px',
+    gridTemplateColumns: 'repeat(3, 270px)',
+    gridTemplateRows: 'repeat(2, 232px)',
+    gap: '10px',
+    borderRadius: '20px',
+    '& div:has(.firstImg)': {
+      gridColumn: '1 / 3',
+      gridRow: '1 / 3',
+    },
+    '& div:has(.secondImg)': {
+      gridColumn: '3',
+      gridRow: '1',
+    },
+    '& div:has(.thirdImg)': {
+      gridColumn: '3',
+      gridRow: '2',
+    },
+    '& div img.firstImg': {
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover',
+    },
+    '& div img.secondImg': {
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover',
+    },
+    '& div img.thirdImg': {
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover',
+    },
+  },
+};
+
+// src/components/NavBar/NavBar.tsx
+// Компонент навигационной панели с логотипом и кнопками
+import { ReactNode, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppBar, Box, Button, Divider, IconButton, Toolbar } from '@mui/material';
+import { useNavigate, useLocation } from 'react-router-dom';
+
+import { AppDispatch, RootState } from '../../hooks/getTypedSelector';
+import LogoSvg from '../../assets/logo.svg';
+import UserIcon from '../../assets/user.svg';
+
+import { navbarStyles } from './NavBarStyle';
+import { api, getImageUrl } from '../../utils/api';
+import { authReceived } from '../../redux/actions/auth';
+
+export const NavBar = (): ReactNode => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch: AppDispatch = useDispatch();
+
+  const { isLogged } = useSelector((state: RootState) => state.auth);
+  const { authUser } = useSelector((state: RootState) => state.auth);
+
+  const whoami = async () => {
+    try {
+      const response = await api.get('/auth/whoami');
+      dispatch(authReceived(response.data));
+    } catch (error) {
+      console.error('Ошибка при загрузке данных пользователя:', error);
+    }
+  };
+
+  useEffect(() => {
+    whoami();
+  }, []);
+
+  return (
+    <Box sx={navbarStyles.box}>
+      <AppBar position="static" sx={navbarStyles.appBar} elevation={0}>
+        <Toolbar>
+          <img src={LogoSvg} alt="Logo" style={{ cursor: 'pointer' }} onClick={() => navigate('/')} />
+
+          <Box sx={{ height: '100%', display: 'flex', alignItems: 'center' }}>
+            <Button 
+              sx={{
+                ...navbarStyles.button,
+                fontWeight: location.pathname === '/' ? '700' : '500'
+              }} 
+              onClick={() => navigate('/')}
+            >
+              Главная
+            </Button>
+            <Button 
+              sx={{
+                ...navbarStyles.button,
+                fontWeight: location.pathname === '/search' ? '700' : '500'
+              }}
+              onClick={() => navigate('/search')}
+            >
+              Поиск
+            </Button>
+            <Divider orientation="vertical" flexItem sx={{ margin: '10px 2px' }} />
+            {!isLogged && (
+              <Button
+                sx={{
+                  ...navbarStyles.button,
+                  fontWeight: location.pathname === '/auth' ? '700' : '500',
+                }}
+                onClick={() => navigate('/auth')}
+              >
+                Войти
+              </Button>
+            )}
+            {isLogged && (
+              <>
+                <IconButton 
+                  sx={{
+                    ...navbarStyles.userIcon,
+                    '& img': {
+                      border: location.pathname === '/profile' ? '2px solid #393939' : 'none'
+                    }
+                  }} 
+                  onClick={() => navigate('/profile')}
+                > 
+                  <img src={authUser.avatarPath ? getImageUrl(authUser.avatarPath) : UserIcon} style={{ width: '30px', height: '30px', borderRadius: '20px', }}></img>
+                </IconButton>
+              </>
+            )}
+          </Box>
+        </Toolbar>
+      </AppBar>
+    </Box>
+  );
+};
+
+// src/components/NavBar/NavBarStyle.ts
+// Стили для компонента NavBar
+import backgroundImage from '../../assets/body_background.png';
+
+export const navbarStyles = {
+  box: {
+    flexGrow: 1,
+    left: 0,
+    paddingTop: 0,
+    position: 'fixed',
+    backgroundImage: `url(${backgroundImage})`,
+    backgroundSize: '260px 240px',
+    zIndex: 10,
+    width: '100%',
+  },
+  appBar: {
+    border: 'none',
+    background: 'none',
+    height: '64px',
+    width: '1140px',
+    margin: 'auto',
+    '& div': {
+      padding: '0px',
+      display: 'flex',
+      justifyContent: 'space-between',
+    },
+  },
+  button: {
+    color: '#393939',
+    backgroundColor: 'none',
+    marginLeft: '15px',
+    borderRadius: '16px',
+    fontFamily: '"Montserrat Alternates", sans-serif',
+    fontWeight: '500',
+    fontStyle: 'normal',
+    fontSize: '18px',
+    textTransform: 'none',
+    width: '126px',
+    ':hover': {
+      fontWeight: '700',
+      background: 'none',
+    },
+  },
+  userIcon: {
+    marginLeft: '20px',
+  },
+};
+
+// src/components/CategoryList/CategoryList.tsx
+// Компонент списка категорий с возможностью прокрутки
+import { useEffect, useState } from 'react';
+import { Box, IconButton, Skeleton, Card, CardHeader, CardContent } from '@mui/material';
+import { useDispatch, useSelector } from 'react-redux';
+import { categoryListStyles } from './CategoryListStyle';
+import { CategoryListItem } from '../CategoryListItem/CategoryListItem';
+import { RootState } from '../../types/rootState';
+import { fetchCategoriesRequest } from '../../redux/actions/categories';
+import { Category } from '../../types/category';
+import arrowLeft from '../../assets/arrow_left.svg';
+import arrowRight from '../../assets/arrow_right.svg';
+import { itemStyles } from '../CategoryListItem/CategoryListStyleItem';
+
+const ITEMS_PER_PAGE = 4;
+const ITEM_WIDTH = 290; // 270px width + 20px gap
+
+export const CategoryList = () => {
+  const dispatch = useDispatch();
+  const categories = useSelector((state: RootState) => state.categories?.items || []);
+  const loading = useSelector((state: RootState) => state.categories?.loading || false);
+  const [startIndex, setStartIndex] = useState(0);
+  
+  useEffect(() => {
+    dispatch(fetchCategoriesRequest());
+  }, []);
+
+  const maxStartIndex = Math.max(0, categories.length - ITEMS_PER_PAGE);
+  const canGoBack = startIndex > 0;
+  const canGoForward = startIndex < maxStartIndex;
+
+  const handlePrev = () => {
+    if (canGoBack) {
+      setStartIndex(prev => Math.max(0, prev - 1));
+    }
+  };
+  
+  const handleNext = () => {
+    if (canGoForward) {
+      setStartIndex(prev => Math.min(maxStartIndex, prev + 1));
+    }
+  };
+
+  if (loading) {
+    return (
+      <Box sx={categoryListStyles.container}>
+        <Box sx={categoryListStyles.visibleContainer}>
+          <Box sx={categoryListStyles.sliderContainer}>
+            {[...Array(4)].map((_, idx) => (
+              <Card key={idx} sx={itemStyles.card} elevation={0}>
+                <CardHeader
+                  avatar={<Skeleton variant="circular" width={30} height={30} />}
+                  title={<Skeleton variant="text" width="100%" height={28} />}
+                  sx={itemStyles.header}
+                />
+                <CardContent>
+                  <Skeleton variant="text" width="100%" height={20} />
+                  <Skeleton variant="text" width="60%" height={20} />
+                  <Skeleton variant="text" width="90%" height={20} />
+                  <Skeleton variant="text" width="70%" height={20} />
+                  <Skeleton variant="text" width="40%" height={20} />
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={categoryListStyles.container}>
+      <Box sx={categoryListStyles.visibleContainer}>
+        <Box
+          sx={{
+            ...categoryListStyles.sliderContainer,
+            transform: `translateX(-${startIndex * ITEM_WIDTH}px)`,
+          }}
+        >
+          {categories.map((category: Category) => (
+            <CategoryListItem
+              key={category.id}
+              icon={category.iconPath || ''}
+              title={category.title}
+              description={category.description}
+            />
+          ))}
+        </Box>
+      </Box>
+
+      {canGoBack && (
+        <IconButton
+          onClick={handlePrev}
+          sx={categoryListStyles.arrowRight}
+          className="arrow-button"
+        >
+          <img src={arrowLeft} alt="Previous"/>
+        </IconButton>
+      )}
+
+      {canGoForward && (
+        <IconButton
+          onClick={handleNext}
+          sx={categoryListStyles.arrowLeft}
+          className="arrow-button"
+        >
+          <img src={arrowRight} alt="Next"/>
+        </IconButton>
+      )}
+    </Box>
+  );
+};
+
+// src/components/CategoryList/CategoryListStyle.ts
+// Стили для компонента CategoryList
+export const categoryListStyles = {
+  container: {
+    position: 'relative',
+    width: '100%',
+    padding: '40px 0px',
+    display: 'flex',
+    alignItems: 'center',
+    '&:hover .arrow-button': {
+      opacity: 1,
+    },
+  },
+  sliderContainer: {
+    display: 'flex',
+    gap: '20px',
+    transition: 'transform 0.5s ease-in-out',
+    width: 'fit-content',
+  },
+  arrowLeft: {
+    position: 'absolute',
+    right: -60,
+    opacity: 0,
+    transition: 'opacity 0.3s ease-in-out',
+    zIndex: 1,
+    '&:hover': {
+      backgroundColor: 'white',
+    },
+  },
+  arrowRight: {
+    position: 'absolute',
+    left: -60,
+    opacity: 0,
+    transition: 'opacity 0.3s ease-in-out',
+    zIndex: 1,
+    '&:hover': {
+      backgroundColor: 'white',
+    },
+  },
+  visibleContainer: {
+    width: '1140px', // 4 cards * 270px + 3 gaps * 20px
+    display: 'flex',
+    overflow: 'hidden',
+  }
+};
+
+// src/components/CategoryListItem/CategoryListItem.tsx
+// Компонент элемента категории
+import { Typography, Card, CardHeader, CardContent } from '@mui/material';
+import { itemStyles } from './CategoryListStyleItem';
+
+export const CategoryListItem = ({
+  icon,
+  title,
+  description,
+}: {
+  icon: string;
+  title: string;
+  description: string;
+}) => {
+  return (
+    <Card sx={itemStyles.card} elevation={0}>
+      <CardHeader
+        avatar={<img src={icon} />}
+        title={title}
+        sx={itemStyles.header}
+      />
+      <CardContent>
+        <Typography>{description}</Typography>
+      </CardContent>
+    </Card>
+  );
+};
+
+// src/components/CategoryListItem/CategoryListStyleItem.ts
+// Стили для компонента CategoryListItem
+export const itemStyles = {
+  card: {
+    width: '270px',
+    height: '190px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '15px',
+    padding: '20px 30px',
+    borderRadius: '20px',
+    '& span, p': {
+      fontFamily: '"Montserrat Alternates", sans-serif',
+      fontWeight: 200,
+      fontStyle: 'normal',
+      fontSize: '16px',
+      color: '#393939',
+    },
+    '& span': {
+      fontWeight: '400',
+    },
+    '& p': {
+      fontSize: '14px',
+    },
+    '& img': {
+      width: '30px',
+      height: '30px',
+      padding: '0px',
+    },
+    '& div, .MuiCardContent-root': {
+      padding: '0px',
+    }
+  },
+  header: {
+    width: '100%',
+    justify: 'left',
+    display: 'flex',
+    gap: '10px',
+    '& div': {
+      width: 'fit-content',
+      margin: '0px',
+    }
+  },
+};
+
+// src/components/EditUserForm/EditUserForm.tsx
+// Компонент формы редактирования данных пользователя
+import {
+  Avatar,
+  Button,
+  TextField,
+  Typography,
+  Box,
+  Badge,
+} from '@mui/material';
+import { styles } from './EditUserFormStyle';
+
+import EditIcon from '../../assets/edit.png';
+import { authReceived } from '../../redux/actions/auth';
+import { AppDispatch, RootState } from '../../hooks/getTypedSelector';
+import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { api, getImageUrl } from '../../utils/api';
+import UserIcon from '../../assets/user.png';
+
+export const EditUserForm = () => {
+  const { authUser } = useSelector((state: RootState) => state.auth);
+  const dispatch: AppDispatch = useDispatch();
+  const [values, setValues] = useState({
+    name: authUser?.name || '',
+    email: authUser?.email || '',
+    surname: authUser?.surname || '',
+    avatar: authUser?.avatarPath || '',
+    patronymic: authUser?.patronymic || '',
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, files } = e.target;
+    if (name === 'avatar' && files?.[0]) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setValues((prev) => ({ ...prev, avatar: reader.result as string }));
+      };
+      reader.readAsDataURL(files[0]);
+    } else {
+      setValues((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+  
+    const formData = new FormData();
+    if (values.surname) formData.append('surname', values.surname);
+    if (values.name) formData.append('name', values.name);
+    if (values.patronymic) formData.append('patronymic', values.patronymic);
+    if (values.email) formData.append('email', values.email);
+  
+    if (values.avatar) {
+      const blob = await fetch(values.avatar).then(res => res.blob());
+      formData.append('avatarPath', blob, 'avatar.png');
+    }
+
+    try {
+      const response = await api.patch('/user/personal-info', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+  
+      dispatch(authReceived(response.data));
+      setValues(authUser);
+    } catch (error) {
+      console.error('Ошибка:', error);
+    }
+  };
+
+  const whoami = async () => {
+    const url = 'https://82grrc2b-3001.euw.devtunnels.ms/auth/whoami';
+    const token = localStorage.getItem('token');
+
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      dispatch(authReceived(response.data));
+    } catch (error) {
+      console.error('Ошибка при отправке запроса:', error);
+    }
+  };
+
+  useEffect(() => {
+    whoami();
+  }, []);
+  
+  return (
+    <Box component="form" onSubmit={handleSubmit} sx={styles.container}>
+      <Typography sx={styles.title}>
+        Редактирование личных данных
+      </Typography>
+      <label htmlFor="avatar-upload" style={{ cursor: 'pointer', width: 'fit-content' }}>
+        <input
+          id="avatar-upload"
+          hidden
+          type="file"
+          accept="image/*"
+          name="avatar"
+          onChange={handleChange}
+        />
+        <Badge
+          overlap="circular"
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          badgeContent={
+            <img src={EditIcon} style={styles.editIcon} alt="Редактировать" />
+          }
+        >
+         <Avatar src={'https://82grrc2b-3001.euw.devtunnels.ms/' + values.avatar} sx={{ width: 110, height: 110 }} />
+        </Badge>
+      </label>
+      <TextField
+        label="Фамилия"
+        name="surname"
+        fullWidth
+        sx={styles.input}
+        value={values.surname}
+        onChange={handleChange}
+      />
+      <TextField
+        label="Имя"
+        name="name"
+        fullWidth
+        sx={styles.input}
+        value={values.name}
+        onChange={handleChange}
+      />
+      <TextField
+        label="Отчество"
+        name="patronymic"
+        fullWidth
+        sx={styles.input}
+        value={values.patronymic}
+        onChange={handleChange}
+      />
+      <TextField
+        label="Почта"
+        name="email"
+        type="email"
+        sx={styles.input}
+        fullWidth
+        value={values.email}
+        onChange={handleChange}
+      />
+
+      <Button type="submit" variant="contained" sx={styles.saveButton} disableElevation>
+        Сохранить изменения
+      </Button>
+    </Box>
+  );
+}
+
+// src/components/EditUserForm/EditUserFormStyle.tsx
+// Стили для компонента EditUserForm
+export const styles = {
+  title: {
+    fontSize: '24px',
+    fontWeight: '500',
+    margin: '10px auto',
+    color: '#393939',
+  },
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    padding: '0px 160px',
+  },
+  input: {
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    width: '400px',
+    gap: '20px',
+    '& fieldset': {
+      borderRadius: '20px',
+    },
+  },
+  editIcon: {
+    width: '30px',
+    height: '30px',
+  },
+  saveButton: {
+    borderRadius: '20px',
+    fontSize: '18px',
+    textTransform: 'none',
+    fontWeight: '600',
+    height: '56px',
+    width: '400px',
+    '&:hover': {
+      backgroundColor: '#FFBEB2',
+    },
+  },
+};
+
+// src/components/AccountSetting/AccountSetting.tsx
+// Компонент настроек аккаунта
+import React, { useState } from 'react';
+import {
+  Button,
+  TextField,
+  Typography,
+  Box,
+} from '@mui/material';
+import { styles } from './AccountSettingStyle';
+
+import { authReceived, userLogOut } from '../../redux/actions/auth';
+import { AppDispatch } from '../../hooks/getTypedSelector';
+import { useDispatch } from 'react-redux';
+import axios from 'axios';
+import { Divider } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import { api } from '../../utils/api';
+
+export function AccountSetting() {
+  const defaultValues = {
+    oldPassword: '',
+    newPassword: '',
+  };
+  const dispatch: AppDispatch = useDispatch();
+  const [values, setValues] = useState(defaultValues);
+  const navigate = useNavigate();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setValues((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await api.patch('/user/password', values);
+      console.log('Ответ сервера:', response.data);
+    } catch (error) {
+      console.error('Ошибка при отправке формы:', error);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    dispatch(userLogOut());
+    navigate('/');
+  };
+
+  return (
+    <Box component="form" onSubmit={handleSubmit} sx={styles.container}>
+      <Typography sx={styles.title}>Установка нового пароля</Typography>
+      <TextField
+        label="Новый пароль"
+        name="newPassword"
+        fullWidth
+        sx={styles.input}
+        value={values.newPassword}
+        onChange={handleChange}
+      />
+      <TextField
+        label="Старый пароль"
+        name="oldPassword"
+        fullWidth
+        sx={styles.input}
+        value={values.oldPassword}
+        onChange={handleChange}
+      />
+
+      <Button type="submit" variant="contained" sx={styles.saveButton} disableElevation>
+        Сохранить изменения
+      </Button>
+      <Divider></Divider>
+      <Button type="button" variant="outlined" sx={styles.saveButton} disableElevation onClick={handleLogout}>
+        Выйти
+      </Button>
+    </Box>
+  );
+}
+
+// src/components/AccountSetting/AccountSettingStyle.tsx
+// Стили для компонента AccountSetting
+export const styles = {
+  title: {
+    fontSize: '24px',
+    fontWeight: '500',
+    margin: '10px auto',
+    color: '#393939',
+  },
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    padding: '0px 160px',
+  },
+  input: {
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    width: '400px',
+    gap: '20px',
+    '& fieldset': {
+      borderRadius: '20px',
+    },
+  },
+  saveButton: {
+    borderRadius: '20px',
+    fontSize: '18px',
+    textTransform: 'none',
+    fontWeight: '600',
+    height: '56px',
+    width: '400px',
+    '&:hover': {
+      backgroundColor: '#FFBEB2',
+    },
+  },
+};
+
+// src/components/BookBar/BookBar.tsx
+// Компонент панели бронирования
+import { useState } from "react";
+import {
+  Box,
+  Typography,
+  IconButton,
+  Divider,
+  FormControl,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+  Button,
+} from "@mui/material";
+import { itemStyles } from "./BookBarStyle";
+import formatMoney from "../../utils/formatMoney";
+import getDaysAmountLiteral from "../../utils/getDaysAmountLiteral";
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
+
+export function BookBar() {
+  const [dates, setDates] = useState('10');
+  const [adults, setAdults] = useState(2);
+  const [children, setChildren] = useState(0);
+
+  const handleChange = (event: SelectChangeEvent) => {
+    setDates(event.target.value as string);
+  };
+
+  const updateCount = (type: 'adults' | 'children', increment: boolean) => {
+    if (type === 'adults') {
+      setAdults((prev) => Math.max(1, prev + (increment ? 1 : -1)));
+    } else {
+      setChildren((prev) => Math.max(0, prev + (increment ? 1 : -1)));
+    }
+  };
+
+  return (
+    <Box sx={itemStyles.container}>
+      <Typography sx={itemStyles.title}>Бронирование</Typography>
+      <Divider></Divider>
+      <Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '200px' }}>
+            <Typography>Взрослые</Typography>
+            <Box>
+              <IconButton size="small" onClick={() => updateCount('adults', false)}><RemoveIcon /></IconButton>
+              <Typography component="span" sx={{ mx: 1 }}>{adults}</Typography>
+              <IconButton size="small" onClick={() => updateCount('adults', true)}><AddIcon /></IconButton>
+            </Box>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '200px' }}>
+            <Typography>Дети</Typography>
+            <Box>
+              <IconButton size="small" onClick={() => updateCount('children', false)}><RemoveIcon /></IconButton>
+              <Typography component="span" sx={{ mx: 1 }}>{children}</Typography>
+              <IconButton size="small" onClick={() => updateCount('children', true)}><AddIcon /></IconButton>
+            </Box>
+          </Box>
+      </Box>
+      <Divider></Divider>
+      <Typography>Даты</Typography>
+      <FormControl fullWidth>
+        <Select
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          value={dates}
+          onChange={handleChange}
+          sx={itemStyles.select}
+        >
+          <MenuItem value={10}>чт, 1 мая – сб, 4 мая</MenuItem>
+          <MenuItem value={20}>сб, 10 мая – вт, 13 мая</MenuItem>
+          <MenuItem value={30}>вт, 20 мая – пт, 23 мая</MenuItem>
+        </Select>
+      </FormControl>
+      <Divider></Divider>
+      <Box sx={itemStyles.availability}>
+        <Typography>Свободных мест:</Typography>
+        <Typography>25</Typography>
+      </Box>
+      <Divider></Divider>
+      <Box sx={itemStyles.price}>
+       <Typography>Итого:</Typography>
+        <Typography>
+          {formatMoney(10000 * adults + 10000 * children)} ₽
+        </Typography>
+        <Typography>
+          / {4} {getDaysAmountLiteral(4)}
+        </Typography>
+      </Box>
+      <Button
+          variant="contained"
+          className="searchButton"
+          disableElevation
+        >
+          Забронировать
+        </Button>
+    </Box>
+  );
+}
+
+// src/components/BookBar/BookBarStyle.ts
+// Стили для компонента BookBar
+export const itemStyles = {
+  container: {
+    width: '270px',
+    height: '464px',
+    backgroundColor: '#fff',
+    padding: '20px',
+    borderRadius: '20px',
+    display: 'flex',
+    flexDirection: 'column',
+    flex: 'none',
+    position: 'sticky',
+    gap: '10px',
+    '& #people-count': {
+      fontSize: '16px',
+      textTransform: 'none',
+      backgroundColor: 'transparent',
+      boxShadow: 'none',
+      outline: 'none',
+      padding: '5px',
+      fontWeight: '400',
+      color: '#393939',
+      border: '1px solid #c9c9c9',
+      width: '100%',
+      borderRadius: '10px',
+    },
+    '& hr': {
+      margin: '5px 0px',
+    },
+    '& .searchButton': {
+      borderRadius: '15px',
+      height: '50px',
+      backgroundColor: '#FF5333',
+      color: '#fff',
+      textTransform: 'none',
+      fontWeight: 600,
+      fontSize: '16px',
+      padding: '0px 20px',
+    },
+    '& .searchButton:hover': {
+      backgroundColor: '#FFBEB2',
+      color: '#393939',
+    },
+  },
+  price: {
+    display: 'flex',
+    alignItems: 'flex-end',
+    flexGrow: '1',
+    gap: '5px',
+    '& p': {
+      fontSize: '18px',
+      fontWeight: '500',
+      marginRight: '15px',
+    },
+    '& p + p': {
+      fontSize: '17px',
+      marginRight: '0px',
+    },
+    '& p + p + p': {
+      color: '#8a8a8a',
+      fontSize: '14px',
+      marginRight: '0px',
+    },
+  },
+  title: {
+    fontWeight: '500',
+    fontSize: '20px',
+    textAlign: 'center',
+  },
+  popper: {
+    fontFamily: '"Montserrat Alternates", sans-serif',
+    fontStyle: 'normal',
+    color: '#393939',
+    fontSize: '14px',
+  },
+  textField: {
+    '& fieldset': {
+      fontSize: '14px',
+      borderRadius: '15px',
+    },
+  },
+  availability: {
+    display: 'flex',
+    '& p + p': {
+      flexGrow: '1',
+      textAlign: 'center',
+    }
+  },
+  select: {
+    '& fieldset': {
+      borderRadius: '15px',
+    },
+  },
+};
+
+// src/components/ErrorsAlerts/ErrorAlert.tsx
+// Компонент для отображения ошибок и уведомлений
+import * as React from 'react';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+
+import { ErrorAlertProps } from './ErrorAlertProps';
+import { ErrorAlertStyle } from './ErrorAlertStyle';
+
+export const ErrorAlert:React.FC<ErrorAlertProps> = ({ text, isError }) => {
+  return (
+    <Stack sx={ErrorAlertStyle.stack} spacing={2}>
+      <Alert variant="filled" severity={isError ? 'error' : 'success'}>{text}</Alert>
+    </Stack>
+  );
+}
+
+// src/components/ErrorsAlerts/ErrorAlertProps.ts
+// Интерфейс пропсов для компонента ErrorAlert
+export interface ErrorAlertProps {
+  text: string;
+  isError: boolean;
+}
+
+// src/components/ErrorsAlerts/ErrorAlertStyle.ts
+// Стили для компонента ErrorAlert
+export const ErrorAlertStyle = {
+  stack: {
+    maxWidth: '900px',
+  },
+};
+
+// src/components/Loading/Loading.tsx
+// Компонент индикатора загрузки
+import { FC } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
+
+import { LoadingStyle } from './LoadingStyle';
+
+export const Loading: FC = () => {
+  return (
+    <Box sx={LoadingStyle.box}>
+      <CircularProgress/>
+    </Box>
+  );
+}
+
+// src/components/Loading/LoadingStyle.ts
+// Стили для компонента Loading
+export const LoadingStyle = { 
+  box: { 
+    display: 'flex',
+    position: 'fixed', 
+    top: '50%', 
+    left: '50%'
+  }
+}

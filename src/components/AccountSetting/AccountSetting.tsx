@@ -13,6 +13,7 @@ import { useDispatch } from 'react-redux';
 import axios from 'axios';
 import { Divider } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { api } from '../../utils/api';
 
 export function AccountSetting() {
   const defaultValues = {
@@ -30,20 +31,11 @@ export function AccountSetting() {
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const token = localStorage.getItem('token');
-
     try {
-      const response = await axios.patch('https://82grrc2b-3001.euw.devtunnels.ms/user/password', values, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      dispatch(authReceived(response.data));
-      setValues(defaultValues);
+      const response = await api.patch('/user/password', values);
+      console.log('Ответ сервера:', response.data);
     } catch (error) {
-      console.error('Ошибка:', error);
+      console.error('Ошибка при отправке формы:', error);
     }
   };
 

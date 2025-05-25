@@ -1,3 +1,7 @@
+const CARD_HEIGHT = '407px';
+const CARD_WIDTH = '100%';
+const CARD_WIDTH_SMALL = '126px';
+
 export const itemStyles = {
   imageListItemBar: {
     background: 'linear-gradient(0deg,rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 25%, rgba(0,0,0,0) 50%)',
@@ -42,29 +46,37 @@ export const itemStyles = {
     },
   },
   featured: {
-    height: '100%',
-    width: '100%',
-    transition: 'all 1s ease',
+    height: CARD_HEIGHT,
+    width: CARD_WIDTH,
     position: 'relative',
     overflow: 'hidden',
     borderRadius: '25px',
+    transition: 'all 1s ease',
+    margin: 0,
+    padding: 0,
     '& img': {
       objectFit: 'cover',
       height: '100%',
       width: '100%',
+      margin: 0,
+      padding: 0,
     },
   },
   default: {
-    height: '100%',
-    width: '126px',
-    transition: 'all 1s ease',
+    height: CARD_HEIGHT,
+    width: CARD_WIDTH_SMALL,
     position: 'relative',
     overflow: 'hidden',
     borderRadius: '25px',
+    transition: 'all 1s ease',
+    margin: 0,
+    padding: 0,
     '& img': {
       objectFit: 'cover',
       height: '100%',
       width: '100%',
+      margin: 0,
+      padding: 0,
     },
   },
 };

@@ -1,6 +1,6 @@
 import { FC, useState } from 'react';
 import { Box, Button, TextField, Typography } from '@mui/material';
-import axios from 'axios'; // Импортируем axios
+import { api } from '../../utils/api';
 
 import image from '../../assets/auth_img.jpg';
 import { authPageStyles } from './AuthPageStyle';
@@ -27,13 +27,13 @@ const AuthPage: FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const url = isLogin ? 'https://82grrc2b-3001.euw.devtunnels.ms/auth/login' : 'https://82grrc2b-3001.euw.devtunnels.ms/auth/registration';
+    const url = isLogin ? '/auth/login' : '/auth/registration';
     const payload = isLogin
       ? { email, password }
       : { email, name, surname, password };
 
     try {
-      const response = await axios.post(url, payload);
+      const response = await api.post(url, payload);
 
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);

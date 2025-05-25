@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'; // Путь для пр�
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputAdornment from '@mui/material/InputAdornment';
 import FormControl from '@mui/material/FormControl';
-import { Box, Button, Divider, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import { Box, Button, Divider, IconButton, Menu, MenuItem, Typography, Tooltip } from '@mui/material';
 import { ConfigProvider, DatePicker } from 'antd';
 import ruRU from 'antd/locale/ru_RU';
 import dayjs from 'dayjs';
@@ -17,7 +17,7 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import { searchStyles } from './SearchBarStyle';
 import { RootState } from '../../hooks/getTypedSelector';
 import { setSearchData } from '../../redux/actions/search';
-import axios from 'axios';
+import { api } from '../../utils/api';
 import { setTours } from '../../redux/actions/tour';
 
 dayjs.locale('ru');
@@ -39,22 +39,39 @@ export const SearchBar = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
+  const [showTooltip, setShowTooltip] = useState(false);
+
   const dispatch = useDispatch();
+
+  // Только буквы (русские, латинские), пробелы и дефисы
+  const allowedPattern = /^[a-zA-Zа-яА-ЯёЁ\-\s]*$/;
 
   // Обработчик изменения поля "Место"
   const handlePlaceChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setPlace(event.target.value);
-    dispatch(setSearchData({ city: placeInput }))
+    const value = event.target.value;
+    if (allowedPattern.test(value)) {
+      setPlace(value);
+      dispatch(setSearchData({ city: value }));
+      if (value.trim()) {
+        setShowTooltip(false);
+      }
+    }
+    // Если не проходит по паттерну, не обновляем значение
   };
 
   // Обработчик изменения дат
   const handleDateChange = (dates: any) => {
     setDateRange(dates);
-    dispatch(setSearchData({ dateRange }))
+    dispatch(setSearchData({ dateRange: dates }));
   };
 
   // Функция для отправки данных (например, в Redux Store или на сервер)
   const handleSearch = async () => {
+    if (!placeInput.trim()) {
+      setShowTooltip(true);
+      return;
+    }
+    setShowTooltip(false);
     try {
       const params = new URLSearchParams();
   
@@ -65,7 +82,7 @@ export const SearchBar = () => {
       if (searchData.durationTo) params.append('durationTo', String(searchData.durationTo));
       if (searchData.isAccomodation !== undefined) params.append('isAccomodation', String(searchData.isAccomodation));
   
-      const response = await axios.get(`https://82grrc2b-3001.euw.devtunnels.ms/tour`, {
+      const response = await api.get('/tour', {
         params: Object.fromEntries(params),
       });
   
@@ -105,18 +122,33 @@ export const SearchBar = () => {
       <Box sx={searchStyles.mainContainer}>
         {/* Поле для ввода места */}
         <FormControl variant="outlined" className="barItem">
-          <OutlinedInput
-            type="text"
-            placeholder="Место"
-            value={placeInput}  // Значение инпута из локального состояния
-            onChange={handlePlaceChange}  // Обработчик изменений
-            sx={searchStyles.input}
-            startAdornment={
-              <InputAdornment position="start">
-                <img src={SearchIcon} alt="search" />
-              </InputAdornment>
-            }
-          />
+          <Tooltip
+            title={showTooltip ? 'Место не может быть пустым' : ''}
+            open={showTooltip}
+            arrow
+            placement="bottom"
+          >
+            <OutlinedInput
+              type="text"
+              placeholder="Место"
+              value={placeInput}
+              onChange={handlePlaceChange}
+              sx={{
+                ...searchStyles.input,
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  border: 'none',
+                },
+                '& .MuiOutlinedInput-notchedOutline': {
+                  border: 'none',
+                },
+              }}
+              startAdornment={
+                <InputAdornment position="start">
+                  <img src={SearchIcon} alt="search" />
+                </InputAdornment>
+              }
+            />
+          </Tooltip>
         </FormControl>
 
         <Divider orientation="vertical" />
@@ -131,8 +163,8 @@ export const SearchBar = () => {
             suffixIcon={null}
             style={searchStyles.input}
             inputReadOnly
-            value={dateRangeInput}  // Значение для дат из локального состояния
-            onChange={handleDateChange}  // Обработчик изменения дат
+            value={dateRangeInput}
+            onChange={handleDateChange}
             className="barItem"
           />
         </ConfigProvider>
@@ -197,7 +229,7 @@ export const SearchBar = () => {
           variant="contained"
           className="searchButton"
           disableElevation
-          onClick={handleSearch}  // Обработчик клика по кнопке
+          onClick={handleSearch}
         >
           Найти
         </Button>
