@@ -13,5 +13,16 @@ export default {
   },
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-  testMatch: ['**/__tests__/**/*.test.(ts|tsx)']
+  testMatch: ['**/__tests__/**/*.test.(ts|tsx)'],
+  collectCoverageFrom: [
+    'src/components/CategoryListItem/*',
+    'src/components/FilterBar/*.ts',
+    'src/components/RecentTourList/*',
+    'src/components/RecentTourListItem/*',
+    'src/components/SearchBar/*.ts',
+    'src/components/SmallSearchForm/*',
+    'src/components/TourCard/*',
+    'src/components/TourCardList/*',
+    'src/pages/*'
+  ]
 };

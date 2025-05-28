@@ -205,9 +205,9 @@ export const SearchBar = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '200px' }}>
                 <Typography>Взрослые</Typography>
                 <Box>
-                  <IconButton size="small" onClick={() => updateCount('adults', false)}><RemoveIcon /></IconButton>
+                  <IconButton size="small" aria-label="minus adults" onClick={() => updateCount('adults', false)}><RemoveIcon /></IconButton>
                   <Typography component="span" sx={{ mx: 1 }}>{adults}</Typography>
-                  <IconButton size="small" onClick={() => updateCount('adults', true)}><AddIcon /></IconButton>
+                  <IconButton size="small" aria-label="plus adults" onClick={() => updateCount('adults', true)}><AddIcon /></IconButton>
                 </Box>
               </Box>
             </MenuItem>
@@ -215,9 +215,9 @@ export const SearchBar = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '200px' }}>
                 <Typography>Дети</Typography>
                 <Box>
-                  <IconButton size="small" onClick={() => updateCount('children', false)}><RemoveIcon /></IconButton>
+                  <IconButton size="small" aria-label="minus children" onClick={() => updateCount('children', false)}><RemoveIcon /></IconButton>
                   <Typography component="span" sx={{ mx: 1 }}>{children}</Typography>
-                  <IconButton size="small" onClick={() => updateCount('children', true)}><AddIcon /></IconButton>
+                  <IconButton size="small" aria-label="plus children" onClick={() => updateCount('children', true)}><AddIcon /></IconButton>
                 </Box>
               </Box>
             </MenuItem>

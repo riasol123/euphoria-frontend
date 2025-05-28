@@ -1,5 +1,4 @@
 import { FC } from 'react';
-import ReactDOMServer from 'react-dom/server';
 
 import ImageGallery from '../../components/ImageGallery/ImageGallery';
 import { Box, Typography } from '@mui/material';
@@ -78,8 +77,5 @@ const TourPage: FC = () => {
   </Box>
   );
 };
-
-console.log(ReactDOMServer.renderToString());
-
 
 export default TourPage;
