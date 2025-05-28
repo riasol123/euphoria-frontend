@@ -71,8 +71,8 @@ export const searchStyles = {
     flexDirection: 'column',
     alignItems: 'center',
     padding: '30px',
-    gap: '20px',
     borderRadius: '20px',
+    gap: '20px',
   },
   textContainer: {
     display: 'flex',

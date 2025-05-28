@@ -14,6 +14,8 @@ import { AppDispatch, RootState } from '../../hooks/getTypedSelector';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import { api, getImageUrl } from '../../utils/api';
+import UserIcon from '../../assets/user.png';
 
 export const EditUserForm = () => {
   const { authUser } = useSelector((state: RootState) => state.auth);
@@ -52,11 +54,10 @@ export const EditUserForm = () => {
       formData.append('avatarPath', blob, 'avatar.png');
     }
 
-    const token = localStorage.getItem('token');
-
     try {
-      const response = await axios.patch('https://82grrc2b-3001.euw.devtunnels.ms/user/personal-info', formData, {
+      const response = await api.patch('/user/personal-info', formData, {
         headers: {
+          'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${token}`
         }
       });

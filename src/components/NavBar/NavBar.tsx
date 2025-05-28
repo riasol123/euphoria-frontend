@@ -8,7 +8,7 @@ import LogoSvg from '../../assets/logo.svg';
 import UserIcon from '../../assets/user.svg';
 
 import { navbarStyles } from './NavBarStyle';
-import axios from 'axios';
+import { api, getImageUrl } from '../../utils/api';
 import { authReceived } from '../../redux/actions/auth';
 
 
@@ -21,19 +21,11 @@ export const NavBar = (): ReactNode => {
   const { authUser } = useSelector((state: RootState) => state.auth);
 
   const whoami = async () => {
-
-    const url = 'https://82grrc2b-3001.euw.devtunnels.ms/auth/whoami';
-    const token = localStorage.getItem('token');
-
     try {
-      const response = await axios.get(url, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await api.get('/auth/whoami');
       dispatch(authReceived(response.data));
     } catch (error) {
-      console.error('Ошибка при отправке запроса:', error);
+      console.error('Ошибка при загрузке данных пользователя:', error);
     }
   };
 
@@ -91,7 +83,7 @@ export const NavBar = (): ReactNode => {
                   }} 
                   onClick={() => navigate('/profile')}
                 > 
-                  <img src={authUser.avatarPath ? 'https://82grrc2b-3001.euw.devtunnels.ms/' + authUser.avatarPath : UserIcon} style={{ width: '30px', height: '30px', borderRadius: '20px', }}></img>
+                  <img src={authUser.avatarPath ? getImageUrl(authUser.avatarPath) : UserIcon} style={{ width: '30px', height: '30px', borderRadius: '20px', }}></img>
                 </IconButton>
               </>
             )}

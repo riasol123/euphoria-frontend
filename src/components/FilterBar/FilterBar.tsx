@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { api } from '../../utils/api';
 import {
   Box,
   Slider,
@@ -13,11 +14,16 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { itemStyles } from "./FilterBarStyle";
-import { useDispatch } from "react-redux";
 import { setSearchData } from "../../redux/actions/search";
 import DropDown from "../../assets/dropdown.svg";
+import { fetchFoodCategoriesRequest } from '../../redux/actions/foodCategories';
 
 interface CuisineType {
+  id: number;
+  title: string;
+}
+
+interface CategoryType {
   id: number;
   title: string;
 }
@@ -26,24 +32,28 @@ export function FilterBar() {
   const [duration, setDuration] = useState<[number, number]>([1, 30]);
   const [accommodation, setAccommodation] = useState(false);
   const [selectedCuisines, setSelectedCuisines] = useState<CuisineType[]>([]);
-  const [cuisineOptions, setCuisineOptions] = useState<CuisineType[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<CategoryType[]>([]);
+  const [categoryOptions, setCategoryOptions] = useState<CategoryType[]>([]);
   const dispatch = useDispatch();
+
+  const foodCategories = useSelector((state: any) => state.foodCategories.items);
 
   const [durationInput, setDurationInput] = useState<[string, string]>([
     String(duration[0]),
     String(duration[1])
   ]);
 
-  // Запрос списка типов кухни
+  // Запрос списка категорий (НЕ кухни)
   useEffect(() => {
-    axios.get("https://82grrc2b-3001.euw.devtunnels.ms/categories")
+    dispatch(fetchFoodCategoriesRequest());
+    api.get("/categories")
       .then(response => {
-        setCuisineOptions(response.data);
+        setCategoryOptions(response.data);
       })
       .catch(error => {
-        console.error("Ошибка загрузки типов кухни:", error);
+        console.error("Ошибка загрузки категорий:", error);
       });
-  }, []);
+  }, [dispatch]);
 
   const handleSliderChange = (_: any, newValue: number | number[]) => {
     setDuration(newValue as [number, number]);
@@ -51,7 +61,7 @@ export function FilterBar() {
       String((newValue as [number, number])[0]),
       String((newValue as [number, number])[1])
     ]);
-    dispatch(setSearchData({ durationFrom: newValue[0], durationTo: newValue[1] }));
+    dispatch(setSearchData({ durationFrom: (newValue as [number, number])[0], durationTo: (newValue as [number, number])[1] }));
   };
 
   const handleInputChange = (index: number, value: string) => {
@@ -84,17 +94,24 @@ export function FilterBar() {
     dispatch(setSearchData({ durationFrom: newDuration[0], durationTo: newDuration[1] }));
   };
 
-  const handleCheck = (e) => {
+  const handleCheck = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
     setAccommodation(checked);
     dispatch(setSearchData({ isAccommodation: checked }));
   };
 
-  const handleCuisineChange = (_, newValue: CuisineType[]) => {
-    setSelectedCuisines(newValue);
-    dispatch(setSearchData({ 
-      cuisineTypes: newValue.map(cuisine => cuisine.id)
-    }));
+  const handleCuisineChange = (_: any, newValue: CuisineType[]) => {
+    if (newValue.length <= 3) {
+      setSelectedCuisines(newValue);
+      dispatch(setSearchData({ cuisineTypes: newValue.map(cuisine => cuisine.id) } as any));
+    }
+  };
+
+  const handleCategoryChange = (_: any, newValue: CategoryType[]) => {
+    if (newValue.length <= 5) {
+      setSelectedCategories(newValue);
+      dispatch(setSearchData({ categoryTypes: newValue.map(category => category.id) } as any));
+    }
   };
 
   return (
@@ -168,7 +185,7 @@ export function FilterBar() {
       <Typography>Тип кухни</Typography>
       <Autocomplete
         multiple
-        options={cuisineOptions}
+        options={foodCategories}
         disableCloseOnSelect
         value={selectedCuisines}
         onChange={handleCuisineChange}
@@ -187,6 +204,33 @@ export function FilterBar() {
             {...params}
             sx={itemStyles.textField}
             placeholder={selectedCuisines.length === 0 ? "Не выбран" : ""}
+          />
+        )}
+      />
+
+      <Divider sx={itemStyles.divider} />
+      <Typography>Категории</Typography>
+      <Autocomplete
+        multiple
+        options={categoryOptions}
+        disableCloseOnSelect
+        value={selectedCategories}
+        onChange={handleCategoryChange}
+        getOptionLabel={(option) => option.title}
+        isOptionEqualToValue={(option, value) => option.id === value.id}
+        sx={itemStyles.popper}
+        popupIcon={<img src={DropDown} alt="dropdown" className="custom-dropdown-icon" style={{ width: 20, height: 20, opacity: 0.7, transition: 'transform 0.2s' }} />}
+        renderOption={(props, option, { selected }) => (
+          <li {...props}>
+            <Checkbox checked={selected} />
+            {option.title}
+          </li>
+        )}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            sx={itemStyles.textField}
+            placeholder={selectedCategories.length === 0 ? "Не выбран" : ""}
           />
         )}
       />

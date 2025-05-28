@@ -66,7 +66,7 @@ export default function ProfilePage() {
         {isOrganizer ? (
             <Tab label="Мои туры" {...a11yProps(2)} />
         ) : (
-          <Tab label="Стать организатором" {...a11yProps(2)} />
+        <Tab label="Стать организатором" {...a11yProps(2)} />
         )}
         {isOrganizer && <Tab label="Создать тур" {...a11yProps(3)} />}
         <Tab label="Настройки аккаунта" {...a11yProps(isOrganizer ? 4 : 3)} />

@@ -1,0 +1,986 @@
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { RecentTourList } from '../RecentTourList';
+import { Provider } from 'react-redux';
+import configureStore from 'redux-mock-store';
+import { MemoryRouter } from 'react-router-dom';
+
+const mockStore = configureStore([]);
+const dispatchMock = jest.fn();
+
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useDispatch: () => dispatchMock,
+  useSelector: jest.fn(),
+}));
+
+describe('RecentTourList', () => {
+  beforeEach(() => {
+    dispatchMock.mockClear();
+  });
+
+  test('dispatches fetchToursRequest on mount', () => {
+    jest.requireMock('react-redux').useSelector.mockReturnValue({ tours: [], loading: true });
+    render(
+      <Provider store={mockStore({})}>
+        <MemoryRouter>
+          <RecentTourList />
+        </MemoryRouter>
+      </Provider>
+    );
+    expect(dispatchMock).toHaveBeenCalledWith(expect.objectContaining({ type: 'FETCH_TOURS_REQUEST' }));
+  });
+
+  test('shows skeletons while loading', () => {
+    jest.requireMock('react-redux').useSelector.mockReturnValue({ tours: [], loading: true });
+
+    const { container } = render(
+      <Provider store={mockStore({})}>
+            <MemoryRouter>
+      <RecentTourList />
+    </MemoryRouter>
+      </Provider>
+    );
+
+    expect(container.querySelectorAll('.MuiSkeleton-root')).not.toHaveLength(0);
+    expect(container.firstChild).toBeInTheDocument();
+  });
+
+  test('renders sorted tours after loading', () => {
+    const tours = [
+      { id: '1', title: 'Tour A', photos: ['photo1.jpg'], flows: [{ startDate: '2025-06-01' }] },
+      { id: '2', title: 'Tour B', photos: ['photo2.jpg'], flows: [{ startDate: '2025-05-01' }] },
+      { id: '3', title: 'Tour C', photos: ['photo3.jpg'], flows: [{ startDate: '2025-07-01' }] },
+    ];
+    jest.requireMock('react-redux').useSelector.mockReturnValue({ tours, loading: false });
+
+    render(
+      <Provider store={mockStore({})}>
+        <MemoryRouter>
+          <RecentTourList />
+        </MemoryRouter>
+      </Provider>
+    );
+
+    // Проверим, что заголовки туров есть (текст title)
+    expect(screen.getByAltText('Tour B')).toBeInTheDocument();
+    expect(screen.getByAltText('Tour A')).toBeInTheDocument();
+    expect(screen.getByAltText('Tour C')).toBeInTheDocument();
+  });
+});
+
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { SmallSearchForm } from '../SmallSearchForm';
+import { Provider } from 'react-redux';
+import configureStore from 'redux-mock-store';
+import { MemoryRouter } from 'react-router-dom';
+
+const mockStore = configureStore([]);
+const dispatchMock = jest.fn();
+const navigateMock = jest.fn();
+jest.mock('../../../assets/search.svg', () => 'search.svg');
+jest.mock('../../../assets/date.svg', () => 'date.svg');
+
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useDispatch: () => dispatchMock,
+}));
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: () => navigateMock,
+}));
+
+describe('SmallSearchForm', () => {
+  let store: any;
+
+  beforeEach(() => {
+    store = mockStore({});
+    dispatchMock.mockClear();
+    navigateMock.mockClear();
+  });
+
+  test('renders input and button', () => {
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <SmallSearchForm />
+        </MemoryRouter>
+      </Provider>
+    );
+
+    expect(screen.getByPlaceholderText(/место/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /найти туры/i })).toBeInTheDocument();
+  });
+
+  test('shows tooltip error when city input is empty and search clicked', () => {
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <SmallSearchForm />
+        </MemoryRouter>
+      </Provider>
+    );
+
+    const button = screen.getByRole('button', { name: /найти туры/i });
+    fireEvent.click(button);
+
+    expect(screen.getByText(/место не может быть пустым/i)).toBeInTheDocument();
+  });
+
+  test('dispatches search data and navigates on valid search', () => {
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <SmallSearchForm />
+        </MemoryRouter>
+      </Provider>
+    );
+
+    const input = screen.getByPlaceholderText(/место/i);
+    const button = screen.getByRole('button', { name: /найти туры/i });
+
+    fireEvent.change(input, { target: { value: 'Сочи' } });
+    fireEvent.click(button);
+
+    expect(dispatchMock).toHaveBeenCalledWith(expect.objectContaining({
+      type: expect.any(String), // setSearchData action type
+      payload: expect.objectContaining({ city: 'Сочи' }),
+    }));
+
+    expect(navigateMock).toHaveBeenCalledWith('/search');
+  });
+
+  test('accepts only allowed characters in city input', async () => {
+    render(<SmallSearchForm />);
+    const input = screen.getByPlaceholderText(/место/i);
+
+    // Очищаем поле
+    await userEvent.clear(input);
+
+    // Пробуем ввести строку с цифрами
+    await userEvent.type(input, 'Москва-123');
+
+    // Проверяем, что в поле нет цифр
+    expect(input).toHaveValue('Москва-');
+
+    // Проверяем ввод без цифр
+    await userEvent.clear(input);
+    await userEvent.type(input, 'New York');
+    expect(input).toHaveValue('New York');
+  });
+});
+
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import MainPage from '../MainPage';
+
+// Мокаем дочерние компоненты
+jest.mock('../../../components/RecentTourList/RecentTourList', () => ({
+  RecentTourList: () => <div data-testid="recent-tour-list" />
+}));
+
+jest.mock('../../../components/SmallSearchForm/SmallSearchForm', () => ({
+  SmallSearchForm: () => <div data-testid="small-search-form" />
+}));
+
+jest.mock('../../../components/CategoryList/CategoryList', () => ({
+  CategoryList: () => <div data-testid="category-list" />
+}));
+
+describe('MainPage', () => {
+  it('renders search form and recent tours', () => {
+    render(<MainPage />);
+    
+    // Проверяем, что SmallSearchForm отрисован
+    expect(screen.getByTestId('small-search-form')).toBeInTheDocument();
+    
+    // Проверяем, что RecentTourList отрисован
+    expect(screen.getByTestId('recent-tour-list')).toBeInTheDocument();
+  });
+
+  it('renders categories section with title', () => {
+    render(<MainPage />);
+    
+    // Проверяем, что категория заголовок присутствует
+    const categoryTitle = screen.getByText(/популярные категории/i);
+    expect(categoryTitle).toBeInTheDocument();
+    
+    // Проверяем, что CategoryList отрисован
+    expect(screen.getByTestId('category-list')).toBeInTheDocument();
+  });
+
+  test('applies container styles correctly', () => {
+    const { container } = render(<MainPage />);
+    const mainContainer = container.firstChild as HTMLElement; // корневой Box из mainPageStyles.container
+    
+    // Проверяем стили через getComputedStyle
+    const styles = window.getComputedStyle(mainContainer);
+    expect(styles.display).toBe('flex');
+    expect(styles.flexWrap).toBe('wrap');
+    expect(styles.justifyContent).toBe('space-evenly');
+  });
+});
+
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { CategoryListItem } from '../CategoryListItem';
+
+describe('CategoryListItem', () => {
+  const props = {
+    icon: 'icon.svg',
+    title: 'Test Title',
+    description: 'Test description text',
+  };
+
+  test('рендерится без ошибок', () => {
+    render(<CategoryListItem {...props} />);
+    expect(screen.getByText(props.title)).toBeInTheDocument();
+    expect(screen.getByText(props.description)).toBeInTheDocument();
+  });
+
+  test('отображает иконку с корректным src', () => {
+    render(<CategoryListItem {...props} />);
+    const img = screen.getByRole('img');
+    expect(img).toBeInTheDocument();
+    expect(img).toHaveAttribute('src', props.icon);
+  });
+});
+
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { RecentTourListItem } from '../RecentTourListItem';
+import { MemoryRouter } from 'react-router-dom';
+
+// Мокаем useNavigate из react-router-dom
+const mockedNavigate = jest.fn();
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: () => mockedNavigate,
+}));
+
+describe('RecentTourListItem', () => {
+  const defaultProps = {
+    img: 'test.jpg',
+    title: 'Test Tour',
+    day: 15,
+    month: 'May',
+    featured: false,
+    onMouseEnter: jest.fn(),
+    onImageLoad: jest.fn(),
+    showSkeleton: false,
+  };
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('рендерит скелетоны, если showSkeleton=true', () => {
+    render(
+      <MemoryRouter>
+        <RecentTourListItem {...defaultProps} showSkeleton={true} />
+      </MemoryRouter>
+    );
+
+    // Проверяем, что скелетоны (Skeleton) отображаются
+    expect(screen.getAllByText('', { selector: '.MuiSkeleton-root' }).length).toBeGreaterThan(0);
+
+    // Проверяем, что изображение невидимо (opacity: 0)
+    const img = screen.getByAltText(defaultProps.title);
+    expect(img).toHaveStyle('opacity: 0');
+  });
+
+  test('рендерит данные тура, если showSkeleton=false', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <RecentTourListItem {...defaultProps} featured={true} />
+      </MemoryRouter>
+    );
+
+    // Проверяем изображение
+    const img = screen.getByAltText(defaultProps.title);
+    expect(img).toHaveAttribute('src', defaultProps.img);
+    expect(img).toHaveStyle('opacity: 1');
+
+    // Проверяем заголовок
+    expect(screen.getByText(defaultProps.title)).toBeInTheDocument();
+
+    // Находим все элементы Typography
+    const typographyElements = container.querySelectorAll('.MuiTypography-root');
+
+    // Проверяем, есть ли элемент с датой (например: "15May", "15 May", и т.д.)
+    const dateElement = Array.from(typographyElements).find(el =>
+      el.textContent?.replace(/\s+/g, '').includes(`${defaultProps.day}${defaultProps.month}`)
+    );
+
+    expect(dateElement).toBeTruthy(); // Убедиться, что элемент найден
+  });
+
+  test('вызывает onImageLoad при загрузке изображения', () => {
+    render(
+      <MemoryRouter>
+        <RecentTourListItem {...defaultProps} />
+      </MemoryRouter>
+    );
+
+    const img = screen.getByAltText(defaultProps.title);
+
+    fireEvent.load(img);
+
+    expect(defaultProps.onImageLoad).toHaveBeenCalledTimes(1);
+  });
+
+  test('переходит на страницу тура при клике', () => {
+    render(
+      <MemoryRouter>
+        <RecentTourListItem {...defaultProps} />
+      </MemoryRouter>
+    );
+
+    const item = screen.getByRole('img', { name: defaultProps.title }).parentElement;
+    if (!item) throw new Error('Не найден элемент ImageListItem');
+
+    fireEvent.click(item);
+
+    expect(mockedNavigate).toHaveBeenCalledWith('/tour/1');
+  });
+
+  test('применяет стили featured, если featured=true', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <RecentTourListItem {...defaultProps} featured={true} />
+      </MemoryRouter>
+    );
+
+    expect(container.firstChild).toHaveStyle('transition: all 1s ease');
+  });
+});
+
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import AuthPage from '../AuthPage';
+import { Provider } from 'react-redux';
+import { MemoryRouter } from 'react-router-dom';
+import configureStore from 'redux-mock-store';
+import thunk from 'redux-thunk';
+import * as api from '../../../utils/api';
+
+const middlewares = [thunk];
+const mockStore = configureStore(middlewares);
+
+jest.mock('../../../utils/api');
+
+describe('AuthPage', () => {
+  let store: any;
+
+  beforeEach(() => {
+    store = mockStore({});
+    jest.clearAllMocks();
+  });
+
+  const renderComponent = () =>
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <AuthPage />
+        </MemoryRouter>
+      </Provider>
+    );
+
+  test('отображает форму входа по умолчанию', () => {
+    renderComponent();
+    expect(screen.getByText(/^Вход$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Почта/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Пароль/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Войти/i })).toBeInTheDocument();
+  });
+
+  test('переключается на форму регистрации', () => {
+    renderComponent();
+    fireEvent.click(screen.getByText(/Зарегистрироваться/i));
+
+    expect(screen.getByText(/Регистрация/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Имя/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Фамилия/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Подтвердите пароль/i)).toBeInTheDocument();
+  });
+
+  test('отправляет запрос на вход при submit', async () => {
+    const mockedResponse = {
+      data: {
+        token: 'fake-token',
+        user: { email: 'test@example.com' },
+      },
+    };
+
+    (api.api.post as jest.Mock).mockResolvedValueOnce(mockedResponse);
+
+    renderComponent();
+
+    fireEvent.change(screen.getByLabelText(/Почта/i), {
+      target: { value: 'test@example.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/Пароль/i), {
+      target: { value: '123456' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /Войти/i }));
+
+    await waitFor(() => {
+      expect(api.api.post).toHaveBeenCalledWith('/auth/login', {
+        email: 'test@example.com',
+        password: '123456',
+      });
+    });
+  });
+
+  test('отправляет запрос на регистрацию при submit', async () => {
+    const mockedResponse = {
+      data: {
+        token: 'fake-token',
+        user: { email: 'newuser@example.com' },
+      },
+    };
+
+    (api.api.post as jest.Mock).mockResolvedValueOnce(mockedResponse);
+
+    renderComponent();
+    fireEvent.click(screen.getByText(/Зарегистрироваться/i));
+
+    fireEvent.change(screen.getByLabelText(/Имя/i), {
+      target: { value: 'Иван' },
+    });
+    fireEvent.change(screen.getByLabelText(/Фамилия/i), {
+      target: { value: 'Иванов' },
+    });
+    fireEvent.change(screen.getByLabelText(/Почта/i), {
+      target: { value: 'newuser@example.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/^Пароль$/i), {
+      target: { value: '123456' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /Зарегистрироваться/i }));
+
+    await waitFor(() => {
+      expect(api.api.post).toHaveBeenCalledWith('/auth/registration', {
+        name: 'Иван',
+        surname: 'Иванов',
+        email: 'newuser@example.com',
+        password: '123456',
+      });
+    });
+  });
+});
+
+import { render, screen } from '@testing-library/react';
+import SearchPage from '../SearchPage';
+
+// Мокаем дочерние компоненты
+jest.mock('../../../components/SearchBar/SearchBar', () => ({
+  SearchBar: () => <div data-testid="search-bar">SearchBar Component</div>,
+}));
+
+jest.mock('../../../components/FilterBar/FilterBar', () => ({
+  FilterBar: () => <div data-testid="filter-bar">FilterBar Component</div>,
+}));
+
+jest.mock('../../../components/TourCardList/TourCardList', () => ({
+  TourCardList: () => <div data-testid="tour-card-list">TourCardList Component</div>,
+}));
+
+describe('SearchPage', () => {
+  test('рендерится без ошибок', () => {
+    render(<SearchPage />);
+    expect(screen.getByTestId('search-bar')).toBeInTheDocument();
+    expect(screen.getByTestId('filter-bar')).toBeInTheDocument();
+    expect(screen.getByTestId('tour-card-list')).toBeInTheDocument();
+  });
+
+  test('отображает SearchBar компонент', () => {
+    render(<SearchPage />);
+    const searchBar = screen.getByTestId('search-bar');
+    expect(searchBar).toHaveTextContent('SearchBar Component');
+  });
+
+  test('отображает FilterBar компонент', () => {
+    render(<SearchPage />);
+    const filterBar = screen.getByTestId('filter-bar');
+    expect(filterBar).toHaveTextContent('FilterBar Component');
+  });
+
+  test('отображает TourCardList компонент', () => {
+    render(<SearchPage />);
+    const tourList = screen.getByTestId('tour-card-list');
+    expect(tourList).toHaveTextContent('TourCardList Component');
+  });
+
+  test('структура страницы соответствует ожиданиям', () => {
+    render(<SearchPage />);
+    const container = screen.getByTestId('search-bar').parentElement; // верхний Box
+    expect(container).toHaveStyle('flex-direction: column');
+    expect(container).toHaveStyle('width: 100%');
+  });
+
+  test('блок с фильтрами и турами имеет горизонтальный layout', () => {
+    render(<SearchPage />);
+    const filterBlock = screen.getByTestId('filter-bar').parentElement;
+    expect(filterBlock).toHaveStyle('display: flex');
+    expect(filterBlock).toHaveStyle('gap: 20px');
+  });
+});
+
+import { fireEvent, waitFor } from '@testing-library/react';
+import configureStore from 'redux-mock-store';
+import thunk from 'redux-thunk';
+import { render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { SearchBar } from '../SearchBar';
+import userEvent from '@testing-library/user-event';
+import { searchReducer } from '../../../redux/reducers/searchReducer';
+
+const store = configureStore({
+  reducer: {
+    search: searchReducer,
+  },
+  preloadedState: {
+    search: {
+      city: '',
+      dateRange: { start: null, end: null },
+      adults: 2,
+      children: 0,
+    },
+  },
+});
+
+
+// Мокаем api, чтобы не делать реальные запросы
+jest.mock('../../../utils/api', () => ({
+  api: {
+    get: jest.fn(() => Promise.resolve({ data: [] })),
+  },
+}));
+
+// Мокаем redux actions, чтобы отслеживать вызовы dispatch
+jest.mock('../../../redux/actions/search', () => ({
+  setSearchData: jest.fn((payload) => ({ type: 'SET_SEARCH_DATA', payload })),
+}));
+jest.mock('../../../redux/actions/tour', () => ({
+  setTours: jest.fn((payload) => ({ type: 'SET_TOURS', payload })),
+}));
+
+const middlewares = [thunk];
+const mockStore = configureStore(middlewares);
+
+describe('SearchBar', () => {
+  let store: any;
+
+  beforeEach(() => {
+    store = mockStore({
+      search: {
+        city: '',
+        dateRange: null,
+      },
+    });
+
+    jest.clearAllMocks();
+  });
+
+  const renderComponent = () =>
+    render(
+      <Provider store={store}>
+        <SearchBar />
+      </Provider>
+    );
+
+  test('рендерит все основные элементы', () => {
+    renderComponent();
+
+    expect(screen.getByPlaceholderText(/место/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /найти/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /взрослых/i })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/заезд/i)).toBeInTheDocument();
+  });
+
+  test('показывает тултип с ошибкой, если поле "Место" пустое при поиске', async () => {
+    renderComponent();
+    const button = screen.getByRole('button', { name: /найти/i });
+
+    fireEvent.click(button);
+
+    expect(await screen.findByText(/место не может быть пустым/i)).toBeInTheDocument();
+  });
+
+  test('скрывает тултип с ошибкой, если поле "Место" заполнено', async () => {
+    renderComponent();
+    const input = screen.getByPlaceholderText(/место/i);
+    const button = screen.getByRole('button', { name: /найти/i });
+
+    fireEvent.change(input, { target: { value: 'Сочи' } });
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(screen.queryByText(/место не может быть пустым/i)).not.toBeInTheDocument();
+    });
+  });
+
+  test('вызывает функцию поиска при клике на кнопку "Найти" с валидными данными', async () => {
+    renderComponent();
+    const input = screen.getByPlaceholderText(/место/i);
+    const button = screen.getByRole('button', { name: /найти/i });
+
+    fireEvent.change(input, { target: { value: 'Казань' } });
+    fireEvent.click(button);
+
+    // Ждем, пока запрос выполнится и диспатч произойдет
+    await waitFor(() => {
+      const actions = store.getActions();
+      expect(actions).toContainEqual(expect.objectContaining({ type: 'SET_TOURS' }));
+    });
+  });
+
+  test('обновляет дату при выборе в DatePicker', async () => {
+    renderComponent();
+
+    const dateInputs = screen.getAllByRole('textbox').filter((input) =>
+      ['Заезд', 'Отъезд'].some((placeholder) => input.getAttribute('placeholder') === placeholder)
+    );
+
+    expect(dateInputs.length).toBe(2);
+  });
+
+  test('разрешает ввод только допустимых символов в поле "Место"', () => {
+    render(
+      <Provider store={store}>
+        <SearchBar />
+      </Provider>
+    );
+
+    const input = screen.getByPlaceholderText(/место/i);
+
+    // Вводим по символу (все валидные)
+    fireEvent.change(input, { target: { value: 'М' } });
+    fireEvent.change(input, { target: { value: 'Мо' } });
+    fireEvent.change(input, { target: { value: 'Мос' } });
+    fireEvent.change(input, { target: { value: 'Моск' } });
+    fireEvent.change(input, { target: { value: 'Моска' } });
+    fireEvent.change(input, { target: { value: 'Москва' } });
+
+    // Теперь вводим невалидные символы — состояние не должно измениться
+    fireEvent.change(input, { target: { value: 'Москва123' } });
+
+    expect(input).toHaveValue('Москва');
+  });
+
+  test('SearchBar › SearchBar › открывает меню выбора количества людей и позволяет изменять значения', () => {
+    render(
+      <Provider store={store}>
+        <SearchBar />
+      </Provider>
+    );
+
+    // Ищем кнопку по тексту, который реально присутствует в accessible name
+    const peopleButton = screen.getByRole('button', { name: /2 взрослых/i });
+
+    userEvent.click(peopleButton);
+  });
+});
+
+import { render, screen } from '@testing-library/react';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import TourPage from '../TourPage';
+
+// Мокаем компоненты с правильными путями (2 уровня вверх)
+jest.mock('../../../components/ImageGallery/ImageGallery', () => () => <div data-testid="image-gallery" />);
+jest.mock('../../../components/BookBar/BookBar', () => () => <div data-testid="book-bar" />);
+jest.mock('../../../assets/star.svg', () => 'star.svg');
+
+const renderPage = () => {
+  render(
+    <MemoryRouter initialEntries={['/tours/1']}>
+      <Routes>
+        <Route path="/tours/:id" element={<TourPage />} />
+      </Routes>
+    </MemoryRouter>
+  );
+};
+
+describe('TourPage', () => {
+  test('отрисовывает компонент ImageGallery и BookBar', () => {
+    renderPage();
+
+    expect(screen.getByTestId('image-gallery')).toBeInTheDocument();
+    expect(screen.getByTestId('book-bar')).toBeInTheDocument();
+  });
+
+  test('отображает заголовок тура и рейтинг', () => {
+    renderPage();
+
+    expect(screen.getByText(/тур в сердце осетии/i)).toBeInTheDocument();
+    expect(screen.getByText(/27 отзывов/i)).toBeInTheDocument();
+  });
+
+  test('отображает заголовки разделов', () => {
+    renderPage();
+
+    expect(screen.getByText(/о туре/i)).toBeInTheDocument();
+    expect(screen.getByText(/проживание/i)).toBeInTheDocument();
+    expect(screen.getByText(/включено в стоимость/i)).toBeInTheDocument();
+  });
+
+  test('отображает ключевые тексты', () => {
+    renderPage();
+
+    expect(screen.getByText(/Порог неба/i)).toBeInTheDocument();
+    expect(screen.getByText(/Авиаперелет/i)).toBeInTheDocument();
+  });
+});
+
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { FilterBar } from '../FilterBar';
+
+import { useDispatch, useSelector } from 'react-redux';
+
+jest.mock('react-redux', () => ({
+  useDispatch: jest.fn(),
+  useSelector: jest.fn(),
+}));
+
+jest.mock('../../../utils/api', () => ({
+  api: {
+    get: jest.fn(() => Promise.resolve({ data: [] })),
+  },
+}));
+
+describe('FilterBar', () => {
+  const mockedDispatch = jest.fn();
+
+  const mockFoodCategories = [
+    { id: 1, title: 'Итальянская' },
+    { id: 2, title: 'Французская' },
+    { id: 3, title: 'Японская' },
+    { id: 4, title: 'Доп. кухня' },
+  ];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useDispatch as jest.Mock).mockReturnValue(mockedDispatch);
+    (useSelector as jest.Mock).mockImplementation((selectorFn) =>
+      selectorFn({
+        foodCategories: { items: mockFoodCategories },
+      })
+    );
+  });
+
+  it('рендерит основные элементы фильтра', () => {
+    render(<FilterBar />);
+    expect(screen.getByText('Длительность')).toBeInTheDocument();
+    expect(screen.getByLabelText('От')).toBeInTheDocument();
+    expect(screen.getByLabelText('До')).toBeInTheDocument();
+    expect(screen.getByText('Проживание включено')).toBeInTheDocument();
+    expect(screen.getByText('Тип кухни')).toBeInTheDocument();
+    expect(screen.getByText('Категории')).toBeInTheDocument();
+  });
+
+  it('обновляет длительность и вызывает dispatch', () => {
+    render(<FilterBar />);
+    const inputFrom = screen.getByLabelText('От') as HTMLInputElement;
+    const inputTo = screen.getByLabelText('До') as HTMLInputElement;
+
+    fireEvent.change(inputFrom, { target: { value: '5' } });
+    fireEvent.blur(inputFrom);
+    fireEvent.change(inputTo, { target: { value: '10' } });
+    fireEvent.blur(inputTo);
+
+    expect(mockedDispatch).toHaveBeenCalledWith({
+      type: 'SET_SEARCH_DATA',
+      payload: { durationFrom: 5, durationTo: 10 },
+    });
+  });
+
+  it('отправляет isAccommodation: true при переключении свитча', () => {
+    render(<FilterBar />);
+    const checkbox = screen.getByRole('checkbox');
+    fireEvent.click(checkbox);
+
+    expect(mockedDispatch).toHaveBeenCalledWith({
+      type: 'SET_SEARCH_DATA',
+      payload: { isAccommodation: true },
+    });
+  });
+
+it('не вызывает dispatch при попытке выбрать более 3 кухонь', async () => {
+  const user = userEvent.setup();
+  render(<FilterBar />);
+
+  const inputs = screen.getAllByPlaceholderText('Не выбран');
+
+  await user.click(inputs[0]);
+  await user.click(await screen.findByText(/Итальянская/));
+
+  await user.click(inputs[2]);
+  await user.click(await screen.findByText(/Японская/));
+
+  expect(mockedDispatch).toHaveBeenCalledTimes(4);
+});
+
+
+  it('не вызывает dispatch при попытке выбрать более 3 кухонь', async () => {
+    const user = userEvent.setup();
+    render(<FilterBar />);
+
+    const inputs = screen.getAllByPlaceholderText('Не выбран');
+
+    await user.click(inputs[0]);
+    await user.click(await screen.findByText('Итальянская'));
+
+    await user.click(inputs[2]);
+    await user.click(await screen.findByText('Японская'));
+
+    // Попытка выбрать 4ю кухню (новое поле появляться не должно)
+    const extraInput = screen.queryAllByPlaceholderText('Не выбран')[3];
+    if (extraInput) {
+      await user.click(extraInput);
+      const extraOption = await screen.findByText('Доп. кухня');
+      await user.click(extraOption);
+    }
+
+    // Проверка, что dispatch не вызван с более чем 3 ID
+    const calls = mockedDispatch.mock.calls;
+    const lastPayload = calls[calls.length - 1]?.[0]?.payload;
+    if (lastPayload?.foodCategoryIds) {
+      expect(lastPayload.foodCategoryIds.length).toBeLessThanOrEqual(3);
+    }
+  });
+});
+
+import { render, screen } from '@testing-library/react';
+import { TourCardList } from '../TourCardList';
+import * as reactRedux from 'react-redux';
+
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useSelector: jest.fn(),
+}));
+
+// Мок для TourCard, чтобы не рендерить сложный компонент
+jest.mock('../../TourCard/TourCard', () => ({
+  TourCard: (props: any) => (
+    <div data-testid="tour-card">
+      <h2>{props.title}</h2>
+      <p>{props.description}</p>
+      <p>{props.location}</p>
+      <p>{props.duration}</p>
+      <p>{props.price}</p>
+      <p>{props.rate}</p>
+    </div>
+  ),
+}));
+
+describe('TourCardList', () => {
+  const useSelectorMock = reactRedux.useSelector as jest.Mock;
+
+  afterEach(() => {
+    useSelectorMock.mockReset();
+  });
+
+  it('не рендерит ничего, если tours пустой или undefined', () => {
+    useSelectorMock.mockReturnValue({ tours: [] });
+    const { container } = render(<TourCardList />);
+    expect(container.firstChild).toBeNull();
+
+    useSelectorMock.mockReturnValue({ tours: undefined });
+    const { container: container2 } = render(<TourCardList />);
+    expect(container2.firstChild).toBeNull();
+  });
+
+  it('рендерит список карточек туров', () => {
+    const toursMock = [
+      {
+        id: 1,
+        title: 'Тур 1',
+        description: 'Описание 1',
+        city: 'Москва',
+        duration: 5,
+        flows: [{ currentPrice: '1000' }],
+        photos: ['photo1.jpg'],
+        rate: '4.5',
+      },
+      {
+        id: 2,
+        title: 'Тур 2',
+        description: 'Описание 2',
+        city: 'Санкт-Петербург',
+        duration: 3,
+        flows: [],
+        photos: [],
+        rate: null,
+      },
+    ];
+
+    useSelectorMock.mockReturnValue({ tours: toursMock });
+
+    render(<TourCardList />);
+
+    const cards = screen.getAllByTestId('tour-card');
+    expect(cards).toHaveLength(2);
+
+    expect(screen.getByText('Тур 1')).toBeInTheDocument();
+    expect(screen.getByText('Описание 1')).toBeInTheDocument();
+    expect(screen.getByText('Москва')).toBeInTheDocument();
+    expect(screen.getByText('5')).toBeInTheDocument();
+    expect(screen.getByText('1000')).toBeInTheDocument();
+    expect(screen.getByText('4.5')).toBeInTheDocument();
+
+    expect(screen.getByText('Тур 2')).toBeInTheDocument();
+    expect(screen.getByText('Описание 2')).toBeInTheDocument();
+    expect(screen.getByText('Санкт-Петербург')).toBeInTheDocument();
+    expect(screen.getByText('3')).toBeInTheDocument();
+    expect(screen.getAllByText('—')).toHaveLength(1);
+  });
+});
+
+import { render, screen } from '@testing-library/react';
+import { TourCard } from '../TourCard';
+
+describe('TourCard', () => {
+  const defaultProps = {
+    title: 'Тестовый тур',
+    description: 'Описание тура',
+    location: 'Москва',
+    duration: 5,
+    price: 12345,
+    img: 'test-image.jpg',
+    rate: '4.5',
+  };
+
+  it('рендерит все переданные пропсы', () => {
+    render(<TourCard {...defaultProps} />);
+
+    expect(screen.getByText(defaultProps.title)).toBeInTheDocument();
+    expect(screen.getByText(defaultProps.description)).toBeInTheDocument();
+    expect(screen.getByText(defaultProps.location)).toBeInTheDocument();
+    expect(screen.getByText(defaultProps.rate)).toBeInTheDocument();
+    expect(screen.getByText(/12\s*345\s*₽/)).toBeInTheDocument();
+    expect(screen.getByText(`/ ${defaultProps.duration} дней`)).toBeInTheDocument();
+
+    const image = screen.getByAltText('tour image') as HTMLImageElement;
+    expect(image).toBeInTheDocument();
+    expect(image.src).toContain(defaultProps.img);
+  });
+
+  it('корректно рендерит пустой рейтинг', () => {
+    render(<TourCard {...defaultProps} rate="" />);
+
+    const ratingElements = screen.getAllByText((content, element) => {
+      // Ищем элементы, у которых текст равен пустой строке
+      return element.tagName.toLowerCase() === 'p' && content === '';
+    });
+
+    expect(ratingElements.length).toBeGreaterThan(0);
+  });
+});

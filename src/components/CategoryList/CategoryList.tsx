@@ -1,27 +1,29 @@
-import { useState } from 'react';
-import { Box, IconButton } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Box, IconButton, Skeleton, Card, CardHeader, CardContent } from '@mui/material';
+import { useDispatch, useSelector } from 'react-redux';
 import { categoryListStyles } from './CategoryListStyle';
 import { CategoryListItem } from '../CategoryListItem/CategoryListItem';
-
-import wine from '../../assets/wine.png';
-import cheese from '../../assets/cheese.png';
-import chilli from '../../assets/chilli-pepper.png';
-import shrimp from '../../assets/shrimp.png';
-import croissant from '../../assets/croissant.png';
-import party from '../../assets/party-ornament.png';
-import cauliflower from '../../assets/cauliflower.png';
-import vegan from '../../assets/vegan.png';
-import steak from '../../assets/steak.png';
+import { RootState } from '../../types/rootState';
+import { fetchCategoriesRequest } from '../../redux/actions/categories';
+import { Category } from '../../types/category';
 import arrowLeft from '../../assets/arrow_left.svg';
 import arrowRight from '../../assets/arrow_right.svg';
+import { itemStyles } from '../CategoryListItem/CategoryListStyleItem';
 
 const ITEMS_PER_PAGE = 4;
 const ITEM_WIDTH = 290; // 270px width + 20px gap
 
 export const CategoryList = () => {
+  const dispatch = useDispatch();
+  const categories = useSelector((state: RootState) => state.categories?.items || []);
+  const loading = useSelector((state: RootState) => state.categories?.loading || false);
   const [startIndex, setStartIndex] = useState(0);
   
-  const maxStartIndex = Math.max(0, itemData.length - ITEMS_PER_PAGE);
+  useEffect(() => {
+    dispatch(fetchCategoriesRequest());
+  }, []);
+
+  const maxStartIndex = Math.max(0, categories.length - ITEMS_PER_PAGE);
   const canGoBack = startIndex > 0;
   const canGoForward = startIndex < maxStartIndex;
 
@@ -37,6 +39,33 @@ export const CategoryList = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <Box sx={categoryListStyles.container}>
+        <Box sx={categoryListStyles.visibleContainer}>
+          <Box sx={categoryListStyles.sliderContainer}>
+            {[...Array(4)].map((_, idx) => (
+              <Card key={idx} sx={itemStyles.card} elevation={0}>
+                <CardHeader
+                  avatar={<Skeleton variant="circular" width={30} height={30} />}
+                  title={<Skeleton variant="text" width="100%" height={28} />}
+                  sx={itemStyles.header}
+                />
+                <CardContent>
+                  <Skeleton variant="text" width="100%" height={20} />
+                  <Skeleton variant="text" width="60%" height={20} />
+                  <Skeleton variant="text" width="90%" height={20} />
+                  <Skeleton variant="text" width="70%" height={20} />
+                  <Skeleton variant="text" width="40%" height={20} />
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={categoryListStyles.container}>
       <Box sx={categoryListStyles.visibleContainer}>
@@ -46,12 +75,12 @@ export const CategoryList = () => {
             transform: `translateX(-${startIndex * ITEM_WIDTH}px)`,
           }}
         >
-          {itemData.map((item, index) => (
+          {categories.map((category: Category) => (
             <CategoryListItem
-              key={index}
-              icon={item.icon}
-              title={item.title}
-              description={item.description}
+              key={category.id}
+              icon={category.iconPath || ''}
+              title={category.title}
+              description={category.description}
             />
           ))}
         </Box>
@@ -79,51 +108,3 @@ export const CategoryList = () => {
     </Box>
   );
 };
-
-const itemData = [
-  {
-    icon: wine,
-    title: 'Вино и терруар',
-    description: 'Погружение в винодельни, дегустации, обучение винному этикету и параминг с блюдами.',
-  },
-  {
-    icon: cheese,
-    title: 'Сырный путь',
-    description: 'Тур по лучшим сыродельням: от козьих сыров до выдержанных пармезанов.',
-  },
-  {
-    icon: chilli,
-    title: 'Острый маршрут',
-    description: 'Для любителей остренького: кухни Мексики, Таиланда, Индии, Южной Кореи.',
-  },
-  {
-    icon: shrimp,
-    title: 'Морской гастротур',
-    description: 'Всё, что связано с морепродуктами: устрицы, мидии, севиче, суши, рыбные рынки.',
-  },
-  {
-    icon: croissant,
-    title: 'Хлеб да выпечка',
-    description: 'Круассаны, чиабатты, багеты, фокачча, лаваш. С посещением пекарен и мастер-классов по выпечке.',
-  },
-  {
-    icon: party,
-    title: 'Праздник вкуса',
-    description: 'Тур под сезонные гастрособытия. Отличный способ совместить туризм с праздником.',
-  },
-  {
-    icon: cauliflower,
-    title: 'Эко-гастро',
-    description: 'Фермерские продукты, органика, slow food, zero waste кулинария. Экскурсии на экофермы.',
-  },
-  {
-    icon: vegan,
-    title: 'Сладкая жизнь',
-    description: 'Десерты и выпечка: от французских макаронс до восточной пахлавы. Кондитерские туры.',
-  },
-  {
-    icon: steak,
-    title: 'Мясной пир',
-    description: 'Всё о гриле и барбекю: аргентинский асадо, американский BBQ, грузинский шашлык.',
-  },
-];
