@@ -75,7 +75,7 @@ export const RecentTourListItem = ({
               featured ? (
                 <>
                   <Typography sx={itemStyles.title}>
-                    <Skeleton width="80%" />
+                    <Skeleton width="90%" height={60} />
                   </Typography>
                   <Typography align="center">
                     <Skeleton width={60} height={60} />
@@ -84,7 +84,7 @@ export const RecentTourListItem = ({
               ) : (
                 <Box sx={itemStyles.verticalDate}>
                   <Typography>
-                    <Skeleton width={100} />
+                    <Skeleton width={100} height={40} />
                   </Typography>
                 </Box>
               )

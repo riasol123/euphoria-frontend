@@ -4,7 +4,7 @@ import { styles } from './TourCardListStyle';
 import { useSelector } from 'react-redux';
 
 export const TourCardList = () => {
-  const { tours } = useSelector((state: any) => state.tour);
+  const { tours, loading } = useSelector((state: any) => state.tour);
 
   if (!tours || tours.length === 0) {
     return null;

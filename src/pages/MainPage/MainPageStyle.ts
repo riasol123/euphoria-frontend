@@ -2,6 +2,7 @@ export const mainPageStyles = {
   searchContainer: {
     display: 'flex',
     gap: '40px',
+    width: '100%',
   },
   container: {
     display: 'flex',

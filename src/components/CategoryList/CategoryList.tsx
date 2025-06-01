@@ -39,7 +39,7 @@ export const CategoryList = () => {
     }
   };
 
-  if (loading) {
+  if (categories.length == 0 || loading) {
     return (
       <Box sx={categoryListStyles.container}>
         <Box sx={categoryListStyles.visibleContainer}>
