@@ -26,7 +26,7 @@ export const navbarStyles = {
   button: {
     color: '#393939',
     backgroundColor: 'none',
-    marginLeft: '15px',
+    margin: '0px 15px',
     borderRadius: '16px',
     fontFamily: '"Montserrat Alternates", sans-serif',
     fontWeight: '500',
@@ -37,6 +37,7 @@ export const navbarStyles = {
     ':hover': {
       fontWeight: '700',
       background: 'none',
+      border: '1px solid #393939',
     },
   },
   userIcon: {

@@ -1,10 +1,12 @@
-
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import CardActionArea from '@mui/material/CardActionArea';
 import { Box } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setCurrentTour } from '../../redux/actions/tour';
 
 import StarIcon from '../../assets/star.svg';
 
@@ -13,6 +15,7 @@ import getDaysAmountLiteral from '../../utils/getDaysAmountLiteral';
 import formatMoney from '../../utils/formatMoney';
 
 export const TourCard = ({
+  id,
   title,
   description,
   location,
@@ -20,7 +23,9 @@ export const TourCard = ({
   price,
   img,
   rate,
+  tourData,
 }: { 
+  id: number,
   title: string,
   description: string,
   location: string,
@@ -28,10 +33,20 @@ export const TourCard = ({
   price: string | number,
   img: string,
   rate: string,
+  tourData?: any,
 }) => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const handleClick = () => {
+    if (tourData) {
+      dispatch(setCurrentTour(tourData));
+    }
+    navigate(`/tour/${id}`);
+  };
+
   return (
     <Card sx={styles.cardContainer} elevation={0}>
-      <CardActionArea>
+      <CardActionArea onClick={handleClick}>
         <CardMedia
           component="img"
           height="246"

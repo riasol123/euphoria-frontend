@@ -4,6 +4,7 @@ export const styles = {
     flexDirection: 'column',
     gap: '20px',
     padding: '0px 0px',
+    height: '100%',
   },
   title: {
     fontSize: '24px',
@@ -13,6 +14,7 @@ export const styles = {
     textAlign: 'center'
   },
   tableContainer: {
+    height: '100%',
     boxShadow: 'none',
     backgroundColor: 'transparent',
     '& .MuiTableCell-root': {

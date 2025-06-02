@@ -1,12 +1,11 @@
 import axios from 'axios';
 
-console.log(process.env.VITE_API_BASE_URL);
-const api = axios.create({ baseURL: process.env.VITE_API_BASE_URL });
+const api = axios.create({ baseURL: import.meta.env.VITE_API_BASE_URL });
 
 api.interceptors.request.use(
   (config) => {
     const { headers } = config;
-    const authToken = localStorage.getItem('tokenx');
+    const authToken = localStorage.getItem('token');
     if (authToken !== null) {
       headers.Authorization = `Bearer ${authToken}`;
     }

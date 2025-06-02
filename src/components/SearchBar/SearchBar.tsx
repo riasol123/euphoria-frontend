@@ -17,8 +17,7 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import { searchStyles } from './SearchBarStyle';
 import { RootState } from '../../hooks/getTypedSelector';
 import { setSearchData } from '../../redux/actions/search';
-import { api } from '../../utils/api';
-import { setTours } from '../../redux/actions/tour';
+import { fetchToursRequest } from '../../redux/actions/tour';
 
 dayjs.locale('ru');
 
@@ -28,7 +27,6 @@ export const SearchBar = () => {
 
   // Получаем данные из Redux Store
   const { city, dateRange } = useSelector((state: RootState) => state.search);
-  const searchData = useSelector((state: RootState) => state.search);
 
   // Локальные состояния для инпутов
   const [placeInput, setPlace] = useState(city || '');  // Место
@@ -73,21 +71,18 @@ export const SearchBar = () => {
     }
     setShowTooltip(false);
     try {
-      const params = new URLSearchParams();
-  
-      if (searchData.city) params.append('city', searchData.city);
-      if (searchData.dateRange?.[0]) params.append('startDate', searchData.dateRange[0].format('YYYY-MM-DD'));
-      if (searchData.dateRange?.[1]) params.append('endDate', searchData.dateRange[1].format('YYYY-MM-DD'));
-      if (searchData.durationFrom) params.append('durationFrom', String(searchData.durationFrom));
-      if (searchData.durationTo) params.append('durationTo', String(searchData.durationTo));
-      if (searchData.isAccomodation !== undefined) params.append('isAccomodation', String(searchData.isAccomodation));
-  
-      const response = await api.get('/tour', {
-        params: Object.fromEntries(params),
-      });
-  
-      console.log('Результат поиска:', response.data);
-      dispatch(setTours(response.data));
+      dispatch(fetchToursRequest({
+        page: 1,
+        limit: 10,
+        title: '',
+        isAccommodation: false,
+        categoryIds: '',
+        startDate: dateRangeInput?.[0]?.format ? dateRangeInput[0].format('YYYY-MM-DD') : '',
+        endDate: dateRangeInput?.[1]?.format ? dateRangeInput[1].format('YYYY-MM-DD') : '',
+        city: placeInput,
+        durationFrom: 1,
+        durationTo: 30,
+      }));
     } catch (error) {
       console.error('Ошибка при поиске:', error);
     }

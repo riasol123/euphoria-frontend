@@ -9,13 +9,10 @@ import {
 import { styles } from './EditUserFormStyle';
 
 import EditIcon from '../../assets/edit.png';
-import { authReceived } from '../../redux/actions/auth';
+import { userUpdateRequest } from '../../redux/actions/auth';
 import { AppDispatch, RootState } from '../../hooks/getTypedSelector';
 import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
-import React, { useEffect, useState } from 'react';
-import { api, getImageUrl } from '../../utils/api';
-import UserIcon from '../../assets/user.png';
+import React, { useState, useEffect } from 'react';
 
 export const EditUserForm = () => {
   const { authUser } = useSelector((state: RootState) => state.auth);
@@ -51,45 +48,21 @@ export const EditUserForm = () => {
   
     if (values.avatar) {
       const blob = await fetch(values.avatar).then(res => res.blob());
-      formData.append('avatarPath', blob, 'avatar.png');
+      formData.append('avatar', blob, 'avatar.png');
     }
 
-    try {
-      const response = await api.patch('/user/personal-info', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-  
-      dispatch(authReceived(response.data));
-      setValues(authUser);
-    } catch (error) {
-      console.error('Ошибка:', error);
-    }
-  };
-
-  const whoami = async () => {
-
-    const url = 'https://82grrc2b-3001.euw.devtunnels.ms/auth/whoami';
-    const token = localStorage.getItem('token');
-
-    try {
-      const response = await axios.get(url, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      dispatch(authReceived(response.data));
-    } catch (error) {
-      console.error('Ошибка при отправке запроса:', error);
-    }
+    dispatch(userUpdateRequest(formData));
   };
 
   useEffect(() => {
-    whoami();
-  }, []);
-  
+    setValues({
+      name: authUser?.name || '',
+      email: authUser?.email || '',
+      surname: authUser?.surname || '',
+      avatar: authUser?.avatarPath || '',
+      patronymic: authUser?.patronymic || '',
+    });
+  }, [authUser]);
 
   return (
     <Box component="form" onSubmit={handleSubmit} sx={styles.container}>
@@ -112,7 +85,7 @@ export const EditUserForm = () => {
             <img src={EditIcon} style={styles.editIcon} alt="Редактировать" />
           }
         >
-         <Avatar src={'https://82grrc2b-3001.euw.devtunnels.ms/' + values.avatar} sx={{ width: 110, height: 110 }} />
+         <Avatar src={values.avatar} sx={{ width: 110, height: 110 }} />
         </Badge>
       </label>
       <TextField

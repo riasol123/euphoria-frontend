@@ -1,27 +1,47 @@
-import { call, put, select, takeLatest } from 'redux-saga/effects';
-import { AxiosError } from 'axios';
+import { call, put, takeLatest } from 'redux-saga/effects';
+import api from '../api/api';
+import {
+  AUTH_LOGIN_REQUEST,
+  AUTH_REGISTER_REQUEST,
+} from '../actionTypes';
+import {
+  authLoginSuccess,
+  authLoginFailure,
+  authRegisterSuccess,
+  authRegisterFailure,
+} from '../actions/auth';
 
-import { AuthAction, AuthInformation } from '../../types/auth/types';
-
-import { authFailed, authReceived } from '../actions/auth';
-import getAuthData from '../api/getPosts/getAuthData';
-import { AUTH_REQUESTED } from '../actionTypes';
-import { changeModalProps } from '../actions/modal';
-
-function* authWorker({ payload }: AuthAction) {
+function* authLoginSaga(action: any) {
   try {
-    const requestType: string = yield select((state) => state.modal.modalType);
-    const data: AuthInformation = yield call(getAuthData, payload, requestType);
-    yield put(authReceived(data.user));
-    localStorage.setItem('authToken', data.token);
-    yield put(changeModalProps({ isOpen: false, type: '' }));
-  } catch (error: unknown) {
-    if (error instanceof AxiosError) {
-      yield put(authFailed(error.response?.data.message));
+    const { email, password } = action.payload;
+    console.log(email, password, 'email, password');
+    const response = yield call(api.post, '/auth/login', { email, password });
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
     }
+    yield put(authLoginSuccess(response.data));
+  } catch (error: any) {
+    yield put(authLoginFailure(error.message));
   }
 }
 
-export default function* authWatcher() {
-  yield takeLatest(AUTH_REQUESTED, authWorker);
+function* authRegisterSaga(action: any) {
+  try {
+    const { email, password, name, surname } = action.payload;
+    const response = yield call(api.post, '/auth/registration', { email, password, name, surname });
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+    }
+    yield put(authRegisterSuccess(response.data));
+  } catch (error: any) {
+    yield put(authRegisterFailure(error.message));
+  }
+}
+
+export function* watchAuthLogin() {
+  yield takeLatest(AUTH_LOGIN_REQUEST, authLoginSaga);
+}
+
+export function* watchAuthRegister() {
+  yield takeLatest(AUTH_REGISTER_REQUEST, authRegisterSaga);
 }

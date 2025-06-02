@@ -15,6 +15,8 @@ import 'dayjs/locale/ru';
 dayjs.locale('ru');
 import { Input as MuiInput } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
+import { useDispatch } from 'react-redux';
+import { createTourRequest } from '../../redux/actions/tour';
 
 const steps = ['Основная информация', 'Описание', 'Даты'];
 
@@ -32,6 +34,7 @@ export const CreateTourForm = () => {
   const [cuisines, setCuisines] = useState<string[]>([]);
   const [categories, setCategories] = useState<{ title: string; category: string }[]>([]);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
+  const dispatch = useDispatch();
 
   const onChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
     setFileList(newFileList.slice(0, 10));
@@ -112,8 +115,23 @@ export const CreateTourForm = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isStepValid()) {
-      // TODO: handle tour creation logic
-      alert('Тур создан!');
+      // Формируем данные для создания тура
+      const tourData = {
+        title: name,
+        description,
+        isAccommodation: true,
+        address: 'string',
+        duration: Number(duration),
+        city: 'string',
+        categoryIds: categories.map((cat: any, i: number) => i),
+        flows: dateRanges.map(range => ({
+          startDate: range.start.toISOString(),
+          endDate: range.end.toISOString(),
+          participant: Number(capacity),
+          currentPrice: Number(price.replace(/\s/g, '')),
+        })),
+      };
+      dispatch(createTourRequest(tourData));
     }
   };
 
@@ -140,14 +158,48 @@ export const CreateTourForm = () => {
     const beforeNewLine = needsNewLineBefore ? '\n' : '';
     const afterNewLine = needsNewLineAfter ? '\n' : '';
 
-    if (format === 'title') {
-      newText = textBefore + beforeNewLine + '***' + selectedText + '***' + afterNewLine + textAfter;
-    } else if (format === 'subtitle') {
-      newText = textBefore + beforeNewLine + '**' + selectedText + '**' + afterNewLine + textAfter;
+    if (format === 'title' || format === 'subtitle') {
+      // Если выделена не вся строка, переносим остаток на новую строку без пробелов
+      const beforeNewLine = needsNewLineBefore ? '\n' : '';
+      const afterNewLine = needsNewLineAfter ? '\n' : '';
+      let formatted = '';
+      if (start !== end && selectedText.indexOf('\n') === -1) {
+        const lineStart = description.lastIndexOf('\n', start - 1) + 1;
+        const lineEnd = description.indexOf('\n', end);
+        const fullLine = description.substring(lineStart, lineEnd === -1 ? description.length : lineEnd);
+        const beforeSel = fullLine.substring(0, start - lineStart);
+        const afterSel = fullLine.substring(end - lineStart);
+        formatted =
+          textBefore.substring(0, lineStart) +
+          beforeSel +
+          (format === 'title' ? '***' : '**') + selectedText.trim() + (format === 'title' ? '***' : '**') +
+          '\n' +
+          afterSel.trimStart() +
+          textAfter.substring(lineEnd === -1 ? description.length : lineEnd);
+      } else {
+        formatted = textBefore + beforeNewLine + (format === 'title' ? '***' : '**') + selectedText.trim() + (format === 'title' ? '***' : '**') + afterNewLine + textAfter;
+      }
+      newText = formatted;
     } else if (format === 'list') {
-      const lines = selectedText.split('\n');
-      const formattedLines = lines.map(line => '· ' + line).join('\n');
-      newText = textBefore + beforeNewLine + formattedLines + afterNewLine + textAfter;
+      // Аналогичная логика для списка
+      if (start !== end && selectedText.indexOf('\n') === -1) {
+        const lineStart = description.lastIndexOf('\n', start - 1) + 1;
+        const lineEnd = description.indexOf('\n', end);
+        const fullLine = description.substring(lineStart, lineEnd === -1 ? description.length : lineEnd);
+        const beforeSel = fullLine.substring(0, start - lineStart);
+        const afterSel = fullLine.substring(end - lineStart);
+        newText =
+          textBefore.substring(0, lineStart) +
+          beforeSel +
+          '· ' + selectedText.trim() +
+          '\n' +
+          afterSel.trimStart() +
+          textAfter.substring(lineEnd === -1 ? description.length : lineEnd);
+      } else {
+        const lines = selectedText.split('\n');
+        const formattedLines = lines.map(line => '· ' + line.trim()).join('\n');
+        newText = textBefore + beforeNewLine + formattedLines + afterNewLine + textAfter;
+      }
     }
 
     setDescription(newText);
