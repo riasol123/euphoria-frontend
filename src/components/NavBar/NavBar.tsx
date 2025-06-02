@@ -8,8 +8,8 @@ import LogoSvg from '../../assets/logo.svg';
 import UserIcon from '../../assets/user.svg';
 
 import { navbarStyles } from './NavBarStyle';
-import { api, getImageUrl } from '../../utils/api';
-import { authReceived } from '../../redux/actions/auth';
+import { getImageUrl } from '../../utils/getImageUrl';
+import { whoamiRequest } from '../../redux/actions/auth';
 
 
 export const NavBar = (): ReactNode => {
@@ -20,20 +20,18 @@ export const NavBar = (): ReactNode => {
   const { isLogged } = useSelector((state: RootState) => state.auth);
   const { authUser } = useSelector((state: RootState) => state.auth);
 
-  const whoami = async () => {
-    try {
-      const response = await api.get('/auth/whoami');
-      dispatch(authReceived(response.data));
-    } catch (error) {
-      console.error('Ошибка при загрузке данных пользователя:', error);
-    }
-  };
+  // const whoami = async () => {
+  //   try {
+  //     const response = await api.get('/auth/whoami');
+  //     dispatch(authReceived(response.data));
+  //   } catch (error) {
+  //     console.error('Ошибка при загрузке данных пользователя:', error);
+  //   }
+  // };
 
   useEffect(() => {
-    whoami();
-  }, []);
-
-  console.log(authUser)
+    dispatch(whoamiRequest());
+  }, [dispatch]);
 
   return (
     <Box sx={navbarStyles.box}>
@@ -66,6 +64,7 @@ export const NavBar = (): ReactNode => {
                 sx={{
                   ...navbarStyles.button,
                   fontWeight: location.pathname === '/auth' ? '700' : '500',
+                  marginRight: '0px',
                 }}
                 onClick={() => navigate('/auth')}
               >

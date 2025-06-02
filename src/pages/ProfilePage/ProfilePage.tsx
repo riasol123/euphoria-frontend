@@ -45,7 +45,6 @@ function a11yProps(index: number) {
 
 export default function ProfilePage() {
   const [value, setValue] = React.useState(0);
-  // TODO: Replace with actual user role check from your auth system
   const isOrganizer = true; // This should come from your auth context/state
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {

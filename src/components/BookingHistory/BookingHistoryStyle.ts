@@ -4,6 +4,7 @@ export const styles = {
     flexDirection: 'column',
     gap: '20px',
     padding: '0px 0px',
+    height: '100%',
   },
   title: {
     fontSize: '24px',
@@ -17,7 +18,7 @@ export const styles = {
       color: '#393939',
       textAlign: 'left',
       verticalAlign: 'middle',
-      padding: '16px',
+      padding: '15px',
       maxWidth: '200px',
       whiteSpace: 'nowrap',
       overflow: 'hidden',

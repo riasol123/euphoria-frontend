@@ -5,6 +5,7 @@ import { Typography, Box, Skeleton } from '@mui/material';
 import { itemStyles } from './RecentTourListItemStyle';
 
 interface RecentTourListItemProps {
+  id: number;
   img: string;
   title: string;
   day: number;
@@ -16,6 +17,7 @@ interface RecentTourListItemProps {
 }
 
 export const RecentTourListItem = ({
+  id,
   img,
   title,
   day,
@@ -29,7 +31,7 @@ export const RecentTourListItem = ({
 
   // Обработчик клика
   const handleClick = () => {
-    navigate(`/tour/1`); // Переходим на страницу с детальной информацией о туре
+    navigate(`/tour/${id}`); // Переходим на страницу с детальной информацией о туре
   };
 
   // Без transition для скелетона, с transition только для настоящих карточек
@@ -75,7 +77,7 @@ export const RecentTourListItem = ({
               featured ? (
                 <>
                   <Typography sx={itemStyles.title}>
-                    <Skeleton width="80%" />
+                    <Skeleton width="90%" height={60} />
                   </Typography>
                   <Typography align="center">
                     <Skeleton width={60} height={60} />
@@ -84,7 +86,7 @@ export const RecentTourListItem = ({
               ) : (
                 <Box sx={itemStyles.verticalDate}>
                   <Typography>
-                    <Skeleton width={100} />
+                    <Skeleton width={100} height={40} />
                   </Typography>
                 </Box>
               )

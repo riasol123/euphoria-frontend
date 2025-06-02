@@ -1,10 +1,10 @@
 import { call, put, takeLatest } from 'redux-saga/effects';
-import { api } from '../../utils/api';
 import {
   fetchFoodCategoriesSuccess,
   fetchFoodCategoriesFailure,
 } from '../actions/foodCategories';
 import { FETCH_FOOD_CATEGORIES_REQUEST } from '../actionTypes';
+import api from '../api/api';
 
 function* fetchFoodCategories() {
   try {

@@ -3,16 +3,11 @@ import {
   Button,
   TextField,
   Typography,
-  Paper,
-  FormControl,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
-  FormLabel,
 } from '@mui/material';
 import { styles } from './OrganizerFormStyle';
 import { useState } from 'react';
-import { api } from '../../utils/api';
+import { fetchOrganizerRequest } from '../../redux/actions/organizer';
+import { useDispatch } from 'react-redux';
 
 export const OrganizerForm = () => {
   const [values, setValues] = useState({
@@ -24,6 +19,8 @@ export const OrganizerForm = () => {
     email: '',
   });
 
+  const dispatch = useDispatch();
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setValues((prev) => ({ ...prev, [name]: value }));
@@ -32,8 +29,7 @@ export const OrganizerForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await api.post('/organizer/request', values);
-      console.log('Ответ сервера:', response.data);
+      dispatch(fetchOrganizerRequest(values));
     } catch (error) {
       console.error('Ошибка при отправке формы:', error);
     }

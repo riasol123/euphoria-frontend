@@ -1,13 +1,14 @@
 import { FC, useState } from 'react';
-import { Box, Button, TextField, Typography } from '@mui/material';
-import { api } from '../../utils/api';
-
+import { Box, Button, TextField, Typography, InputAdornment, IconButton } from '@mui/material';
+import { authLoginRequest } from '../../redux/actions/auth';
+import { useSelector, useDispatch } from 'react-redux';
 import image from '../../assets/auth_img.jpg';
 import { authPageStyles } from './AuthPageStyle';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../../hooks/getTypedSelector';
-import { authReceived } from '../../redux/actions/auth';
 import { useNavigate } from 'react-router-dom';
+import { AppDispatch } from '../../hooks/getTypedSelector';
+import EmailVerificationModal from '../../components/EmailVerificationModal/EmailVerificationModal';
+import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
+import VisibilityOffOutlined from '@mui/icons-material/VisibilityOffOutlined';
 
 const AuthPage: FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,35 +16,23 @@ const AuthPage: FC = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [surname, setSurname] = useState('');
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
-
+  const { isLogged } = useSelector((state: any) => state.auth);
 
   const toggleForm = () => {
     setIsLogin(prev => !prev);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    const url = isLogin ? '/auth/login' : '/auth/registration';
-    const payload = isLogin
-      ? { email, password }
-      : { email, name, surname, password };
-
-    try {
-      const response = await api.post(url, payload);
-
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        setToken(response.data.token);
-      }
-
-      dispatch(authReceived(response.data));
-      navigate('/');
-    } catch (error) {
-      console.error('Ошибка при отправке запроса:', error);
+    if (isLogin) {
+      dispatch(authLoginRequest({ email, password }));
+    } else {
+      setShowVerificationModal(true);
     }
   };
 
@@ -93,20 +82,48 @@ const AuthPage: FC = () => {
         <TextField
           label="Пароль"
           name="password"
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           fullWidth
           sx={authPageStyles.input}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={() => setShowPassword((show) => !show)}
+                  edge="end"
+                  sx={{ p: 0.5, background: 'none', '&:hover': { background: 'none' }, '&:active': { background: 'none' }, mr: 0, opacity: 0.5 }}
+                >
+                  {showPassword ? <VisibilityOffOutlined sx={{ fontSize: 20 }} /> : <VisibilityOutlined sx={{ fontSize: 20 }} />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
 
         {!isLogin && (
           <TextField
             label="Подтвердите пароль"
             name="confirmPassword"
-            type="password"
+            type={showConfirmPassword ? 'text' : 'password'}
             fullWidth
             sx={authPageStyles.input}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle confirm password visibility"
+                    onClick={() => setShowConfirmPassword((show) => !show)}
+                    edge="end"
+                    sx={{ p: 0.5, background: 'none', '&:hover': { background: 'none' }, '&:active': { background: 'none' }, mr: 0, opacity: 0.5 }}
+                  >
+                    {showConfirmPassword ? <VisibilityOffOutlined sx={{ fontSize: 20 }} /> : <VisibilityOutlined sx={{ fontSize: 20 }} />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
         )}
 
@@ -139,6 +156,15 @@ const AuthPage: FC = () => {
         </Box>
       </Box>
       <img src={image} />
+
+      <EmailVerificationModal
+        open={showVerificationModal}
+        onClose={() => setShowVerificationModal(false)}
+        email={email}
+        name={name}
+        surname={surname}
+        password={password}
+      />
     </Box>
   );
 };

@@ -13,16 +13,15 @@ import { styles } from './ImageGalleryStyles';
 
 const mask = <p><EyeOutlined style={{ marginRight: '5px' }}/>Просмотр</p>;
 
-const ImageGallery: FC = () => {
+const ImageGallery: FC<{ tour?: any }> = ({ tour }) => {
+  const images = tour?.photos && tour.photos.length > 0 ? tour.photos : [TourImg, First, Second, Third];
   return (
     <ConfigProvider locale={ru_RU}>
       <Box sx={styles.container}>
-        <Image.PreviewGroup
-          items={[TourImg, First, Second, Third]}
-        >
-          <Image src={TourImg} className='firstImg' preview={{ mask }}/>
-          <Image src={First} className='secondImg' preview={{ mask }}/>
-          <Image src={Second} className='thirdImg' preview={{ mask: <p>+ 1 фото</p>}}/>
+        <Image.PreviewGroup items={images}>
+          {images.map((img: string, idx: number) => (
+            <Image key={img} src={img} className={idx === 0 ? 'firstImg' : idx === 1 ? 'secondImg' : 'thirdImg'} preview={{ mask: idx === 2 ? <p>+ 1 фото</p> : mask }} />
+          ))}
         </Image.PreviewGroup>
       </Box>
     </ConfigProvider>

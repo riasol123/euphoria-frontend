@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { api } from '../../utils/api';
 import {
   Box,
   Slider,
@@ -17,6 +16,7 @@ import { itemStyles } from "./FilterBarStyle";
 import { setSearchData } from "../../redux/actions/search";
 import DropDown from "../../assets/dropdown.svg";
 import { fetchFoodCategoriesRequest } from '../../redux/actions/foodCategories';
+import { fetchCategoriesRequest } from '../../redux/actions/categories';
 
 interface CuisineType {
   id: number;
@@ -45,14 +45,7 @@ export function FilterBar() {
 
   // Запрос списка категорий (НЕ кухни)
   useEffect(() => {
-    dispatch(fetchFoodCategoriesRequest());
-    api.get("/categories")
-      .then(response => {
-        setCategoryOptions(response.data);
-      })
-      .catch(error => {
-        console.error("Ошибка загрузки категорий:", error);
-      });
+    dispatch(fetchCategoriesRequest());
   }, [dispatch]);
 
   const handleSliderChange = (_: any, newValue: number | number[]) => {

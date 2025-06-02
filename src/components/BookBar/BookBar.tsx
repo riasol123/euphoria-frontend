@@ -16,7 +16,7 @@ import getDaysAmountLiteral from "../../utils/getDaysAmountLiteral";
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 
-export function BookBar() {
+export function BookBar({ tour }: { tour?: any }) {
   const [dates, setDates] = useState('10');
 
   const [adults, setAdults] = useState(2);
@@ -40,22 +40,22 @@ export function BookBar() {
       <Typography sx={itemStyles.title}>Бронирование</Typography>
       <Divider></Divider>
       <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '200px' }}>
-            <Typography>Взрослые</Typography>
-            <Box>
-              <IconButton size="small" onClick={() => updateCount('adults', false)}><RemoveIcon /></IconButton>
-              <Typography component="span" sx={{ mx: 1 }}>{adults}</Typography>
-              <IconButton size="small" onClick={() => updateCount('adults', true)}><AddIcon /></IconButton>
-            </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '200px' }}>
+          <Typography>Взрослые</Typography>
+          <Box>
+            <IconButton size="small" onClick={() => updateCount('adults', false)}><RemoveIcon /></IconButton>
+            <Typography component="span" sx={{ mx: 1 }}>{adults}</Typography>
+            <IconButton size="small" onClick={() => updateCount('adults', true)}><AddIcon /></IconButton>
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '200px' }}>
-            <Typography>Дети</Typography>
-            <Box>
-              <IconButton size="small" onClick={() => updateCount('children', false)}><RemoveIcon /></IconButton>
-              <Typography component="span" sx={{ mx: 1 }}>{children}</Typography>
-              <IconButton size="small" onClick={() => updateCount('children', true)}><AddIcon /></IconButton>
-            </Box>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '200px' }}>
+          <Typography>Дети</Typography>
+          <Box>
+            <IconButton size="small" onClick={() => updateCount('children', false)}><RemoveIcon /></IconButton>
+            <Typography component="span" sx={{ mx: 1 }}>{children}</Typography>
+            <IconButton size="small" onClick={() => updateCount('children', true)}><AddIcon /></IconButton>
           </Box>
+        </Box>
       </Box>
       <Divider></Divider>
       <Typography>Даты</Typography>
@@ -75,25 +75,25 @@ export function BookBar() {
       <Divider></Divider>
       <Box sx={itemStyles.availability}>
         <Typography>Свободных мест:</Typography>
-        <Typography>25</Typography>
+        <Typography>{tour?.availableSeats ?? 25}</Typography>
       </Box>
       <Divider></Divider>
       <Box sx={itemStyles.price}>
-       <Typography>Итого:</Typography>
+        <Typography>Итого:</Typography>
         <Typography>
-          {formatMoney(10000 * adults + 10000 * children)} ₽
+          {formatMoney((tour?.price ?? 10000) * adults + (tour?.price ?? 10000) * children)} ₽
         </Typography>
         <Typography>
-          / {4} {getDaysAmountLiteral(4)}
+          / {tour?.duration ?? 4} {getDaysAmountLiteral(tour?.duration ?? 4)}
         </Typography>
       </Box>
       <Button
-          variant="contained"
-          className="searchButton"
-          disableElevation
-        >
-          Забронировать
-        </Button>
+        variant="contained"
+        className="searchButton"
+        disableElevation
+      >
+        Забронировать
+      </Button>
     </Box>
   );
 }

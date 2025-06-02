@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useState, useEffect } from 'react';
 import {
   Box,
   Table,
@@ -9,8 +9,13 @@ import {
   TableRow,
   Typography,
   Paper,
+  Pagination,
 } from '@mui/material';
 import { styles } from './BookingHistoryStyle';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../hooks/getTypedSelector';
+import { fetchBookingsRequest } from '../../redux/actions/tour';
+import { Booking } from '../../types/tour';
 
 interface BookingStatus {
   status: 'confirmed' | 'cancelled' | 'completed' | 'upcoming';
@@ -24,46 +29,6 @@ const statusMap: Record<string, BookingStatus> = {
   upcoming: { status: 'upcoming', label: 'Предстоящий' },
 };
 
-// Временные данные для примера
-const mockBookings = [
-  {
-    id: 1,
-    checkIn: '2024-03-15',
-    checkOut: '2024-03-20',
-    guests: 2,
-    price: 25000,
-    status: 'confirmed',
-    tourName: 'Винный тур по Тоскане',
-  },
-  {
-    id: 2,
-    checkIn: '2024-02-10',
-    checkOut: '2024-02-15',
-    guests: 4,
-    price: 45000,
-    status: 'cancelled',
-    tourName: 'Гастротур по Испании',
-  },
-  {
-    id: 3,
-    checkIn: '2024-01-01',
-    checkOut: '2024-01-05',
-    guests: 2,
-    price: 30000,
-    status: 'completed',
-    tourName: 'Сырный тур по Франции',
-  },
-  {
-    id: 4,
-    checkIn: '2024-04-20',
-    checkOut: '2024-04-25',
-    guests: 3,
-    price: 35000,
-    status: 'upcoming',
-    tourName: 'Морской гастротур',
-  },
-];
-
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('ru-RU');
 };
@@ -76,13 +41,30 @@ const formatPrice = (price: number) => {
   return price.toLocaleString('ru-RU') + ' ₽';
 };
 
+const ITEMS_PER_PAGE = 8;
+
 export const BookingHistory: FC = () => {
+  const dispatch = useDispatch();
+  const { bookings, bookingsError } = useSelector((state: RootState) => state.tour);
+  const [page, setPage] = useState(1);
+  useEffect(() => {
+    dispatch(fetchBookingsRequest());
+  }, [dispatch]);
+  const pageCount = Math.ceil((bookings?.length || 0) / ITEMS_PER_PAGE);
+  const paginatedBookings = bookings?.slice(
+    (page - 1) * ITEMS_PER_PAGE,
+    page * ITEMS_PER_PAGE
+  ) || [];
+
   return (
     <Box sx={styles.container}>
       <Typography sx={styles.title}>
         История бронирования
       </Typography>
-      <TableContainer component={Paper} elevation={0}>
+      {bookingsError && (
+        <Typography color="error" sx={{ textAlign: 'center', mt: 2 }}>{bookingsError}</Typography>
+      )}
+      <TableContainer component={Paper} elevation={0} sx={{ height: '100%' }}>
         <Table sx={styles.table}>
           <TableHead>
             <TableRow>
@@ -94,7 +76,11 @@ export const BookingHistory: FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {mockBookings.map((booking) => (
+            {paginatedBookings.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} align="center">Нет бронирований</TableCell>
+              </TableRow>
+            ) : paginatedBookings.map((booking: Booking) => (
               <TableRow key={booking.id}>
                 <TableCell className="tour-name-column">{booking.tourName}</TableCell>
                 <TableCell className="dates-column">{formatDateRange(booking.checkIn, booking.checkOut)}</TableCell>
@@ -104,10 +90,10 @@ export const BookingHistory: FC = () => {
                   <Box 
                     sx={{
                       ...styles.statusChip,
-                      ...styles[statusMap[booking.status].status],
+                      ...styles[statusMap[booking.status]?.status],
                     }}
                   >
-                    {statusMap[booking.status].label}
+                    {statusMap[booking.status]?.label || booking.status}
                   </Box>
                 </TableCell>
               </TableRow>
@@ -115,6 +101,16 @@ export const BookingHistory: FC = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      {pageCount > 1 && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+          <Pagination
+            count={pageCount}
+            page={page}
+            onChange={(_, value) => setPage(value)}
+            color="primary"
+          />
+        </Box>
+      )}
     </Box>
   );
 }; 

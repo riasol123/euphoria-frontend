@@ -15,9 +15,8 @@ import {
   FormControl,
   Collapse,
   Divider,
+  Pagination,
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { styles } from './OrganizerToursStyle';
 import { useState } from 'react';
 import DropDown from '../../assets/dropdown.svg';
@@ -33,6 +32,8 @@ interface Tour {
   status: 'active' | 'paused';
 }
 
+const ITEMS_PER_PAGE = 8;
+
 export const OrganizerTours = () => {
   const [tours, setTours] = useState<Tour[]>([
     {
@@ -47,10 +48,111 @@ export const OrganizerTours = () => {
       totalCapacity: 30,
       status: 'active',
     },
-    // Add more sample data as needed
+    {
+      id: '2',
+      name: 'Тур по Кавказу',
+      dates: [
+        '15.03.2024 - 20.03.2024',
+        '22.03.2024 - 27.03.2024',
+        '29.03.2024 - 03.04.2024',
+      ],
+      bookings: 12,
+      totalCapacity: 30,
+      status: 'active',
+    },
+    {
+      id: '3',
+      name: 'Тур по Кавказу',
+      dates: [
+        '15.03.2024 - 20.03.2024',
+        '22.03.2024 - 27.03.2024',
+        '29.03.2024 - 03.04.2024',
+      ],
+      bookings: 12,
+      totalCapacity: 30,
+      status: 'active',
+    },
+    {
+      id: '4',
+      name: 'Тур по Кавказу',
+      dates: [
+        '15.03.2024 - 20.03.2024',
+        '22.03.2024 - 27.03.2024',
+        '29.03.2024 - 03.04.2024',
+      ],
+      bookings: 12,
+      totalCapacity: 30,
+      status: 'active',
+    },
+    {
+      id: '5',
+      name: 'Тур по Кавказу',
+      dates: [
+        '15.03.2024 - 20.03.2024',
+        '22.03.2024 - 27.03.2024',
+        '29.03.2024 - 03.04.2024',
+      ],
+      bookings: 12,
+      totalCapacity: 30,
+      status: 'active',
+    },
+    {
+      id: '6',
+      name: 'Тур по Кавказу',
+      dates: [
+        '15.03.2024 - 20.03.2024',
+        '22.03.2024 - 27.03.2024',
+        '29.03.2024 - 03.04.2024',
+      ],
+      bookings: 12,
+      totalCapacity: 30,
+      status: 'active',
+    },
+    {
+      id: '7',
+      name: 'Тур по Кавказу',
+      dates: [
+        '15.03.2024 - 20.03.2024',
+        '22.03.2024 - 27.03.2024',
+        '29.03.2024 - 03.04.2024',
+      ],
+      bookings: 12,
+      totalCapacity: 30,
+      status: 'active',
+    },
+    {
+      id: '8',
+      name: 'Тур по Кавказу',
+      dates: [
+        '15.03.2024 - 20.03.2024',
+        '22.03.2024 - 27.03.2024',
+        '29.03.2024 - 03.04.2024',
+      ],
+      bookings: 12,
+      totalCapacity: 30,
+      status: 'active',
+    },
+    {
+      id: '9',
+      name: 'Тур по Кавказу',
+      dates: [
+        '15.03.2024 - 20.03.2024',
+        '22.03.2024 - 27.03.2024',
+        '29.03.2024 - 03.04.2024',
+      ],
+      bookings: 12,
+      totalCapacity: 30,
+      status: 'active',
+    },
   ]);
 
   const [expandedTours, setExpandedTours] = useState<{ [key: string]: boolean }>({});
+  const [page, setPage] = useState(1);
+  const pageCount = Math.ceil(tours.length / ITEMS_PER_PAGE);
+  const paginatedTours = tours.slice(
+    (page - 1) * ITEMS_PER_PAGE,
+    page * ITEMS_PER_PAGE
+  );
 
   const handleEdit = (tourId: string) => {
     // TODO: Implement edit functionality
@@ -92,7 +194,7 @@ export const OrganizerTours = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {tours.map((tour) => (
+            {paginatedTours.map((tour) => (
               <React.Fragment key={tour.id}>
                 <TableRow>
                   <TableCell className="tour-name-column">{tour.name}</TableCell>
@@ -159,6 +261,16 @@ export const OrganizerTours = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      {pageCount > 1 && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+          <Pagination
+            count={pageCount}
+            page={page}
+            onChange={(_, value) => setPage(value)}
+            color="primary"
+          />
+        </Box>
+      )}
     </Box>
   );
 }; 

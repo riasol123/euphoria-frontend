@@ -3,7 +3,6 @@ export const styles = {
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
-    gap: '20px',
     paddingBottom: '20px',
   },
   container: {
@@ -32,6 +31,8 @@ export const styles = {
     // display: 'flex',
     alignItems: 'flex-end',
     paddingRight: '310px',
+    paddingTop: '20px',
+    paddingBottom: '20px',
   },
   paragraphTitle: {
     fontSize: '25px',

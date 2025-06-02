@@ -1,11 +1,11 @@
 import { call, put, takeLatest } from 'redux-saga/effects';
-import { api } from '../../utils/api';
 import {
   fetchCategoriesSuccess,
   fetchCategoriesFailure,
 } from '../actions/categories';
 import { FETCH_CATEGORIES_REQUEST } from '../actionTypes';
 import { Category } from '../../types/category';
+import api from '../api/api';
 
 function* fetchCategories(): Generator<any, void, any> {
   try {
