@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1748202874165" clover="3.2.0">
-  <project timestamp="1748202874165" name="All files">
-    <metrics statements="125" coveredstatements="120" conditionals="43" coveredconditionals="39" methods="26" coveredmethods="16" elements="194" coveredelements="175" complexity="0" loc="125" ncloc="125" packages="8" files="14" classes="14"/>
+<coverage generated="1748919652014" clover="3.2.0">
+  <project timestamp="1748919652014" name="All files">
+    <metrics statements="133" coveredstatements="118" conditionals="44" coveredconditionals="39" methods="27" coveredmethods="16" elements="204" coveredelements="173" complexity="0" loc="133" ncloc="133" packages="8" files="14" classes="14"/>
     <package name="CategoryListItem">
       <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
       <file name="CategoryListItem.tsx" path="/Users/user/projects/euphoria/src/components/CategoryListItem/CategoryListItem.tsx">
@@ -17,11 +17,11 @@
       </file>
     </package>
     <package name="FilterBar">
-      <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <metrics statements="2" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
       <file name="FilterBarStyle.ts" path="/Users/user/projects/euphoria/src/components/FilterBar/FilterBarStyle.ts">
-        <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-        <line num="1" count="1" type="stmt"/>
-        <line num="11" count="1" type="stmt"/>
+        <metrics statements="2" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="0" type="stmt"/>
+        <line num="11" count="0" type="stmt"/>
       </file>
     </package>
     <package name="RecentTourList">
@@ -75,12 +75,12 @@
         <line num="3" count="2" type="stmt"/>
         <line num="4" count="2" type="stmt"/>
         <line num="5" count="2" type="stmt"/>
-        <line num="18" count="2" type="stmt"/>
-        <line num="28" count="14" type="stmt"/>
-        <line num="31" count="14" type="stmt"/>
-        <line num="32" count="1" type="stmt"/>
-        <line num="36" count="14" type="cond" truecount="2" falsecount="0"/>
-        <line num="40" count="14" type="stmt"/>
+        <line num="19" count="2" type="stmt"/>
+        <line num="30" count="14" type="stmt"/>
+        <line num="33" count="14" type="stmt"/>
+        <line num="34" count="1" type="stmt"/>
+        <line num="38" count="14" type="cond" truecount="2" falsecount="0"/>
+        <line num="42" count="14" type="stmt"/>
       </file>
       <file name="RecentTourListItemStyle.ts" path="/Users/user/projects/euphoria/src/components/RecentTourListItem/RecentTourListItemStyle.ts">
         <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
@@ -91,12 +91,11 @@
       </file>
     </package>
     <package name="SearchBar">
-      <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <metrics statements="2" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
       <file name="SearchBarStyle.ts" path="/Users/user/projects/euphoria/src/components/SearchBar/SearchBarStyle.ts">
-        <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-        <line num="1" count="1" type="stmt"/>
-        <line num="3" count="1" type="stmt"/>
-        <line num="9" count="1" type="stmt"/>
+        <metrics statements="2" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="3" count="0" type="stmt"/>
+        <line num="9" count="0" type="stmt"/>
       </file>
     </package>
     <package name="SmallSearchForm">
@@ -152,21 +151,30 @@
       </file>
     </package>
     <package name="TourCard">
-      <metrics statements="13" coveredstatements="13" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+      <metrics statements="22" coveredstatements="16" conditionals="1" coveredconditionals="0" methods="2" coveredmethods="1"/>
       <file name="TourCard.tsx" path="/Users/user/projects/euphoria/src/components/TourCard/TourCard.tsx">
-        <metrics statements="12" coveredstatements="12" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <metrics statements="21" coveredstatements="15" conditionals="1" coveredconditionals="0" methods="2" coveredmethods="1"/>
+        <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
         <line num="3" count="1" type="stmt"/>
         <line num="4" count="1" type="stmt"/>
         <line num="5" count="1" type="stmt"/>
         <line num="6" count="1" type="stmt"/>
         <line num="7" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
         <line num="9" count="1" type="stmt"/>
         <line num="11" count="1" type="stmt"/>
-        <line num="12" count="1" type="stmt"/>
         <line num="13" count="1" type="stmt"/>
+        <line num="14" count="1" type="stmt"/>
         <line num="15" count="1" type="stmt"/>
-        <line num="32" count="2" type="stmt"/>
+        <line num="17" count="1" type="stmt"/>
+        <line num="38" count="8" type="stmt"/>
+        <line num="39" count="0" type="stmt"/>
+        <line num="40" count="0" type="stmt"/>
+        <line num="41" count="0" type="cond" truecount="0" falsecount="1"/>
+        <line num="42" count="0" type="stmt"/>
+        <line num="44" count="0" type="stmt"/>
+        <line num="47" count="0" type="stmt"/>
       </file>
       <file name="TourCardStyle.tsx" path="/Users/user/projects/euphoria/src/components/TourCard/TourCardStyle.tsx">
         <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>

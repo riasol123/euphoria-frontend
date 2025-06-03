@@ -82,7 +82,7 @@ export const NavBar = (): ReactNode => {
                   }} 
                   onClick={() => navigate('/profile')}
                 > 
-                  <img src={authUser.avatarPath ? getImageUrl(authUser.avatarPath) : UserIcon} style={{ width: '30px', height: '30px', borderRadius: '20px', }}></img>
+                  <img src={authUser.avatarPath ? getImageUrl(authUser.avatarPath) : UserIcon} style={{ width: '30px', height: '30px', borderRadius: '20px', objectFit: 'cover' }}></img>
                 </IconButton>
               </>
             )}
