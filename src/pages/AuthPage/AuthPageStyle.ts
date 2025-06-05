@@ -16,6 +16,7 @@ export const authPageStyles = {
     '& > img': {
       width: '50%',
       borderRadius: '0px 20px 20px 0px',
+      objectFit: 'cover',
     },
   },
   authForm: {
