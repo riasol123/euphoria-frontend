@@ -41,6 +41,7 @@ export const NavBar = (): ReactNode => {
 
           <Box sx={{ height: '100%', display: 'flex', alignItems: 'center' }}>
             <Button 
+              disableRipple
               sx={{
                 ...navbarStyles.button,
                 fontWeight: location.pathname === '/' ? '700' : '500'
@@ -49,7 +50,9 @@ export const NavBar = (): ReactNode => {
             >
               Главная
             </Button>
+            <Divider orientation="vertical" flexItem sx={{ margin: '10px 2px' }} />
             <Button 
+              disableRipple
               sx={{
                 ...navbarStyles.button,
                 fontWeight: location.pathname === '/search' ? '700' : '500'
@@ -63,9 +66,10 @@ export const NavBar = (): ReactNode => {
               <Button
                 sx={{
                   ...navbarStyles.button,
-                  fontWeight: location.pathname === '/auth' ? '700' : '500',
-                  marginRight: '0px',
+                  ...navbarStyles.loginButton,
+                  fontWeight: location.pathname === '/auth' ? '700' : '500'
                 }}
+                disableRipple
                 onClick={() => navigate('/auth')}
               >
                 Войти
@@ -82,7 +86,7 @@ export const NavBar = (): ReactNode => {
                   }} 
                   onClick={() => navigate('/profile')}
                 > 
-                  <img src={authUser.avatarPath ? getImageUrl(authUser.avatarPath) : UserIcon} style={{ width: '30px', height: '30px', borderRadius: '20px', }}></img>
+                  <img src={authUser.avatarPath ? getImageUrl(authUser.avatarPath) : UserIcon} style={{ width: '30px', height: '30px', borderRadius: '20px', objectFit: 'cover' }}></img>
                 </IconButton>
               </>
             )}

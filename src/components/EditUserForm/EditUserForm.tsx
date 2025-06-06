@@ -13,6 +13,7 @@ import { userUpdateRequest } from '../../redux/actions/auth';
 import { AppDispatch, RootState } from '../../hooks/getTypedSelector';
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect } from 'react';
+import { getImageUrl } from '../../utils/getImageUrl';
 
 export const EditUserForm = () => {
   const { authUser } = useSelector((state: RootState) => state.auth);
@@ -85,7 +86,7 @@ export const EditUserForm = () => {
             <img src={EditIcon} style={styles.editIcon} alt="Редактировать" />
           }
         >
-         <Avatar src={values.avatar} sx={{ width: 110, height: 110 }} />
+         <Avatar src={values.avatar ? getImageUrl(values.avatar) : undefined} sx={{ width: 110, height: 110 }} />
         </Badge>
       </label>
       <TextField

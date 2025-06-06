@@ -34,10 +34,24 @@ export const navbarStyles = {
     fontSize: '18px',
     textTransform: 'none',
     width: '126px',
+    marginRight: '0px',
+    marginLeft: '0px',
     ':hover': {
       fontWeight: '700',
       background: 'none',
-      border: '1px solid #393939',
+      border: 'none',
+    },
+    ':active': {
+      fontWeight: '700',
+      background: 'none',
+      border: 'none',
+    },
+  },
+  loginButton: {
+    paddingRight: '0px',
+    ':active *': {
+      marginRight: '0px',
+      paddingRight: '0px'
     },
   },
   userIcon: {
