@@ -44,6 +44,7 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H github.com >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -v git@github.com
           git clone git@github.com:mariasol/euphoria-frontend.git euphoria-frontend
           cd euphoria-frontend
           echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" > .env
