@@ -11,7 +11,7 @@ import {
   authVerifyEmailFailure,
 } from '../actions/auth';
 
-function* authGenerateVerifyCodeSaga(action: any) {
+function* authGenerateVerifyCodeSaga(action: any): Generator<any, void, any> {
   try {
     const { email, name } = action.payload;
     const response = yield call(api.post, '/auth/generate-verify-code', { email, name });
@@ -21,7 +21,7 @@ function* authGenerateVerifyCodeSaga(action: any) {
   }
 }
 
-function* authVerifyEmailSaga(action: any) {
+function* authVerifyEmailSaga(action: any): Generator<any, void, any> {
   try {
     const { email, code } = action.payload;
     const response = yield call(api.post, '/auth/verify-email', { email, code });
@@ -31,10 +31,10 @@ function* authVerifyEmailSaga(action: any) {
   }
 }
 
-export function* watchAuthGenerateVerifyCode() {
+export function* watchAuthGenerateVerifyCode(): Generator<any, void, any> {
   yield takeLatest(AUTH_GENERATE_VERIFY_CODE_REQUEST, authGenerateVerifyCodeSaga);
 }
 
-export function* watchAuthVerifyEmail() {
+export function* watchAuthVerifyEmail(): Generator<any, void, any> {
   yield takeLatest(AUTH_VERIFY_EMAIL_REQUEST, authVerifyEmailSaga);
 } 

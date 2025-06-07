@@ -3,12 +3,15 @@ import api from '../api/api';
 import {
   AUTH_LOGIN_REQUEST,
   AUTH_REGISTER_REQUEST,
+  FETCH_AUTH_REQUEST,
 } from '../actionTypes';
 import {
   authLoginSuccess,
   authLoginFailure,
   authRegisterSuccess,
   authRegisterFailure,
+  fetchAuthSuccess,
+  fetchAuthFailure,
 } from '../actions/auth';
 
 function* authLoginSaga(action: any) {
@@ -38,10 +41,24 @@ function* authRegisterSaga(action: any) {
   }
 }
 
+function* fetchAuthSaga(): Generator<any, void, any> {
+  try {
+    const response = yield call(fetch, '/api/auth');
+    const data = yield call([response, 'json']);
+    yield put(fetchAuthSuccess(data));
+  } catch (error) {
+    yield put(fetchAuthFailure(error as Error));
+  }
+}
+
 export function* watchAuthLogin() {
   yield takeLatest(AUTH_LOGIN_REQUEST, authLoginSaga);
 }
 
 export function* watchAuthRegister() {
   yield takeLatest(AUTH_REGISTER_REQUEST, authRegisterSaga);
+}
+
+export function* watchAuthSaga(): Generator<any, void, any> {
+  yield takeLatest(FETCH_AUTH_REQUEST, fetchAuthSaga);
 }
