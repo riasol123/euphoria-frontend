@@ -44,6 +44,16 @@ jobs:
         rm -rf /tmp/.buildx-cache
         mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
+    - name: Copy deployment files
+      uses: appleboy/scp-action@master
+      with:
+        host: 62.109.17.167
+        username: mari
+        key: ${{ secrets.EUPHORIA_DEPLOY_KEY }}
+        source: "docker-compose.frontend.yml,nginx.conf"
+        target: "/home/mari/euphoria-frontend"
+        strip_components: 0
+
     - name: Deploy to server
       uses: appleboy/ssh-action@master
       with:
@@ -51,16 +61,9 @@ jobs:
         username: mari
         key: ${{ secrets.EUPHORIA_DEPLOY_KEY }}
         script: |
-          cd /root
-          rm -rf euphoria-frontend
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          echo "${{ secrets.EUPHORIA_DEPLOY_KEY }}" > ~/.ssh/euphoria
-          chmod 600 ~/.ssh/euphoria
-          ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
-          GIT_SSH_COMMAND="ssh -i ~/.ssh/euphoria" git clone git@github.com:mariasol/euphoria-frontend.git euphoria-frontend
-          cd euphoria-frontend
+          cd /home/mari/euphoria-frontend
+          
+          # Создаем файл с переменными окружения
           echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" > .env
           
           # Останавливаем и удаляем старые контейнеры
