@@ -2,13 +2,9 @@ version: '3.8'
 
 services:
   frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - VITE_API_BASE_URL=${VITE_API_BASE_URL}
+    image: ${DOCKERHUB_USERNAME}/euphoria-frontend:latest
     ports:
-      - "3000:80"  # Изменяем порт на 3000, чтобы не конфликтовать с бэкендом
+      - "3000:80"
     environment:
       - NODE_ENV=production
       - VITE_API_BASE_URL=${VITE_API_BASE_URL}
@@ -18,4 +14,5 @@ services:
 
 networks:
   app-network:
-    external: true  # Используем существующую сеть, если она уже создана для бэкенда 
+    name: euphoria_default
+    external: true 
