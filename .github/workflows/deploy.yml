@@ -48,6 +48,25 @@ jobs:
         rm -rf /tmp/.buildx-cache
         mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
+    - name: Create deployment directory
+      uses: appleboy/ssh-action@master
+      with:
+        host: 62.109.17.167
+        username: mari
+        key: ${{ secrets.EUPHORIA_DEPLOY_KEY }}
+        script: |
+          mkdir -p ~/euphoria-frontend
+
+    - name: Copy deployment files
+      uses: appleboy/scp-action@master
+      with:
+        host: 62.109.17.167
+        username: mari
+        key: ${{ secrets.EUPHORIA_DEPLOY_KEY }}
+        source: "docker-compose.frontend.yml,nginx.conf"
+        target: "/home/mari/euphoria-frontend"
+        strip_components: 0
+
     - name: Deploy to server
       uses: appleboy/ssh-action@master
       with:
@@ -55,17 +74,14 @@ jobs:
         username: mari
         key: ${{ secrets.EUPHORIA_DEPLOY_KEY }}
         script: |
-          # Создаем директорию проекта, если её нет
-          mkdir -p ~/euphoria-frontend
           cd ~/euphoria-frontend
-          
-          # Клонируем репозиторий (используя настроенный deploy key)
-          rm -rf ./* || true
-          git clone git@github.com:riasol123/euphoria-frontend.git .
           
           # Создаем файл с переменными окружения
           echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" > .env
           echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" >> .env
+          
+          # Проверяем наличие файлов
+          ls -la
           
           # Останавливаем и удаляем старые контейнеры
           docker-compose -f docker-compose.frontend.yml down || true
@@ -78,4 +94,5 @@ jobs:
           docker-compose -f docker-compose.frontend.yml up -d
           
           # Проверяем статус
-          docker-compose -f docker-compose.frontend.yml ps 
+          docker-compose -f docker-compose.frontend.yml ps
+          docker ps 
