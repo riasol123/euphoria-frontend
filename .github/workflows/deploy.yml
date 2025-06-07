@@ -34,7 +34,7 @@ jobs:
       with:
         host: 62.109.17.167
         username: root
-        key: ${{ secrets.SERVER_SSH_KEY }}
+        key: ${{ secrets.EUPHORIA_DEPLOY_KEY }}
         script: |
           cd /root
           rm -rf euphoria-frontend
