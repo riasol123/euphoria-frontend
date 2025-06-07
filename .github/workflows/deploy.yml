@@ -25,7 +25,7 @@ jobs:
       with:
         context: .
         push: true
-        tags: mariasol/euphoria-frontend:latest
+        tags: denvill/euphoria-frontend
         build-args: |
           VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
 
