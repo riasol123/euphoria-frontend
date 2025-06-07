@@ -1,12 +1,21 @@
 version: '3.8'
 
 services:
-  app:
+  frontend:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://62.109.17.167/api
     ports:
       - "80:80"
     environment:
       - NODE_ENV=production
-    restart: unless-stopped 
+      - VITE_API_URL=http://62.109.17.167/api
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge 
