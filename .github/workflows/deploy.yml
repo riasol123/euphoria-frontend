@@ -38,13 +38,7 @@ jobs:
         script: |
           cd /root
           rm -rf euphoria-frontend
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          echo "${{ secrets.EUPHORIA_DEPLOY_KEY }}" > ~/.ssh/euphoria
-          chmod 600 ~/.ssh/euphoria
-          ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
-          GIT_SSH_COMMAND="ssh -i ~/.ssh/euphoria" git clone git@github.com:mariasol/euphoria-frontend.git euphoria-frontend
+          git clone https://github.com/mariasol/euphoria-frontend.git euphoria-frontend
           cd euphoria-frontend
           echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" > .env
           docker-compose -f docker-compose.frontend.yml pull
