@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { RecentTourListItem } from '../RecentTourListItem';
 import { MemoryRouter } from 'react-router-dom';
@@ -30,7 +29,7 @@ describe('RecentTourListItem', () => {
   test('рендерит скелетоны, если showSkeleton=true', () => {
     render(
       <MemoryRouter>
-        <RecentTourListItem {...defaultProps} showSkeleton={true} />
+        <RecentTourListItem {...defaultProps} showSkeleton={true} id={1} />
       </MemoryRouter>
     );
 
@@ -45,7 +44,7 @@ describe('RecentTourListItem', () => {
   test('рендерит данные тура, если showSkeleton=false', () => {
     const { container } = render(
       <MemoryRouter>
-        <RecentTourListItem {...defaultProps} featured={true} />
+        <RecentTourListItem {...defaultProps} featured={true} id={1} />
       </MemoryRouter>
     );
 
@@ -71,7 +70,7 @@ describe('RecentTourListItem', () => {
   test('вызывает onImageLoad при загрузке изображения', () => {
     render(
       <MemoryRouter>
-        <RecentTourListItem {...defaultProps} />
+        <RecentTourListItem {...defaultProps} id={1} />
       </MemoryRouter>
     );
 
@@ -85,7 +84,7 @@ describe('RecentTourListItem', () => {
   test('переходит на страницу тура при клике', () => {
     render(
       <MemoryRouter>
-        <RecentTourListItem {...defaultProps} />
+        <RecentTourListItem {...defaultProps} id={1} />
       </MemoryRouter>
     );
 
@@ -100,7 +99,7 @@ describe('RecentTourListItem', () => {
   test('применяет стили featured, если featured=true', () => {
     const { container } = render(
       <MemoryRouter>
-        <RecentTourListItem {...defaultProps} featured={true} />
+        <RecentTourListItem {...defaultProps} featured={true} id={1} />
       </MemoryRouter>
     );
 

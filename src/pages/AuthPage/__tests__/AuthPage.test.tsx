@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import configureStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
-import * as api from '../../../utils/getImageUrl';
+import api from '../../../redux/api/api';
 
 const middlewares = [thunk];
 const mockStore = configureStore(middlewares);
@@ -54,7 +54,7 @@ describe('AuthPage', () => {
       },
     };
 
-    (api.api.post as jest.Mock).mockResolvedValueOnce(mockedResponse);
+    (api.post as jest.Mock).mockResolvedValueOnce(mockedResponse);
 
     renderComponent();
 
@@ -68,7 +68,7 @@ describe('AuthPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /Войти/i }));
 
     await waitFor(() => {
-      expect(api.api.post).toHaveBeenCalledWith('/auth/login', {
+      expect(api.post).toHaveBeenCalledWith('/auth/login', {
         email: 'test@example.com',
         password: '123456',
       });
@@ -83,7 +83,7 @@ describe('AuthPage', () => {
       },
     };
 
-    (api.api.post as jest.Mock).mockResolvedValueOnce(mockedResponse);
+    (api.post as jest.Mock).mockResolvedValueOnce(mockedResponse);
 
     renderComponent();
     fireEvent.click(screen.getByText(/Зарегистрироваться/i));
@@ -104,7 +104,7 @@ describe('AuthPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /Зарегистрироваться/i }));
 
     await waitFor(() => {
-      expect(api.api.post).toHaveBeenCalledWith('/auth/registration', {
+      expect(api.post).toHaveBeenCalledWith('/auth/registration', {
         name: 'Иван',
         surname: 'Иванов',
         email: 'newuser@example.com',

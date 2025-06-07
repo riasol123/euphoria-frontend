@@ -47,7 +47,7 @@ export default function ProfilePage() {
   const [value, setValue] = React.useState(0);
   const isOrganizer = true; // This should come from your auth context/state
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleChange = (_: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 

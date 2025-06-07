@@ -49,7 +49,12 @@ export const SmallSearchForm = () => {
       return;
     }
     setShowTooltip(false);
-    dispatch(setSearchData({ city, dateRange }));
+    dispatch(setSearchData({ 
+      city, 
+      dateRange,
+      adults: 2,
+      children: 0
+    }));
     navigate('/search');
   };
 

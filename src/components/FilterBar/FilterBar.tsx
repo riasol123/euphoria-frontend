@@ -15,7 +15,6 @@ import {
 import { itemStyles } from "./FilterBarStyle";
 import { setSearchData } from "../../redux/actions/search";
 import DropDown from "../../assets/dropdown.svg";
-import { fetchFoodCategoriesRequest } from '../../redux/actions/foodCategories';
 import { fetchCategoriesRequest } from '../../redux/actions/categories';
 
 interface CuisineType {
@@ -33,7 +32,7 @@ export function FilterBar() {
   const [accommodation, setAccommodation] = useState(false);
   const [selectedCuisines, setSelectedCuisines] = useState<CuisineType[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<CategoryType[]>([]);
-  const [categoryOptions, setCategoryOptions] = useState<CategoryType[]>([]);
+  const [categoryOptions] = useState<CategoryType[]>([]);
   const dispatch = useDispatch();
 
   const foodCategories = useSelector((state: any) => state.foodCategories.items);
@@ -54,7 +53,14 @@ export function FilterBar() {
       String((newValue as [number, number])[0]),
       String((newValue as [number, number])[1])
     ]);
-    dispatch(setSearchData({ durationFrom: (newValue as [number, number])[0], durationTo: (newValue as [number, number])[1] }));
+    dispatch(setSearchData({ 
+      city: '',
+      dateRange: { start: null, end: null },
+      adults: 2,
+      children: 0,
+      durationFrom: (newValue as [number, number])[0], 
+      durationTo: (newValue as [number, number])[1] 
+    }));
   };
 
   const handleInputChange = (index: number, value: string) => {
@@ -84,13 +90,27 @@ export function FilterBar() {
     newInputs[index] = String(newDuration[index]);
     setDuration(newDuration);
     setDurationInput(newInputs);
-    dispatch(setSearchData({ durationFrom: newDuration[0], durationTo: newDuration[1] }));
+    dispatch(setSearchData({ 
+      city: '',
+      dateRange: { start: null, end: null },
+      adults: 2,
+      children: 0,
+      durationFrom: newDuration[0],
+      durationTo: newDuration[1]
+    }));
   };
 
   const handleCheck = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
     setAccommodation(checked);
-    dispatch(setSearchData({ isAccommodation: checked }));
+    dispatch(setSearchData({ 
+      city: '',
+      dateRange: { start: null, end: null },
+      adults: 2,
+      children: 0,
+      durationFrom: duration[0],
+      durationTo: duration[1]
+    }));
   };
 
   const handleCuisineChange = (_: any, newValue: CuisineType[]) => {

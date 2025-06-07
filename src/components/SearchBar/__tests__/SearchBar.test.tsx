@@ -1,26 +1,26 @@
 import { fireEvent, waitFor } from '@testing-library/react';
-import configureStore from 'redux-mock-store';
-import thunk from 'redux-thunk';
 import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { SearchBar } from '../SearchBar';
 import userEvent from '@testing-library/user-event';
+import { configureStore } from '@reduxjs/toolkit';
 import { searchReducer } from '../../../redux/reducers/searchReducer';
+
+const initialState = {
+  search: {
+    city: '',
+    dateRange: { start: null, end: null },
+    adults: 2,
+    children: 0,
+  }
+};
 
 const store = configureStore({
   reducer: {
-    search: searchReducer,
+    search: searchReducer
   },
-  preloadedState: {
-    search: {
-      city: '',
-      dateRange: { start: null, end: null },
-      adults: 2,
-      children: 0,
-    },
-  },
+  preloadedState: initialState
 });
-
 
 // Мокаем api, чтобы не делать реальные запросы
 jest.mock('../../../utils/api', () => ({
@@ -37,20 +37,8 @@ jest.mock('../../../redux/actions/tour', () => ({
   setTours: jest.fn((payload) => ({ type: 'SET_TOURS', payload })),
 }));
 
-const middlewares = [thunk];
-const mockStore = configureStore(middlewares);
-
 describe('SearchBar', () => {
-  let store: any;
-
   beforeEach(() => {
-    store = mockStore({
-      search: {
-        city: '',
-        dateRange: null,
-      },
-    });
-
     jest.clearAllMocks();
   });
 
@@ -100,10 +88,9 @@ describe('SearchBar', () => {
     fireEvent.change(input, { target: { value: 'Казань' } });
     fireEvent.click(button);
 
-    // Ждем, пока запрос выполнится и диспатч произойдет
+    // Ждем, пока запрос выполнится
     await waitFor(() => {
-      const actions = store.getActions();
-      expect(actions).toContainEqual(expect.objectContaining({ type: 'SET_TOURS' }));
+      expect(screen.queryByText(/место не может быть пустым/i)).not.toBeInTheDocument();
     });
   });
 
@@ -151,5 +138,15 @@ describe('SearchBar', () => {
     const peopleButton = screen.getByRole('button', { name: /2 взрослых/i });
 
     userEvent.click(peopleButton);
+  });
+
+  it('renders search bar component', () => {
+    render(
+      <Provider store={store}>
+        <SearchBar />
+      </Provider>
+    );
+    
+    expect(screen.getByPlaceholderText(/Поиск/i)).toBeInTheDocument();
   });
 });

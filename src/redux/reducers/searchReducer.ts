@@ -1,29 +1,33 @@
-import { SET_SEARCH_DATA } from '../actions/search';
-
-export interface SearchState {
-  city?: string;
-  dateRange?: any;
-  isAccommodation?: boolean;
-  categoryIds?: any;
-  durationFrom?: number;
-  durationTo?: number;
-}
+import { SearchState } from '../../types/search/types';
 
 const initialState: SearchState = {
   city: '',
-  dateRange: null,
-  isAccommodation: false,
-  categoryIds: null,
-  durationFrom: 1,
-  durationTo: 30,
+  dateRange: { start: null, end: null },
+  adults: 2,
+  children: 0,
 };
 
-export const searchReducer = (state = initialState, action: any): SearchState => {
+export const searchReducer = (state = initialState, action: any) => {
   switch (action.type) {
-    case SET_SEARCH_DATA:
+    case 'SET_SEARCH_CITY':
       return {
         ...state,
-        ...action.payload,
+        city: action.payload,
+      };
+    case 'SET_SEARCH_DATE_RANGE':
+      return {
+        ...state,
+        dateRange: action.payload,
+      };
+    case 'SET_SEARCH_ADULTS':
+      return {
+        ...state,
+        adults: action.payload,
+      };
+    case 'SET_SEARCH_CHILDREN':
+      return {
+        ...state,
+        children: action.payload,
       };
     default:
       return state;

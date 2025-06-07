@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchToursRequest } from '../../redux/actions/tour';
 
 interface Tour {
-  id: string;
+  id: number;
   title: string;
   photos?: string[];
   flows: Array<{
@@ -49,6 +49,7 @@ export const RecentTourList = () => {
         {skeletons.map((_, index) => (
           <RecentTourListItem
             key={index}
+            id={index}
             img=""
             title=""
             day={0}
@@ -73,6 +74,7 @@ export const RecentTourList = () => {
         const month = date.toLocaleString('ru-RU', { month: 'long' });
         return (
           <RecentTourListItem
+            id={Number(tour.id)}
             key={tour.id}
             img={tour.photos?.[0] ? (process.env.VITE_API_BASE_URL + '/' + tour.photos[0]) : ''}
             title={tour.title}
@@ -80,7 +82,7 @@ export const RecentTourList = () => {
             month={month}
             featured={activeIndex === index}
             onMouseEnter={() => setActiveIndex(index)}
-            onImageLoad={() => handleImageLoad(tour.id)}
+            onImageLoad={() => handleImageLoad(tour.id.toString())}
             showSkeleton={!allImagesLoaded}
           />
         );

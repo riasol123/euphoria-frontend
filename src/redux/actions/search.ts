@@ -1,6 +1,6 @@
 // src/redux/actions/search.ts
 
-import { SearchState } from "../reducers/searchReducer";
+import { SearchState } from "../../types/search/types";
 
 export const SET_SEARCH_DATA = 'SET_SEARCH_DATA';
 

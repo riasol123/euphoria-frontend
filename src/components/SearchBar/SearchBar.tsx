@@ -49,7 +49,12 @@ export const SearchBar = () => {
     const value = event.target.value;
     if (allowedPattern.test(value)) {
       setPlace(value);
-      dispatch(setSearchData({ city: value }));
+      dispatch(setSearchData({ 
+        city: value,
+        dateRange,
+        adults,
+        children
+      }));
       if (value.trim()) {
         setShowTooltip(false);
       }
@@ -60,7 +65,12 @@ export const SearchBar = () => {
   // Обработчик изменения дат
   const handleDateChange = (dates: any) => {
     setDateRange(dates);
-    dispatch(setSearchData({ dateRange: dates }));
+    dispatch(setSearchData({ 
+      city: placeInput,
+      dateRange: dates,
+      adults,
+      children
+    }));
   };
 
   // Функция для отправки данных (например, в Redux Store или на сервер)

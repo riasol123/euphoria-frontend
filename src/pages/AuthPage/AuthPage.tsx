@@ -1,10 +1,9 @@
 import { FC, useState } from 'react';
 import { Box, Button, TextField, Typography, InputAdornment, IconButton } from '@mui/material';
 import { authLoginRequest } from '../../redux/actions/auth';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import image from '../../assets/auth_img.jpg';
 import { authPageStyles } from './AuthPageStyle';
-import { useNavigate } from 'react-router-dom';
 import { AppDispatch } from '../../hooks/getTypedSelector';
 import EmailVerificationModal from '../../components/EmailVerificationModal/EmailVerificationModal';
 import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
@@ -20,8 +19,6 @@ const AuthPage: FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const dispatch: AppDispatch = useDispatch();
-  const navigate = useNavigate();
-  const { isLogged } = useSelector((state: any) => state.auth);
 
   const toggleForm = () => {
     setIsLogin(prev => !prev);

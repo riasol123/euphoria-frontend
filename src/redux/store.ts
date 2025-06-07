@@ -6,7 +6,7 @@ import {
 } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 
-import rootSaga from './sagas/rootSaga';
+import { rootSaga } from './sagas/rootSaga';
 import { rootReducer } from './reducers';
 
 declare global {

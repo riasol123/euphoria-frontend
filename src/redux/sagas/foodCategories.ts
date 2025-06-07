@@ -4,7 +4,6 @@ import {
   fetchFoodCategoriesFailure,
 } from '../actions/foodCategories';
 import { FETCH_FOOD_CATEGORIES_REQUEST } from '../actionTypes';
-import api from '../api/api';
 
 function* fetchFoodCategoriesSaga(): Generator<any, void, any> {
   try {

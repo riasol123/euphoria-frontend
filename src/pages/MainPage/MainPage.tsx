@@ -7,8 +7,6 @@ import { Box, Divider, Typography } from '@mui/material';
 import { mainPageStyles } from './MainPageStyle';
 import { CategoryList } from '../../components/CategoryList/CategoryList';
 
-import verification from '../../assets/verification.png';
-
 const MainPage: FC = () => {
 
   return (

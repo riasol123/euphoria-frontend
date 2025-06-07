@@ -4,7 +4,7 @@ import { styles } from './TourCardListStyle';
 import { useSelector } from 'react-redux';
 
 export const TourCardList = () => {
-  const { tours, loading } = useSelector((state: any) => state.tour);
+  const { tours } = useSelector((state: any) => state.tour);
 
   if (!tours || tours.length === 0) {
     return null;
@@ -12,13 +12,14 @@ export const TourCardList = () => {
 
   return (
     <Box sx={styles.container}>
-      {tours.map((tour) => (
-        <TourCard
+      {tours.map((tour: any) => (
+        < TourCard
           key={tour.id}
-        title={tour.title}
-        description={tour.description}
-        location={tour.city}
-        duration={tour.duration}
+          id={Number(tour.id)}
+          title={tour.title}
+          description={tour.description}
+          location={tour.city}
+          duration={tour.duration}
           price={tour.flows?.[0]?.currentPrice || ''}
           img={tour.photos?.[0] ? (process.env.VITE_API_BASE_URL + '/' + tour.photos[0]) : ''}
           rate={tour.rate || '—'}

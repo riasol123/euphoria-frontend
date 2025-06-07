@@ -13,7 +13,7 @@ describe('TourCard', () => {
   };
 
   it('рендерит все переданные пропсы', () => {
-    render(<TourCard {...defaultProps} />);
+    render(<TourCard {...defaultProps} id={1} />);
 
     expect(screen.getByText(defaultProps.title)).toBeInTheDocument();
     expect(screen.getByText(defaultProps.description)).toBeInTheDocument();
@@ -28,11 +28,11 @@ describe('TourCard', () => {
   });
 
   it('корректно рендерит пустой рейтинг', () => {
-    render(<TourCard {...defaultProps} rate="" />);
+    render(<TourCard {...defaultProps} rate="" id={1} />);
 
     const ratingElements = screen.getAllByText((content, element) => {
       // Ищем элементы, у которых текст равен пустой строке
-      return element.tagName.toLowerCase() === 'p' && content === '';
+      return element?.tagName.toLowerCase() === 'p' && content === '';
     });
 
     expect(ratingElements.length).toBeGreaterThan(0);

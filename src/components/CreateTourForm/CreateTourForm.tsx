@@ -123,7 +123,7 @@ export const CreateTourForm = () => {
         address: 'string',
         duration: Number(duration),
         city: 'string',
-        categoryIds: categories.map((cat: any, i: number) => i),
+        categoryIds: categories.map((_: any, i: number) => i),
         flows: dateRanges.map(range => ({
           startDate: range.start.toISOString(),
           endDate: range.end.toISOString(),
