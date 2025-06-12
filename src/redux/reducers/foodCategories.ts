@@ -1,8 +1,8 @@
 import { FoodCategory } from '../../types/food/types';
 import {
-  FETCH_FOOD_CATEGORIES_REQUEST,
-  FETCH_FOOD_CATEGORIES_SUCCESS,
-  FETCH_FOOD_CATEGORIES_FAILURE,
+  GET_FOOD_CATEGORIES_REQUEST,
+  GET_FOOD_CATEGORIES_SUCCESS,
+  GET_FOOD_CATEGORIES_FAILURE,
 } from '../actionTypes';
 
 interface FoodCategoriesState {
@@ -19,18 +19,18 @@ const initialState: FoodCategoriesState = {
 
 export const foodCategoriesReducer = (state = initialState, action: any) => {
   switch (action.type) {
-    case FETCH_FOOD_CATEGORIES_REQUEST:
+    case GET_FOOD_CATEGORIES_REQUEST:
       return {
         ...state,
         loading: true,
       };
-    case FETCH_FOOD_CATEGORIES_SUCCESS:
+    case GET_FOOD_CATEGORIES_SUCCESS:
       return {
         ...state,
         loading: false,
         categories: action.payload,
       };
-    case FETCH_FOOD_CATEGORIES_FAILURE:
+    case GET_FOOD_CATEGORIES_FAILURE:
       return {
         ...state,
         loading: false,

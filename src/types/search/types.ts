@@ -5,7 +5,7 @@ export interface DateRange {
 
 export interface SearchState {
   city: string;
-  dateRange: DateRange;
+  dateRange?: DateRange;
   adults: number;
   children: number;
   durationFrom?: number;

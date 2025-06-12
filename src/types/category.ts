@@ -8,7 +8,7 @@ export interface Category {
 }
 
 export interface CategoriesState {
-  items: Category[];
+  categories: Category[];
   loading: boolean;
   error: string | null;
 } 

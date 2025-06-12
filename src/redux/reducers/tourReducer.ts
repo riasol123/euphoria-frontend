@@ -1,17 +1,14 @@
-// tourReducer.ts
 import {
+  GET_TOURS_REQUEST,
+  GET_TOURS_SUCCESS,
+  GET_TOURS_FAILURE,
   SET_TOURS,
-  SET_TOURS_LOADING,
-  SET_TOURS_ERROR,
+  FETCH_BOOKINGS_FAILURE,
   FETCH_BOOKINGS_REQUEST,
   FETCH_BOOKINGS_SUCCESS,
-  FETCH_BOOKINGS_FAILURE,
   SET_CURRENT_TOUR,
-} from '../actions/tour';
-import {
-  FETCH_TOURS_REQUEST,
-  FETCH_TOURS_SUCCESS,
-  FETCH_TOURS_FAILURE,
+  SET_TOURS_ERROR,
+  SET_TOURS_LOADING,
 } from '../actionTypes';
 import { Booking } from '../../types/tour';
 
@@ -54,9 +51,9 @@ type Action =
   | { type: typeof SET_TOURS; payload: Tour[] }
   | { type: typeof SET_TOURS_LOADING; payload: boolean }
   | { type: typeof SET_TOURS_ERROR; payload: string }
-  | { type: typeof FETCH_TOURS_REQUEST }
-  | { type: typeof FETCH_TOURS_SUCCESS; payload: Tour[] }
-  | { type: typeof FETCH_TOURS_FAILURE; payload: string }
+  | { type: typeof GET_TOURS_REQUEST }
+  | { type: typeof GET_TOURS_SUCCESS; payload: Tour[] }
+  | { type: typeof GET_TOURS_FAILURE; payload: string }
   | { type: typeof FETCH_BOOKINGS_REQUEST }
   | { type: typeof FETCH_BOOKINGS_SUCCESS; payload: Booking[] }
   | { type: typeof FETCH_BOOKINGS_FAILURE; payload: string }
@@ -70,11 +67,11 @@ export const tourReducer = (state = initialState, action: Action): TourState => 
       return { ...state, loading: action.payload };
     case SET_TOURS_ERROR:
       return { ...state, error: action.payload, loading: false };
-    case FETCH_TOURS_REQUEST:
+    case GET_TOURS_REQUEST:
       return { ...state, loading: true, error: null };
-    case FETCH_TOURS_SUCCESS:
+    case GET_TOURS_SUCCESS:
       return { ...state, tours: action.payload, loading: false, error: null };
-    case FETCH_TOURS_FAILURE:
+    case GET_TOURS_FAILURE:
       return { ...state, error: action.payload, loading: false };
     case FETCH_BOOKINGS_REQUEST:
       return {

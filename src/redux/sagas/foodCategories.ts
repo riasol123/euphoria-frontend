@@ -1,24 +1,24 @@
 import { call, put, takeLatest } from 'redux-saga/effects';
 import {
-  fetchFoodCategoriesSuccess,
-  fetchFoodCategoriesFailure,
+  getFoodCategoriesSuccess,
+  getFoodCategoriesFailure,
 } from '../actions/foodCategories';
-import { FETCH_FOOD_CATEGORIES_REQUEST } from '../actionTypes';
+import { GET_FOOD_CATEGORIES_REQUEST } from '../actionTypes';
 
-function* fetchFoodCategoriesSaga(): Generator<any, void, any> {
+function* foodCategoriesSaga(): Generator<any, void, any> {
   try {
     const response = yield call(fetch, '/api/food-categories');
     const data = yield call([response, 'json']);
-    yield put(fetchFoodCategoriesSuccess(data));
+    yield put(getFoodCategoriesSuccess(data));
   } catch (error) {
     if (error instanceof Error) {
-      yield put(fetchFoodCategoriesFailure(error));
+      yield put(getFoodCategoriesFailure(error));
     } else {
-      yield put(fetchFoodCategoriesFailure(new Error('Unknown error occurred')));
+      yield put(getFoodCategoriesFailure(new Error('Unknown error occurred')));
     }
   }
 }
 
-export function* watchFoodCategoriesSaga(): Generator<any, void, any> {
-  yield takeLatest(FETCH_FOOD_CATEGORIES_REQUEST, fetchFoodCategoriesSaga);
+export function* watchFoodCategories(): Generator<any, void, any> {
+  yield takeLatest(GET_FOOD_CATEGORIES_REQUEST, foodCategoriesSaga);
 } 

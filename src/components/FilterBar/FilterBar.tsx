@@ -15,7 +15,8 @@ import {
 import { itemStyles } from "./FilterBarStyle";
 import { setSearchData } from "../../redux/actions/search";
 import DropDown from "../../assets/dropdown.svg";
-import { fetchCategoriesRequest } from '../../redux/actions/categories';
+import { getCategoriesRequest } from '../../redux/actions/categories';
+import { getFoodCategoriesRequest } from "../../redux/actions/foodCategories";
 
 interface CuisineType {
   id: number;
@@ -32,19 +33,19 @@ export function FilterBar() {
   const [accommodation, setAccommodation] = useState(false);
   const [selectedCuisines, setSelectedCuisines] = useState<CuisineType[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<CategoryType[]>([]);
-  const [categoryOptions] = useState<CategoryType[]>([]);
+  const { categories } = useSelector((state: any) => state.categories);
   const dispatch = useDispatch();
 
-  const foodCategories = useSelector((state: any) => state.foodCategories.items);
+  const { categories: foodCategories } = useSelector((state: any) => state.foodCategories);
 
   const [durationInput, setDurationInput] = useState<[string, string]>([
     String(duration[0]),
     String(duration[1])
   ]);
 
-  // Запрос списка категорий (НЕ кухни)
   useEffect(() => {
-    dispatch(fetchCategoriesRequest());
+    dispatch(getCategoriesRequest());
+    dispatch(getFoodCategoriesRequest());
   }, [dispatch]);
 
   const handleSliderChange = (_: any, newValue: number | number[]) => {
@@ -198,7 +199,7 @@ export function FilterBar() {
       <Typography>Тип кухни</Typography>
       <Autocomplete
         multiple
-        options={foodCategories}
+        options={foodCategories || []}
         disableCloseOnSelect
         value={selectedCuisines}
         onChange={handleCuisineChange}
@@ -225,7 +226,7 @@ export function FilterBar() {
       <Typography>Категории</Typography>
       <Autocomplete
         multiple
-        options={categoryOptions}
+        options={categories || []}
         disableCloseOnSelect
         value={selectedCategories}
         onChange={handleCategoryChange}

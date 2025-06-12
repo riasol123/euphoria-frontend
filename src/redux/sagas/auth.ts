@@ -9,16 +9,11 @@ import {
   authRegisterSuccess,
   authRegisterFailure,
 } from '../actions/auth';
+import { login, register } from '../api/auth';
 
 function* authLoginSaga(action: any): Generator<any, void, any> {
   try {
-    const response = yield call(fetch, '/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(action.payload),
-    });
+    const response = yield call(login, action.payload);
     const data = yield call([response, 'json']);
     yield put(authLoginSuccess(data));
   } catch (error) {
@@ -28,13 +23,7 @@ function* authLoginSaga(action: any): Generator<any, void, any> {
 
 function* authRegisterSaga(action: any): Generator<any, void, any> {
   try {
-    const response = yield call(fetch, '/api/auth/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(action.payload),
-    });
+    const response = yield call(register, action.payload);
     const data = yield call([response, 'json']);
     yield put(authRegisterSuccess(data));
   } catch (error) {

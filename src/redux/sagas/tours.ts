@@ -1,8 +1,14 @@
 import { call, put, takeLatest } from 'redux-saga/effects';
 import api from '../api/api';
-import { FETCH_TOURS_REQUEST } from '../actionTypes';
-import { CREATE_TOUR_REQUEST } from '../actions/tour';
-import { fetchToursSuccess, fetchToursFailure, createTourSuccess, createTourFailure, FETCH_BOOKINGS_REQUEST, fetchBookingsSuccess, fetchBookingsFailure } from '../actions/tour';
+import { CREATE_TOUR_REQUEST, FETCH_BOOKINGS_REQUEST, GET_TOURS_REQUEST } from '../actionTypes';
+import {
+  fetchToursSuccess,
+  fetchToursFailure,
+  createTourSuccess,
+  createTourFailure,
+  fetchBookingsSuccess,
+  fetchBookingsFailure,
+} from '../actions/tour';
 
 function* fetchTours(action: any): Generator<any, void, any> {
   try {
@@ -57,7 +63,7 @@ function* fetchBookingsSaga(): Generator<any, void, any> {
 }
 
 export function* toursSaga() {
-  yield takeLatest(FETCH_TOURS_REQUEST, fetchTours);
+  yield takeLatest(GET_TOURS_REQUEST, fetchTours);
   yield takeLatest(CREATE_TOUR_REQUEST, createTourSaga);
   yield takeLatest(FETCH_BOOKINGS_REQUEST, fetchBookingsSaga);
 } 

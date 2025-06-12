@@ -1,18 +1,20 @@
 import { all } from 'redux-saga/effects';
 
-import { watchAuthLogin, watchAuthRegister } from './authSaga';
-import { watchFoodCategoriesSaga } from './foodCategories';
-import { watchAuthGenerateVerifyCode, watchAuthVerifyEmail } from './verifyEmailSaga';
-import { watchWhoami, watchUserUpdate, watchUserPasswordChange } from './authUserSaga';
+import { watchAuthLogin, watchAuthRegister } from './auth';
+import { watchFoodCategories } from './foodCategories';
+import { watchAuthGenerateVerifyCode, watchAuthVerifyEmail } from './verify';
+import { watchWhoami, watchUserUpdate, watchUserPasswordChange } from './user';
 import { toursSaga } from './tours';
-import { watchOrganizerRequest } from './organizerSaga';
+import { watchOrganizerRequest } from './organizer';
+import { watchCategories } from './categories';
 
 export function* rootSaga() {
   yield all([
     watchAuthLogin(),
     watchAuthRegister(),
-    watchFoodCategoriesSaga(),
+    watchFoodCategories(),
     watchAuthGenerateVerifyCode(),
+    watchCategories(),
     watchAuthVerifyEmail(),
     watchWhoami(),
     toursSaga(),

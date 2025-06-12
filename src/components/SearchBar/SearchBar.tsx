@@ -30,7 +30,7 @@ export const SearchBar = () => {
 
   // Локальные состояния для инпутов
   const [placeInput, setPlace] = useState(city || '');  // Место
-  const [dateRangeInput, setDateRange] = useState(dateRange || null);  // Даты
+  const [dateRangeInput, setDateRange] = useState(dateRange);  // Даты
   const [adults, setAdults] = useState(2);  // Количество взрослых
   const [children, setChildren] = useState(0);  // Количество детей
 

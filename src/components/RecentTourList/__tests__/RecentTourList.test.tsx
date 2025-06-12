@@ -27,7 +27,7 @@ describe('RecentTourList', () => {
         </MemoryRouter>
       </Provider>
     );
-    expect(dispatchMock).toHaveBeenCalledWith(expect.objectContaining({ type: 'FETCH_TOURS_REQUEST' }));
+    expect(dispatchMock).toHaveBeenCalledWith(expect.objectContaining({ type: 'TOURS_REQUEST' }));
   });
 
   test('shows skeletons while loading', () => {

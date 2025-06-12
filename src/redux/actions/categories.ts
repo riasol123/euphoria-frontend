@@ -1,20 +1,20 @@
 import { Category } from '../../types/category';
 import {
-  FETCH_CATEGORIES_REQUEST,
-  FETCH_CATEGORIES_SUCCESS,
-  FETCH_CATEGORIES_FAILURE,
+  GET_CATEGORIES_REQUEST,
+  GET_CATEGORIES_SUCCESS,
+  GET_CATEGORIES_FAILURE,
 } from '../actionTypes';
 
-export const fetchCategoriesRequest = () => ({
-  type: FETCH_CATEGORIES_REQUEST,
+export const getCategoriesRequest = () => ({
+  type: GET_CATEGORIES_REQUEST,
 });
 
-export const fetchCategoriesSuccess = (categories: Category[]) => ({
-  type: FETCH_CATEGORIES_SUCCESS,
+export const getCategoriesSuccess = (categories: Category[]) => ({
+  type: GET_CATEGORIES_SUCCESS,
   payload: categories,
 });
 
-export const fetchCategoriesFailure = (error: string) => ({
-  type: FETCH_CATEGORIES_FAILURE,
+export const getCategoriesFailure = (error: string) => ({
+  type: GET_CATEGORIES_FAILURE,
   payload: error,
 }); 

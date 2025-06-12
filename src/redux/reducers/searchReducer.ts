@@ -2,7 +2,7 @@ import { SearchState } from '../../types/search/types';
 
 const initialState: SearchState = {
   city: '',
-  dateRange: { start: null, end: null },
+  dateRange: undefined,
   adults: 2,
   children: 0,
 };

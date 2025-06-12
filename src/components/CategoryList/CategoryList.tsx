@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { categoryListStyles } from './CategoryListStyle';
 import { CategoryListItem } from '../CategoryListItem/CategoryListItem';
 import { RootState } from '../../types/rootState';
-import { fetchCategoriesRequest } from '../../redux/actions/categories';
+import { getCategoriesRequest } from '../../redux/actions/categories';
 import { Category } from '../../types/category';
 import arrowLeft from '../../assets/arrow_left.svg';
 import arrowRight from '../../assets/arrow_right.svg';
@@ -15,12 +15,12 @@ const ITEM_WIDTH = 290; // 270px width + 20px gap
 
 export const CategoryList = () => {
   const dispatch = useDispatch();
-  const categories = useSelector((state: RootState) => state.categories?.items || []);
+  const categories = useSelector((state: RootState) => state.categories?.categories || []);
   const loading = useSelector((state: RootState) => state.categories?.loading || false);
   const [startIndex, setStartIndex] = useState(0);
   
   useEffect(() => {
-    dispatch(fetchCategoriesRequest());
+    dispatch(getCategoriesRequest());
   }, []);
 
   const maxStartIndex = Math.max(0, categories.length - ITEMS_PER_PAGE);

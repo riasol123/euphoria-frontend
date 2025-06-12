@@ -1,5 +1,4 @@
 import {
-  AUTH_VERIFY_REQUESTED,
   AUTH_LOGOUT,
   WHOAMI_REQUEST,
   WHOAMI_SUCCESS,
@@ -11,10 +10,6 @@ import {
   AUTH_VERIFY_EMAIL_SUCCESS,
   AUTH_VERIFY_EMAIL_FAILURE,
 } from '../actionTypes';
-
-export const verificationUser = () => ({
-  type: AUTH_VERIFY_REQUESTED,
-});
 
 export const userLogOut = () => ({
   type: AUTH_LOGOUT,

@@ -1,19 +1,19 @@
-import { Tour } from "../reducers/tourReducer";
-import { FETCH_TOURS_REQUEST, FETCH_TOURS_SUCCESS, FETCH_TOURS_FAILURE } from '../actionTypes';
-
-// actions.ts
-export const SET_TOURS = 'SET_TOURS';
-export const SET_TOURS_LOADING = 'SET_TOURS_LOADING';
-export const SET_TOURS_ERROR = 'SET_TOURS_ERROR';
-export const CREATE_TOUR_REQUEST = 'CREATE_TOUR_REQUEST';
-export const CREATE_TOUR_SUCCESS = 'CREATE_TOUR_SUCCESS';
-export const CREATE_TOUR_FAILURE = 'CREATE_TOUR_FAILURE';
-export const SET_CURRENT_TOUR = 'SET_CURRENT_TOUR';
-
-// BOOKINGS
-export const FETCH_BOOKINGS_REQUEST = 'FETCH_BOOKINGS_REQUEST';
-export const FETCH_BOOKINGS_SUCCESS = 'FETCH_BOOKINGS_SUCCESS';
-export const FETCH_BOOKINGS_FAILURE = 'FETCH_BOOKINGS_FAILURE';
+import { Tour } from '../reducers/tourReducer';
+import {
+  GET_TOURS_REQUEST,
+  GET_TOURS_SUCCESS,
+  GET_TOURS_FAILURE,
+  CREATE_TOUR_FAILURE,
+  CREATE_TOUR_REQUEST,
+  CREATE_TOUR_SUCCESS,
+  FETCH_BOOKINGS_FAILURE,
+  FETCH_BOOKINGS_REQUEST,
+  FETCH_BOOKINGS_SUCCESS,
+  SET_CURRENT_TOUR,
+  SET_TOURS,
+  SET_TOURS_ERROR,
+  SET_TOURS_LOADING,
+} from '../actionTypes';
 
 export const setTours = (tours: Tour[]) => ({
   type: SET_TOURS,
@@ -31,17 +31,17 @@ export const setToursError = (error: string) => ({
 });
 
 export const fetchToursRequest = (payload?: any) => ({
-  type: FETCH_TOURS_REQUEST,
+  type: GET_TOURS_REQUEST,
   payload,
 });
 
 export const fetchToursSuccess = (tours: Tour[]) => ({
-  type: FETCH_TOURS_SUCCESS,
+  type: GET_TOURS_SUCCESS,
   payload: tours,
 });
 
 export const fetchToursFailure = (error: string) => ({
-  type: FETCH_TOURS_FAILURE,
+  type: GET_TOURS_FAILURE,
   payload: error,
 });
 
