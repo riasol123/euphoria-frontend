@@ -14,8 +14,9 @@ import { login, register } from '../api/auth';
 function* authLoginSaga(action: any): Generator<any, void, any> {
   try {
     const response = yield call(login, action.payload);
-    const data = yield call([response, 'json']);
-    yield put(authLoginSuccess(data));
+    console.log(response.token)
+    localStorage.setItem('token', response.token);
+    yield put(authLoginSuccess(response));
   } catch (error) {
     yield put(authLoginFailure(error instanceof Error ? error.message : 'Unknown error occurred'));
   }
@@ -24,8 +25,8 @@ function* authLoginSaga(action: any): Generator<any, void, any> {
 function* authRegisterSaga(action: any): Generator<any, void, any> {
   try {
     const response = yield call(register, action.payload);
-    const data = yield call([response, 'json']);
-    yield put(authRegisterSuccess(data));
+    localStorage.setItem('token', response.token);
+    yield put(authRegisterSuccess(response));
   } catch (error) {
     yield put(authRegisterFailure(error instanceof Error ? error.message : 'Unknown error occurred'));
   }

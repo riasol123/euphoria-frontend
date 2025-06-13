@@ -2,34 +2,21 @@ import { call, put, takeLatest } from 'redux-saga/effects';
 import api from '../api/api';
 import { CREATE_TOUR_REQUEST, FETCH_BOOKINGS_REQUEST, GET_TOURS_REQUEST } from '../actionTypes';
 import {
-  fetchToursSuccess,
-  fetchToursFailure,
+  getToursSuccess,
+  getToursFailure,
   createTourSuccess,
   createTourFailure,
   fetchBookingsSuccess,
   fetchBookingsFailure,
 } from '../actions/tour';
+import { getTours } from '../api/tours';
 
-function* fetchTours(action: any): Generator<any, void, any> {
+function* getTourSaga(action: any): Generator<any, void, any> {
   try {
-    let url = '/tour';
-    const p = action.payload || {};
-    const params = new URLSearchParams();
-    params.append('page', p.page ?? 1);
-    params.append('limit', p.limit ?? 10);
-    params.append('title', p.title ?? '');
-    params.append('isAccommodation', String(p.isAccommodation ?? false));
-    params.append('categoryIds', p.categoryIds ?? '');
-    params.append('startDate', p.startDate ?? '');
-    params.append('endDate', p.endDate ?? '');
-    params.append('city', p.city ?? '');
-    params.append('durationFrom', p.durationFrom ?? 1);
-    params.append('durationTo', p.durationTo ?? 30);
-    url += `?${params.toString()}`;
-    const response = yield call(api.get, url);
-    yield put(fetchToursSuccess(response.data));
+    const response = yield call(getTours, action.payload);
+    yield put(getToursSuccess(response.data));
   } catch (error: any) {
-    yield put(fetchToursFailure(error.message));
+    yield put(getToursFailure(error.message));
   }
 }
 
@@ -62,8 +49,8 @@ function* fetchBookingsSaga(): Generator<any, void, any> {
   }
 }
 
-export function* toursSaga() {
-  yield takeLatest(GET_TOURS_REQUEST, fetchTours);
+export function* watchTours() {
+  yield takeLatest(GET_TOURS_REQUEST, getTourSaga);
   yield takeLatest(CREATE_TOUR_REQUEST, createTourSaga);
   yield takeLatest(FETCH_BOOKINGS_REQUEST, fetchBookingsSaga);
 } 

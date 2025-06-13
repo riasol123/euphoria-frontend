@@ -4,12 +4,12 @@ import {
   getFoodCategoriesFailure,
 } from '../actions/foodCategories';
 import { GET_FOOD_CATEGORIES_REQUEST } from '../actionTypes';
+import { getFoodCategories } from '../api/foodCategories';
 
 function* foodCategoriesSaga(): Generator<any, void, any> {
   try {
-    const response = yield call(fetch, '/api/food-categories');
-    const data = yield call([response, 'json']);
-    yield put(getFoodCategoriesSuccess(data));
+    const response = yield call(getFoodCategories);
+    yield put(getFoodCategoriesSuccess(response));
   } catch (error) {
     if (error instanceof Error) {
       yield put(getFoodCategoriesFailure(error));

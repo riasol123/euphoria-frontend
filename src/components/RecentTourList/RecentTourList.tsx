@@ -3,7 +3,7 @@ import ImageList from '@mui/material/ImageList';
 import { RecentTourListItem } from '../RecentTourListItem/RecentTourListItem';
 import { recentTourListStyles } from './RecentTourListStyle';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchToursRequest } from '../../redux/actions/tour';
+import { getToursRequest } from '../../redux/actions/tour';
 
 interface Tour {
   id: number;
@@ -21,7 +21,7 @@ export const RecentTourList = () => {
   const [loadedImages, setLoadedImages] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
-    dispatch(fetchToursRequest());
+    dispatch(getToursRequest());
   }, [dispatch]);
 
   // Оставляем только 3 ближайших тура по дате flows[0].startDate

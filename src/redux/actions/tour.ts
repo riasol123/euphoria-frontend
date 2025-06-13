@@ -30,17 +30,17 @@ export const setToursError = (error: string) => ({
   payload: error,
 });
 
-export const fetchToursRequest = (payload?: any) => ({
+export const getToursRequest = (payload?: any) => ({
   type: GET_TOURS_REQUEST,
   payload,
 });
 
-export const fetchToursSuccess = (tours: Tour[]) => ({
+export const getToursSuccess = (tours: Tour[]) => ({
   type: GET_TOURS_SUCCESS,
   payload: tours,
 });
 
-export const fetchToursFailure = (error: string) => ({
+export const getToursFailure = (error: string) => ({
   type: GET_TOURS_FAILURE,
   payload: error,
 });

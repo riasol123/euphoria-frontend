@@ -17,7 +17,7 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import { searchStyles } from './SearchBarStyle';
 import { RootState } from '../../hooks/getTypedSelector';
 import { setSearchData } from '../../redux/actions/search';
-import { fetchToursRequest } from '../../redux/actions/tour';
+import { getToursRequest } from '../../redux/actions/tour';
 
 dayjs.locale('ru');
 
@@ -81,10 +81,7 @@ export const SearchBar = () => {
     }
     setShowTooltip(false);
     try {
-      dispatch(fetchToursRequest({
-        page: 1,
-        limit: 10,
-        title: '',
+      dispatch(getToursRequest({
         isAccommodation: false,
         categoryIds: '',
         startDate: dateRangeInput?.[0]?.format ? dateRangeInput[0].format('YYYY-MM-DD') : '',

@@ -21,14 +21,9 @@ const EmailVerificationModal: FC<EmailVerificationModalProps> = ({ open, onClose
   const [timeLeft, setTimeLeft] = useState(60); // 1 minute in seconds
   const [canResendCode, setCanResendCode] = useState(false);
   const [isCodeSent, setIsCodeSent] = useState(false);
-  const [isVerified, setIsVerified] = useState(false);
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
-  const { isVerifying, verificationError, isGeneratingCode, isLogged } = useSelector((state: any) => state.auth);
-
-  // DEBUG: выводим состояние стора и локальное состояние
-  console.log('Redux:', { isGeneratingCode, isVerifying, verificationError });
-  console.log('Local:', { isCodeSent, canResendCode, timeLeft, verificationCode });
+  const { isVerifying, verificationError, isGeneratingCode, isLogged, isVerified } = useSelector((state: any) => state.auth);
 
   // Сбрасываем состояние при открытии модалки
   useEffect(() => {
@@ -37,7 +32,6 @@ const EmailVerificationModal: FC<EmailVerificationModalProps> = ({ open, onClose
       setVerificationCode('');
       setTimeLeft(60);
       setCanResendCode(false);
-      setIsVerified(false);
     }
   }, [open]);
 
@@ -59,13 +53,6 @@ const EmailVerificationModal: FC<EmailVerificationModalProps> = ({ open, onClose
     }
     return () => clearInterval(timer);
   }, [timeLeft, isCodeSent]);
-
-  // После успешной верификации кода выставляем isVerified
-  useEffect(() => {
-    if (isVerifying === false && !verificationError && isCodeSent && verificationCode.length === 6) {
-      setIsVerified(true);
-    }
-  }, [isVerifying, verificationError, isCodeSent, verificationCode]);
 
   // Только после isVerified отправляем регистрацию
   useEffect(() => {
