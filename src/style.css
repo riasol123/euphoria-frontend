@@ -27,3 +27,7 @@ body {
   padding-top: 64px;
   width: 100%;
 }
+
+html {
+  scrollbar-gutter: stable;
+}

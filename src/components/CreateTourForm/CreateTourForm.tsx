@@ -88,7 +88,7 @@ export const CreateTourForm = () => {
     switch (activeStep) {
       case 0:
         return (
-          fileList.length > 0 &&
+          // fileList.length > 0 &&
           name.trim() !== '' &&
           capacity.trim() !== '' &&
           Number(capacity) > 0 &&

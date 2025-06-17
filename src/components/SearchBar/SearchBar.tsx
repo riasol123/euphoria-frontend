@@ -3,15 +3,13 @@ import { useDispatch, useSelector } from 'react-redux'; // Путь для пр�
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputAdornment from '@mui/material/InputAdornment';
 import FormControl from '@mui/material/FormControl';
-import { Box, Button, Divider, IconButton, Menu, MenuItem, Typography, Tooltip } from '@mui/material';
+import { Box, Button, Divider, IconButton, Typography, Tooltip } from '@mui/material';
 import { ConfigProvider, DatePicker } from 'antd';
 import ruRU from 'antd/locale/ru_RU';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
 import SearchIcon from '../../assets/search.svg';
 import DateIcon from '../../assets/date.svg';
-import DropDown from '../../assets/dropdown.svg';
-import PeopleIcon from '../../assets/people.svg';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { searchStyles } from './SearchBarStyle';
@@ -30,13 +28,8 @@ export const SearchBar = () => {
 
   // Локальные состояния для инпутов
   const [placeInput, setPlace] = useState(city || '');  // Место
-  const [dateRangeInput, setDateRange] = useState(dateRange);  // Даты
-  const [adults, setAdults] = useState(2);  // Количество взрослых
-  const [children, setChildren] = useState(0);  // Количество детей
-
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-
+  const [dateRangeInput, setDateRange] = useState(dateRange || null);  // Даты
+  const [participants, setParticipants] = useState(2);
   const [showTooltip, setShowTooltip] = useState(false);
 
   const dispatch = useDispatch();
@@ -52,8 +45,6 @@ export const SearchBar = () => {
       dispatch(setSearchData({ 
         city: value,
         dateRange,
-        adults,
-        children
       }));
       if (value.trim()) {
         setShowTooltip(false);
@@ -68,8 +59,6 @@ export const SearchBar = () => {
     dispatch(setSearchData({ 
       city: placeInput,
       dateRange: dates,
-      adults,
-      children
     }));
   };
 
@@ -96,23 +85,8 @@ export const SearchBar = () => {
   };
   
 
-  // Обработчик клика по кнопке для изменения количества людей
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  // Закрытие меню выбора людей
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  // Функция для обновления количества людей (взрослых и детей)
-  const updateCount = (type: 'adults' | 'children', increment: boolean) => {
-    if (type === 'adults') {
-      setAdults((prev) => Math.max(1, prev + (increment ? 1 : -1)));
-    } else {
-      setChildren((prev) => Math.max(0, prev + (increment ? 1 : -1)));
-    }
+  const updateParticipants = (increment: boolean) => {
+    setParticipants((prev: number) => Math.max(1, prev + (increment ? 1 : -1)));
   };
 
   useEffect(() => {
@@ -175,55 +149,10 @@ export const SearchBar = () => {
 
         {/* Меню для выбора количества людей */}
         <Box sx={searchStyles.peopleWrapper} className="barItem">
-          <Button
-            id="people-count"
-            aria-controls={open ? 'people-count-menu' : undefined}
-            aria-haspopup="true"
-            aria-expanded={open ? 'true' : undefined}
-            onClick={handleClick}
-          >
-            <img src={PeopleIcon} alt="people" />
-            {adults} взрослых · {children} детей
-            <img
-              src={DropDown}
-              alt="dropdown"
-              style={{
-                // transition: 'transform 0.2s',
-                transform: open ? 'rotate(180deg)' : 'none',
-                width: '16px',
-                height: '16px',
-              }}
-            />
-          </Button>
-          <Menu
-            id="people-count-menu"
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleClose}
-            sx={searchStyles.menu}
-            MenuListProps={{ 'aria-labelledby': 'people-count' }}
-          >
-            <MenuItem>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '200px' }}>
-                <Typography>Взрослые</Typography>
-                <Box>
-                  <IconButton size="small" aria-label="minus adults" onClick={() => updateCount('adults', false)}><RemoveIcon /></IconButton>
-                  <Typography component="span" sx={{ mx: 1 }}>{adults}</Typography>
-                  <IconButton size="small" aria-label="plus adults" onClick={() => updateCount('adults', true)}><AddIcon /></IconButton>
-                </Box>
-              </Box>
-            </MenuItem>
-            <MenuItem>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '200px' }}>
-                <Typography>Дети</Typography>
-                <Box>
-                  <IconButton size="small" aria-label="minus children" onClick={() => updateCount('children', false)}><RemoveIcon /></IconButton>
-                  <Typography component="span" sx={{ mx: 1 }}>{children}</Typography>
-                  <IconButton size="small" aria-label="plus children" onClick={() => updateCount('children', true)}><AddIcon /></IconButton>
-                </Box>
-              </Box>
-            </MenuItem>
-          </Menu>
+          <Typography sx={{ mr: 2, minWidth: '90px', alignContent: 'center' }}>Участники</Typography>
+          <IconButton size="small" aria-label="minus participants" onClick={() => updateParticipants(false)}><RemoveIcon /></IconButton>
+          <Typography component="span" sx={{ mx: 1, alignContent: 'center' }}>{participants}</Typography>
+          <IconButton size="small" aria-label="plus participants" onClick={() => updateParticipants(true)}><AddIcon /></IconButton>
         </Box>
 
         {/* Кнопка поиска */}

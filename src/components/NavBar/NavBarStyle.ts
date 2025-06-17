@@ -3,7 +3,7 @@ import backgroundImage from '../../assets/body_background.png';
 export const navbarStyles = {
   box: {
     flexGrow: 1,
-    left: 0,
+    left: 7,
     paddingTop: 0,
     position: 'fixed',
     backgroundImage: `url(${backgroundImage})`,

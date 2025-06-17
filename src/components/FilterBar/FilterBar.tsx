@@ -57,8 +57,7 @@ export function FilterBar() {
     dispatch(setSearchData({ 
       city: '',
       dateRange: { start: null, end: null },
-      adults: 2,
-      children: 0,
+      people: 2,
       durationFrom: (newValue as [number, number])[0], 
       durationTo: (newValue as [number, number])[1] 
     }));
@@ -94,8 +93,7 @@ export function FilterBar() {
     dispatch(setSearchData({ 
       city: '',
       dateRange: { start: null, end: null },
-      adults: 2,
-      children: 0,
+      people: 2,
       durationFrom: newDuration[0],
       durationTo: newDuration[1]
     }));
@@ -107,8 +105,7 @@ export function FilterBar() {
     dispatch(setSearchData({ 
       city: '',
       dateRange: { start: null, end: null },
-      adults: 2,
-      children: 0,
+      people: 2,
       durationFrom: duration[0],
       durationTo: duration[1]
     }));

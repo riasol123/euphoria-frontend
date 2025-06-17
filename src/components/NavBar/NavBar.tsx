@@ -17,7 +17,8 @@ export const NavBar = (): ReactNode => {
   const location = useLocation();
   const dispatch: AppDispatch = useDispatch();
 
-  const { isLogged } = useSelector((state: RootState) => state.auth);
+  // const { isLogged } = useSelector((state: RootState) => state.auth);
+  const isLogged = true;
   const { authUser } = useSelector((state: RootState) => state.auth);
 
   // const whoami = async () => {
@@ -86,7 +87,7 @@ export const NavBar = (): ReactNode => {
                   }} 
                   onClick={() => navigate('/profile')}
                 > 
-                  <img src={authUser.avatarPath ? getImageUrl(authUser.avatarPath) : UserIcon} style={{ width: '30px', height: '30px', borderRadius: '20px', objectFit: 'cover' }}></img>
+                  <img src={authUser?.avatarPath ? getImageUrl(authUser.avatarPath) : UserIcon} style={{ width: '30px', height: '30px', borderRadius: '20px', objectFit: 'cover' }}></img>
                 </IconButton>
               </>
             )}

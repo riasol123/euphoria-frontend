@@ -43,7 +43,7 @@ export const itemStyles = {
   },
   price: {
     display: 'flex',
-    alignItems: 'flex-end',
+    alignItems: 'flex-start',
     flexGrow: '1',
     gap: '5px',
     '& p': {

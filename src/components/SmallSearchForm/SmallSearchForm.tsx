@@ -52,8 +52,7 @@ export const SmallSearchForm = () => {
     dispatch(setSearchData({ 
       city, 
       dateRange,
-      adults: 2,
-      children: 0
+      people: 2,
     }));
     navigate('/search');
   };

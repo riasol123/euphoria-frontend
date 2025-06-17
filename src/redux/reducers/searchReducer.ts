@@ -3,8 +3,7 @@ import { SearchState } from '../../types/search/types';
 const initialState: SearchState = {
   city: '',
   dateRange: undefined,
-  adults: 2,
-  children: 0,
+  people: 2,
 };
 
 export const searchReducer = (state = initialState, action: any) => {

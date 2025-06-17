@@ -96,6 +96,7 @@ export const searchStyles = {
   },
   peopleWrapper: {
     display: 'flex',
+    width: '100%',
   },
   menu: {
     '& li div p, li div span': {
