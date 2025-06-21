@@ -1,7 +1,14 @@
+export enum ModalType {
+  error = 'error',
+  success = 'success',
+  approve = 'approve',
+}
+
 export interface ModalState {
   isOpen: boolean;
-  type: string | null;
-  data: any | null;
+  type: ModalType;
+  title: string;
+  description: string;
 }
 
 export interface ModalAction {

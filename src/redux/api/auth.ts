@@ -5,7 +5,7 @@ import api from './api';
 export const register = async (
   value: AuthAction,
 ): Promise<AuthInformation> => {
-  const { data } = await api.post('/auth/login', value);
+  const { data } = await api.post('/auth/registration', value);
   return data;
 };
 

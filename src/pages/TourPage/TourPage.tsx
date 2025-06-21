@@ -9,6 +9,7 @@ import { styles } from './TourPageStyle';
 
 const TourPage: FC = () => {
   const currentTour = useSelector((state: RootState) => state.tour.currentTour);
+
   function formatText(input: string) {
     return input
       .split('\n')

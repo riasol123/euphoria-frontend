@@ -70,7 +70,7 @@ export const tourReducer = (state = initialState, action: Action): TourState => 
     case GET_TOURS_REQUEST:
       return { ...state, loading: true, error: null };
     case GET_TOURS_SUCCESS:
-      return { ...state, tours: action.payload, loading: false, error: null };
+      return { ...state, tours: (action.payload as any).items, loading: false, error: null };
     case GET_TOURS_FAILURE:
       return { ...state, error: action.payload, loading: false };
     case FETCH_BOOKINGS_REQUEST:

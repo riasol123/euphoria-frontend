@@ -43,6 +43,7 @@ export const TourCard = ({
     }
     navigate(`/tour/${id}`);
   };
+  const cleanedDescription = description.replace(/^\*{3}.*?\*{3}\s*/g, '');
 
   return (
     <Card sx={styles.cardContainer} elevation={0}>
@@ -56,17 +57,17 @@ export const TourCard = ({
         />
         <CardContent sx={{ height: '181px' }}>
           <Box sx={styles.topTextContainer}>
-          <img src={StarIcon} style={styles.ratingIcon}></img>
+          {/* <img src={StarIcon} style={styles.ratingIcon}></img>
             <Typography>
               {rate}
-            </Typography>
+            </Typography> */}
             <Typography>{location}</Typography>
           </Box>
           <Typography sx={styles.title}>
             {title}
           </Typography>
           <Typography sx={styles.description}>
-            {description}
+            {cleanedDescription}
           </Typography>
           <Box sx={styles.bottomTextContainer}>
             <Typography>

@@ -10,6 +10,7 @@ import UserIcon from '../../assets/user.svg';
 import { navbarStyles } from './NavBarStyle';
 import { getImageUrl } from '../../utils/getImageUrl';
 import { whoamiRequest } from '../../redux/actions/auth';
+import { hasToken } from '../../utils/token';
 
 
 export const NavBar = (): ReactNode => {
@@ -17,21 +18,11 @@ export const NavBar = (): ReactNode => {
   const location = useLocation();
   const dispatch: AppDispatch = useDispatch();
 
-  // const { isLogged } = useSelector((state: RootState) => state.auth);
-  const isLogged = true;
+  const { isLogged } = useSelector((state: RootState) => state.auth);
   const { authUser } = useSelector((state: RootState) => state.auth);
 
-  // const whoami = async () => {
-  //   try {
-  //     const response = await api.get('/auth/whoami');
-  //     dispatch(authReceived(response.data));
-  //   } catch (error) {
-  //     console.error('Ошибка при загрузке данных пользователя:', error);
-  //   }
-  // };
-
   useEffect(() => {
-    dispatch(whoamiRequest());
+    if (hasToken()) dispatch(whoamiRequest());
   }, [dispatch]);
 
   return (

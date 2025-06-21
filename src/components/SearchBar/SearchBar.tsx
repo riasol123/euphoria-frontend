@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'; // Путь для пр�
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputAdornment from '@mui/material/InputAdornment';
 import FormControl from '@mui/material/FormControl';
-import { Box, Button, Divider, IconButton, Typography, Tooltip } from '@mui/material';
+import { Box, Button, Divider, IconButton, Typography } from '@mui/material';
 import { ConfigProvider, DatePicker } from 'antd';
 import ruRU from 'antd/locale/ru_RU';
 import dayjs from 'dayjs';
@@ -30,7 +30,6 @@ export const SearchBar = () => {
   const [placeInput, setPlace] = useState(city || '');  // Место
   const [dateRangeInput, setDateRange] = useState(dateRange || null);  // Даты
   const [participants, setParticipants] = useState(2);
-  const [showTooltip, setShowTooltip] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -46,9 +45,6 @@ export const SearchBar = () => {
         city: value,
         dateRange,
       }));
-      if (value.trim()) {
-        setShowTooltip(false);
-      }
     }
     // Если не проходит по паттерну, не обновляем значение
   };
@@ -64,11 +60,6 @@ export const SearchBar = () => {
 
   // Функция для отправки данных (например, в Redux Store или на сервер)
   const handleSearch = async () => {
-    if (!placeInput.trim()) {
-      setShowTooltip(true);
-      return;
-    }
-    setShowTooltip(false);
     try {
       dispatch(getToursRequest({
         isAccommodation: false,
@@ -98,12 +89,6 @@ export const SearchBar = () => {
       <Box sx={searchStyles.mainContainer}>
         {/* Поле для ввода места */}
         <FormControl variant="outlined" className="barItem">
-          <Tooltip
-            title={showTooltip ? 'Место не может быть пустым' : ''}
-            open={showTooltip}
-            arrow
-            placement="bottom"
-          >
             <OutlinedInput
               type="text"
               placeholder="Место"
@@ -124,7 +109,6 @@ export const SearchBar = () => {
                 </InputAdornment>
               }
             />
-          </Tooltip>
         </FormControl>
 
         <Divider orientation="vertical" />

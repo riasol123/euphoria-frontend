@@ -1,27 +1,30 @@
 import { call, put, takeLatest } from 'redux-saga/effects';
-import api from '../api/api';
-import { FETCH_ORGANIZER_REQUEST, fetchOrganizerSuccess, fetchOrganizerFailure } from '../actions/organizer';
+import { fetchOrganizerSuccess, fetchOrganizerFailure, getOrganizerStatusSuccess, getOrganizerStatusFailure } from '../actions/organizer';
+import { GET_ORGANIZER_STATUS_REQUEST, POST_ORGANIZER_REQUEST } from '../actionTypes';
+import { getApplicationStatus, postApplication } from '../api/organizer';
+import { openModal } from '../actions/modal';
+import { ModalType } from '../../types/modal/types';
 
 function* organizerRequestSaga(action: any): Generator<any, void, any> {
   try {
-    const token = localStorage.getItem('token');
-    const response = yield call(
-      api.post,
-      '/organizer/request',
-      action.payload,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      }
-    );
-    yield put(fetchOrganizerSuccess(response.data));
+    const response = yield call(postApplication, action.payload);
+    yield put(fetchOrganizerSuccess(response));
   } catch (error: any) {
     yield put(fetchOrganizerFailure(error.message));
   }
 }
 
-export function* watchOrganizerRequest() {
-  yield takeLatest(FETCH_ORGANIZER_REQUEST, organizerRequestSaga);
+function* organizerStatusSaga(): Generator<any, void, any> {
+  try {
+    const response = yield call(getApplicationStatus);
+    yield put(getOrganizerStatusSuccess(response));
+    yield put(openModal({ title: 'Готово!', description: 'Тур был успешно создан.', type: ModalType.success }));
+  } catch (error: any) {
+    yield put(getOrganizerStatusFailure(error.message));
+  }
+}
+
+export function* watchOrganizer() {
+  yield takeLatest(POST_ORGANIZER_REQUEST, organizerRequestSaga);
+  yield takeLatest(GET_ORGANIZER_STATUS_REQUEST, organizerStatusSaga);
 } 

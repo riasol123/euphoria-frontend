@@ -7,11 +7,13 @@ import SearchPage from './pages/SearchPage/SearchPage';
 import { Box } from '@mui/material';
 import TourPage from './pages/TourPage/TourPage';
 import ProfilePage from './pages/ProfilePage/ProfilePage';
+import CommonModal from './components/CommonModal/CommonModal';
 
 const Layout: FC = () => {
   return (
     <div className='appContainer'>
       <NavBar />
+      <CommonModal></CommonModal>
       <Box className="pageWrapper">
         <Outlet />
       </Box>

@@ -55,4 +55,11 @@ export const styles = {
       backgroundColor: '#FFBEB2',
     },
   },
+  status: {
+    fontSize: '20px',
+    color: '#393939',
+    fontWeight: '500',
+    width: '100%',
+    textAlign: 'center',
+  },
 }; 

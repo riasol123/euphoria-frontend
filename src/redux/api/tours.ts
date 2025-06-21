@@ -7,3 +7,13 @@ export const getTours = async (params: Tour) => {
   });
   return data;
 };
+
+export const createTour = async (formData: FormData) => {
+  const { data } = await api.post('/tour', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return data;
+};
+

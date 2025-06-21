@@ -76,8 +76,7 @@ export const styles = {
       display: 'flex !important',
       flexWrap: 'wrap',
     },
-    //.ant-upload-list-item-container.ant-upload-animate-inline-appear.ant-upload-animate-inline-appear-active.ant-upload-animate-inline
-    '& .ant-upload.ant-upload-select, .ant-upload-list-item.ant-upload-list-item-error': {
+    '& .ant-upload-list-item.ant-upload-list-item-error, div': {
       borderRadius: '20px !important',
     },
   },

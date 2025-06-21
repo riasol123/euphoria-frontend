@@ -5,7 +5,7 @@ import { watchFoodCategories } from './foodCategories';
 import { watchAuthGenerateVerifyCode, watchAuthVerifyEmail } from './verify';
 import { watchWhoami, watchUserUpdate, watchUserPasswordChange } from './user';
 import { watchTours } from './tours';
-import { watchOrganizerRequest } from './organizer';
+import { watchOrganizer } from './organizer';
 import { watchCategories } from './categories';
 
 export function* rootSaga() {
@@ -20,6 +20,6 @@ export function* rootSaga() {
     watchTours(),
     watchUserUpdate(),
     watchUserPasswordChange(),
-    watchOrganizerRequest(),
+    watchOrganizer(),
   ]);
 }

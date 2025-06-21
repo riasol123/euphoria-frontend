@@ -25,19 +25,38 @@ export const EditUserForm = () => {
     avatar: authUser?.avatarPath || '',
     patronymic: authUser?.patronymic || '',
   });
+  const [isAvatarChanged, setIsAvatarChanged] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, files } = e.target;
+
     if (name === 'avatar' && files?.[0]) {
+      const file = files[0];
+
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      const maxSize = 10 * 1024 * 1024; // 10 MB
+
+      if (!allowedTypes.includes(file.type)) {
+        alert('Допустимы только изображения форматов JPG, JPEG и PNG.');
+        return;
+      }
+
+      if (file.size > maxSize) {
+        alert('Размер изображения не должен превышать 10 МБ.');
+        return;
+      }
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setValues((prev) => ({ ...prev, avatar: reader.result as string }));
+        setIsAvatarChanged(true);
       };
-      reader.readAsDataURL(files[0]);
+      reader.readAsDataURL(file);
     } else {
       setValues((prev) => ({ ...prev, [name]: value }));
     }
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
   
@@ -45,9 +64,8 @@ export const EditUserForm = () => {
     if (values.surname) formData.append('surname', values.surname);
     if (values.name) formData.append('name', values.name);
     if (values.patronymic) formData.append('patronymic', values.patronymic);
-    if (values.email) formData.append('email', values.email);
   
-    if (values.avatar) {
+    if (values.avatar && isAvatarChanged) {
       const blob = await fetch(values.avatar).then(res => res.blob());
       formData.append('avatar', blob, 'avatar.png');
     }
@@ -65,6 +83,10 @@ export const EditUserForm = () => {
     });
   }, [authUser]);
 
+  useEffect(() => {
+    setIsAvatarChanged(false);
+  }, [authUser?.avatarPath]);
+
   return (
     <Box component="form" onSubmit={handleSubmit} sx={styles.container}>
       <Typography sx={styles.title}>
@@ -75,7 +97,7 @@ export const EditUserForm = () => {
           id="avatar-upload"
           hidden
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/jpg,image/png"
           name="avatar"
           onChange={handleChange}
         />
@@ -86,7 +108,16 @@ export const EditUserForm = () => {
             <img src={EditIcon} style={styles.editIcon} alt="Редактировать" />
           }
         >
-         <Avatar src={values.avatar ? getImageUrl(values.avatar) : undefined} sx={{ width: 110, height: 110 }} />
+        <Avatar
+          src={
+            values.avatar?.startsWith('data:')
+              ? values.avatar
+              : values.avatar
+              ? getImageUrl(values.avatar)
+              : undefined
+          }
+          sx={{ width: 110, height: 110 }}
+        />
         </Badge>
       </label>
       <TextField
@@ -121,6 +152,7 @@ export const EditUserForm = () => {
         fullWidth
         value={values.email}
         onChange={handleChange}
+        disabled
       />
 
       <Button type="submit" variant="contained" sx={styles.saveButton} disableElevation>

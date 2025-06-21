@@ -9,12 +9,12 @@ import {
   fetchBookingsSuccess,
   fetchBookingsFailure,
 } from '../actions/tour';
-import { getTours } from '../api/tours';
+import { createTour, getTours } from '../api/tours';
 
 function* getTourSaga(action: any): Generator<any, void, any> {
   try {
     const response = yield call(getTours, action.payload);
-    yield put(getToursSuccess(response.data));
+    yield put(getToursSuccess(response));
   } catch (error: any) {
     yield put(getToursFailure(error.message));
   }
@@ -22,19 +22,8 @@ function* getTourSaga(action: any): Generator<any, void, any> {
 
 function* createTourSaga(action: any): Generator<any, void, any> {
   try {
-    const token = localStorage.getItem('token');
-    const response = yield call(
-      api.post,
-      '/tour',
-      action.payload,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      }
-    );
-    yield put(createTourSuccess(response.data));
+    const response = yield call(createTour, action.payload)
+    yield put(createTourSuccess(response));
   } catch (error: any) {
     yield put(createTourFailure((error as any).message));
   }

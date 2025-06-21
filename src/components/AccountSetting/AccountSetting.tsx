@@ -16,6 +16,9 @@ import { Divider } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlined from '@mui/icons-material/VisibilityOffOutlined';
+import { openModal } from '../../redux/actions/modal';
+import { ModalType } from '../../types/modal/types';
+import { removeToken } from '../../utils/token';
 
 export function AccountSetting() {
   const defaultValues = {
@@ -32,19 +35,18 @@ export function AccountSetting() {
     const { name, value } = e.target;
     setValues((prev) => ({ ...prev, [name]: value }));
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      dispatch(userPasswordChangeRequest(values));
-    } catch (error) {
-      console.error('Ошибка при отправке формы:', error);
-    }
+    dispatch(userPasswordChangeRequest(values));
+    setValues(defaultValues);
   };
 
   const handleLogout = () => {
-    localStorage.clear();
+    removeToken();
     dispatch(userLogOut());
     navigate('/');
+    dispatch(openModal({ title: 'Готово!', description: 'Выход из учетной записи был выполнен успешно.', type: ModalType.success }));
   };
 
   return (

@@ -9,6 +9,8 @@ import { BookingHistory } from '../../components/BookingHistory/BookingHistory';
 import { OrganizerForm } from '../../components/OrganizerForm/OrganizerForm';
 import { OrganizerTours } from '../../components/OrganizerTours/OrganizerTours';
 import { CreateTourForm } from '../../components/CreateTourForm/CreateTourForm';
+import { RootState } from '../../hooks/getTypedSelector';
+import { useSelector } from 'react-redux';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -45,7 +47,8 @@ function a11yProps(index: number) {
 
 export default function ProfilePage() {
   const [value, setValue] = React.useState(0);
-  const isOrganizer = true; // This should come from your auth context/state
+  const { authUser } = useSelector((state: RootState) => state.auth);
+  const isOrganizer = authUser?.role === 'organizer';
 
   const handleChange = (_: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);

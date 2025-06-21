@@ -36,7 +36,7 @@ export const styles = {
     flexGrow: 1,
     overflow: 'hidden',
     display: '-webkit-box',
-    WebkitLineClamp: 2,
+    WebkitLineClamp: 3,
     WebkitBoxOrient: 'vertical',
     textOverflow: 'ellipsis',
     whiteSpace: 'normal',
