@@ -28,7 +28,7 @@ describe('TourCard', () => {
   });
 
   it('корректно рендерит пустой рейтинг', () => {
-    render(<TourCard {...defaultProps} rate="" id={1} />);
+    render(<TourCard {...defaultProps} id={1} />);
 
     const ratingElements = screen.getAllByText((content, element) => {
       // Ищем элементы, у которых текст равен пустой строке

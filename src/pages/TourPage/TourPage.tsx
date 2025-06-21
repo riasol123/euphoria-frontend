@@ -45,7 +45,7 @@ const TourPage: FC = () => {
     <Box sx={styles.main}>
       <Box sx={styles.container}>
         <ImageGallery tour={currentTour} />
-        <BookBar tour={currentTour} />
+        <BookBar />
       </Box>
       <Box sx={styles.titleContainer}>
         <Typography sx={styles.title}>{currentTour?.title || 'Тур'}</Typography>

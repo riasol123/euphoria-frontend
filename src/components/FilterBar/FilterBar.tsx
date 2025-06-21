@@ -200,7 +200,7 @@ export function FilterBar() {
         disableCloseOnSelect
         value={selectedCuisines}
         onChange={handleCuisineChange}
-        getOptionLabel={(option) => option.name}
+        getOptionLabel={(option: any) => option.name}
         isOptionEqualToValue={(option, value) => option.id === value.id}
         sx={itemStyles.popper}
         popupIcon={<img src={DropDown} alt="dropdown" className="custom-dropdown-icon" style={{ width: 20, height: 20, opacity: 0.7, transition: 'transform 0.2s' }} />}

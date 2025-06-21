@@ -23,7 +23,6 @@ export const TourCardList = () => {
           duration={tour.duration}
           price={tour.flows?.[0]?.currentPrice || ''}
           img={tour.photos?.[0] ? (getImageUrl(tour.photos[0])) : ''}
-          rate={tour.rate || '—'}
           tourData={tour}
         />
       ))}

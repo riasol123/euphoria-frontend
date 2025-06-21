@@ -8,8 +8,6 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setCurrentTour } from '../../redux/actions/tour';
 
-import StarIcon from '../../assets/star.svg';
-
 import { styles } from './TourCardStyle';
 import getDaysAmountLiteral from '../../utils/getDaysAmountLiteral';
 import formatMoney from '../../utils/formatMoney';
@@ -22,7 +20,6 @@ export const TourCard = ({
   duration,
   price,
   img,
-  rate,
   tourData,
 }: { 
   id: number,
@@ -32,7 +29,6 @@ export const TourCard = ({
   duration: number,
   price: string | number,
   img: string,
-  rate: string,
   tourData?: any,
 }) => {
   const navigate = useNavigate();
