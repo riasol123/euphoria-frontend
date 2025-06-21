@@ -15,6 +15,7 @@ import { getImageUrl } from '../../utils/getImageUrl';
 const mask = <p><EyeOutlined style={{ marginRight: '5px' }}/>Просмотр</p>;
 
 const ImageGallery: FC<{ tour?: any }> = ({ tour }) => {
+  if (!tour || !tour.photos) return null;
   const images = tour?.photos && tour.photos.length > 0 ? tour.photos : [TourImg, First, Second, Third];
   const imagesUrls = images.map((image) => tour.photos?.length > 0 ? getImageUrl(image) : image);
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -10,28 +10,72 @@ import {
   SelectChangeEvent,
   Button,
 } from "@mui/material";
-import { itemStyles } from "./BookBarStyle";
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+import { itemStyles } from "./BookBarStyle";
 import getDaysAmountLiteral from "../../utils/getDaysAmountLiteral";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../hooks/getTypedSelector";
+import { getTourRequest, postBookingsRequest } from "../../redux/actions/tour";
+import { useParams } from "react-router-dom";
+import api from "../../redux/api/api";
 
-export function BookBar({ tour }: { tour?: any }) {
-  const [dates, setDates] = useState('2024-07-10_2024-07-15');
+export function BookBar() {
+  const tour = useSelector((state: RootState) => state.tour.currentTour);
+  const dispatch = useDispatch();
+  const { id } = useParams<{ id: string }>();
+
+  const [selectedFlowId, setSelectedFlowId] = useState<number | null>(null);
   const [participants, setParticipants] = useState(2);
+  const [freeSeats, setFreeSeats] = useState<number | null>(null);
+
+  // Устанавливаем первую дату по умолчанию, когда тур загружен
+  useEffect(() => {
+    if (tour?.flows?.length && selectedFlowId === null) {
+      setSelectedFlowId(tour.flows[0].id);
+    }
+  }, [tour, selectedFlowId]);
+
+  const selectedFlow = tour?.flows?.find(flow => flow.id === selectedFlowId);
+
+  // Загружаем брони по выбранному потоку и вычисляем свободные места
+  useEffect(() => {
+    if (selectedFlowId && selectedFlow) {
+      api.get(`/bookings/flow/${selectedFlowId}`)
+        .then(res => {
+          const bookings = res.data; // ожидается массив броней
+          const booked = bookings.reduce((sum: number, booking: { participant: number }) => {
+            return sum + (booking.participant || 0);
+          }, 0);
+          setFreeSeats(selectedFlow.participant - booked);
+        })
+        .catch(() => setFreeSeats(null));
+    }
+  }, [selectedFlowId, selectedFlow]);
 
   const handleChange = (event: SelectChangeEvent) => {
-    setDates(event.target.value as string);
+    setSelectedFlowId(Number(event.target.value));
   };
 
   const updateParticipants = (increment: boolean) => {
-    setParticipants((prev: number) => Math.max(1, prev + (increment ? 1 : -1)));
+    setParticipants((prev) => Math.max(1, prev + (increment ? 1 : -1)));
   };
+
+  const handleSubmit = () => {
+    if (selectedFlow) {
+      dispatch(postBookingsRequest({ participant: participants, flowId: selectedFlow.id }));
+      dispatch(getTourRequest(Number(id)));
+    }
+  };
+
+  if (!tour || !tour.flows?.length || selectedFlowId === null) return null;
 
   return (
     <Box sx={itemStyles.container}>
       <Typography sx={itemStyles.title}>Бронирование</Typography>
-      <Divider></Divider>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+      <Divider />
+
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Typography>Участники</Typography>
         <Box>
           <IconButton size="small" onClick={() => updateParticipants(false)}><RemoveIcon /></IconButton>
@@ -39,41 +83,53 @@ export function BookBar({ tour }: { tour?: any }) {
           <IconButton size="small" onClick={() => updateParticipants(true)}><AddIcon /></IconButton>
         </Box>
       </Box>
-      <Divider></Divider>
+
+      <Divider />
       <Typography>Даты</Typography>
       <FormControl fullWidth>
         <Select
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          value={dates}
+          value={selectedFlowId?.toString()}
           onChange={handleChange}
           sx={itemStyles.select}
         >
-          <MenuItem value={10}>чт, 1 мая – сб, 4 мая</MenuItem>
-          <MenuItem value={20}>сб, 10 мая – вт, 13 мая</MenuItem>
-          <MenuItem value={30}>вт, 20 мая – пт, 23 мая</MenuItem>
+          {tour.flows.map(flow => {
+            const start = new Date(flow.startDate);
+            const end = new Date(flow.endDate);
+            const formatter = new Intl.DateTimeFormat('ru-RU', {
+              weekday: 'short', day: 'numeric', month: 'short'
+            });
+            return (
+              <MenuItem key={flow.id} value={flow.id}>
+                {formatter.format(start)} – {formatter.format(end)}
+              </MenuItem>
+            );
+          })}
         </Select>
       </FormControl>
-      <Divider></Divider>
+
+      <Divider />
       <Box sx={itemStyles.availability}>
         <Typography>Свободных мест:</Typography>
-        <Typography>{tour?.availableSeats ?? 25}</Typography>
+        <Typography>{freeSeats !== null ? freeSeats : "–"}</Typography>
       </Box>
-      <Divider></Divider>
+
+      <Divider />
       <Box sx={itemStyles.price}>
         <Typography>Итого:</Typography>
         <Typography>
-          {/* {formatMoney(selectedOption.price * participants)} ₽ */}
-          20 000 ₽
+          {(Number(selectedFlow?.currentPrice ?? 0) * participants).toLocaleString()} ₽
         </Typography>
         <Typography>
-          / {tour?.duration ?? 4} {getDaysAmountLiteral(tour?.duration ?? 4)}
+          / {tour.duration} {getDaysAmountLiteral(tour.duration)}
         </Typography>
       </Box>
+
       <Button
         variant="contained"
         className="searchButton"
         disableElevation
+        onClick={handleSubmit}
+        disabled={freeSeats !== null && participants > freeSeats}
       >
         Забронировать
       </Button>

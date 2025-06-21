@@ -30,8 +30,8 @@ const App: FC = () => {
           <Route index element={<MainPage />} />
           <Route path="search" element={<SearchPage />} />
           <Route path="auth" element={<AuthPage />} />
-          <Route path="/tour/:id" element={<TourPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="tour/:id" element={<TourPage />} />
+          <Route path="profile" element={<ProfilePage />} />
         </Route>
       </Routes>
     </Router>

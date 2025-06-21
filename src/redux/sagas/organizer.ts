@@ -18,7 +18,6 @@ function* organizerStatusSaga(): Generator<any, void, any> {
   try {
     const response = yield call(getApplicationStatus);
     yield put(getOrganizerStatusSuccess(response));
-    yield put(openModal({ title: 'Готово!', description: 'Тур был успешно создан.', type: ModalType.success }));
   } catch (error: any) {
     yield put(getOrganizerStatusFailure(error.message));
   }

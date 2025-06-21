@@ -27,18 +27,19 @@ export const RecentTourList = () => {
   }, [dispatch]);
 
   // Фильтрация и сортировка туров по дате startDate первого потока
-  const sortedTours = (tours || [])
-    .map((tour: Tour) => ({
-      ...tour,
-      flows: [{
-        startDate: new Date(Date.now() + Math.random() * 1000000000).toISOString(), // случайная дата в будущем
-      }]
-    }))
-    .sort((a: Tour, b: Tour) =>
-      new Date(a.flows[0].startDate).getTime() - new Date(b.flows[0].startDate).getTime()
+const sortedTours = (tours || [])
+    .filter(
+      (tour: Tour) =>
+        Array.isArray(tour.flows) &&
+        tour.flows.length > 0 &&
+        !!tour.flows[0].startDate
+    )
+    .sort(
+      (a: Tour, b: Tour) =>
+        new Date(a.flows[0].startDate).getTime() -
+        new Date(b.flows[0].startDate).getTime()
     )
     .slice(0, 3);
-
 
   const handleImageLoad = (tourId: string) => {
     setLoadedImages((prev) => ({
@@ -81,7 +82,10 @@ export const RecentTourList = () => {
         const flow = tour.flows[0];
         const date = new Date(flow.startDate);
         const day = date.getDate();
-        const month = date.toLocaleString('ru-RU', { month: 'long' });
+        const month = date.toLocaleDateString('ru-RU', {
+          month: 'long',
+          day: 'numeric',
+        }).split(' ')[1]; // 'июня'
         const imgUrl = tour.photos?.[0]
           ? getImageUrl(tour.photos[0])
           : '';

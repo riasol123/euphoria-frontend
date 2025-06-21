@@ -8,12 +8,22 @@ export const getTours = async (params: Tour) => {
   return data;
 };
 
+export const getTour = async (id: any) => {
+  const { data } = await api.get(`/tour/${id}`);
+  return data;
+};
+
 export const createTour = async (formData: FormData) => {
   const { data } = await api.post('/tour', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
   });
+  return data;
+};
+
+export const bookTour = async (payload: any) => {
+  const { data } = await api.post('/bookings', payload);
   return data;
 };
 
