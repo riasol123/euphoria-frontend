@@ -14,9 +14,7 @@ import {
 function* authGenerateVerifyCodeSaga(action: any): Generator<any, void, any> {
   try {
     const { email, name } = action.payload;
-    console.log('Sending request with data:', { email, name });
     const response = yield call(api.post, '/auth/generate-verify-code', { email, name });
-    console.log('Response:', response);
     yield put(authGenerateVerifyCodeSuccess(response.data));
   } catch (error: any) {
     console.error('Error:', error);

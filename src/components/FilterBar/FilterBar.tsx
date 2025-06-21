@@ -57,8 +57,7 @@ export function FilterBar() {
     dispatch(setSearchData({ 
       city: '',
       dateRange: { start: null, end: null },
-      adults: 2,
-      children: 0,
+      people: 2,
       durationFrom: (newValue as [number, number])[0], 
       durationTo: (newValue as [number, number])[1] 
     }));
@@ -94,8 +93,7 @@ export function FilterBar() {
     dispatch(setSearchData({ 
       city: '',
       dateRange: { start: null, end: null },
-      adults: 2,
-      children: 0,
+      people: 2,
       durationFrom: newDuration[0],
       durationTo: newDuration[1]
     }));
@@ -107,8 +105,7 @@ export function FilterBar() {
     dispatch(setSearchData({ 
       city: '',
       dateRange: { start: null, end: null },
-      adults: 2,
-      children: 0,
+      people: 2,
       durationFrom: duration[0],
       durationTo: duration[1]
     }));
@@ -203,14 +200,14 @@ export function FilterBar() {
         disableCloseOnSelect
         value={selectedCuisines}
         onChange={handleCuisineChange}
-        getOptionLabel={(option) => option.title}
+        getOptionLabel={(option) => option.name}
         isOptionEqualToValue={(option, value) => option.id === value.id}
         sx={itemStyles.popper}
         popupIcon={<img src={DropDown} alt="dropdown" className="custom-dropdown-icon" style={{ width: 20, height: 20, opacity: 0.7, transition: 'transform 0.2s' }} />}
         renderOption={(props, option, { selected }) => (
           <li {...props}>
             <Checkbox checked={selected} />
-            {option.title}
+            {option.name}
           </li>
         )}
         renderInput={(params) => (

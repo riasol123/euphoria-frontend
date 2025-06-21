@@ -1,18 +1,13 @@
-import { ModalAction } from '../../types/modal/types';
+import { ModalAction, ModalState } from '../../types/modal/types';
 
-import { CHANGE_MODAL_PROPS } from '../actionTypes';
+import { CLOSE_MODAL, OPEN_MODAL } from '../actionTypes';
 
-export const changeModalProps = (payload: ModalAction): ModalAction => ({
-  type: CHANGE_MODAL_PROPS,
+export const openModal = (payload: Omit<ModalState, 'isOpen'>): ModalAction => ({
+  type: OPEN_MODAL,
   payload,
-})
-
-export const openModal = (type: string, data?: any): ModalAction => ({
-  type: 'OPEN_MODAL',
-  payload: { type, data },
 });
 
 export const closeModal = (): ModalAction => ({
-  type: 'CLOSE_MODAL',
+  type: CLOSE_MODAL,
 });
 

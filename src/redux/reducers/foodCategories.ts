@@ -28,7 +28,7 @@ export const foodCategoriesReducer = (state = initialState, action: any) => {
       return {
         ...state,
         loading: false,
-        categories: action.payload,
+        categories: action.payload.data,
       };
     case GET_FOOD_CATEGORIES_FAILURE:
       return {

@@ -6,8 +6,7 @@ export interface DateRange {
 export interface SearchState {
   city: string;
   dateRange?: DateRange;
-  adults: number;
-  children: number;
+  people?: number;
   durationFrom?: number;
   durationTo?: number;
   isAccommodation?: boolean;

@@ -10,6 +10,7 @@ import UserIcon from '../../assets/user.svg';
 import { navbarStyles } from './NavBarStyle';
 import { getImageUrl } from '../../utils/getImageUrl';
 import { whoamiRequest } from '../../redux/actions/auth';
+import { hasToken } from '../../utils/token';
 
 
 export const NavBar = (): ReactNode => {
@@ -20,17 +21,8 @@ export const NavBar = (): ReactNode => {
   const { isLogged } = useSelector((state: RootState) => state.auth);
   const { authUser } = useSelector((state: RootState) => state.auth);
 
-  // const whoami = async () => {
-  //   try {
-  //     const response = await api.get('/auth/whoami');
-  //     dispatch(authReceived(response.data));
-  //   } catch (error) {
-  //     console.error('Ошибка при загрузке данных пользователя:', error);
-  //   }
-  // };
-
   useEffect(() => {
-    dispatch(whoamiRequest());
+    if (hasToken()) dispatch(whoamiRequest());
   }, [dispatch]);
 
   return (
@@ -86,7 +78,7 @@ export const NavBar = (): ReactNode => {
                   }} 
                   onClick={() => navigate('/profile')}
                 > 
-                  <img src={authUser.avatarPath ? getImageUrl(authUser.avatarPath) : UserIcon} style={{ width: '30px', height: '30px', borderRadius: '20px', objectFit: 'cover' }}></img>
+                  <img src={authUser?.avatarPath ? getImageUrl(authUser.avatarPath) : UserIcon} style={{ width: '30px', height: '30px', borderRadius: '20px', objectFit: 'cover' }}></img>
                 </IconButton>
               </>
             )}

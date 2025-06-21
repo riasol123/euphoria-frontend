@@ -19,13 +19,13 @@ import { useDispatch } from 'react-redux';
 import { createTourRequest } from '../../redux/actions/tour';
 
 const steps = ['Основная информация', 'Описание', 'Даты'];
-
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 export const CreateTourForm = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [name, setName] = useState('');
+  const [city, setCity] = useState('');
   const [description, setDescription] = useState('');
   const [capacity, setCapacity] = useState('');
   const [duration, setDuration] = useState('1');
@@ -69,10 +69,7 @@ export const CreateTourForm = () => {
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Если вводится 0 и поле пустое, игнорируем ввод
-    if (value === '0') {
-      return;
-    }
+    if (value === '0') return;
     const formattedValue = formatPrice(value);
     setPrice(formattedValue);
   };
@@ -90,6 +87,7 @@ export const CreateTourForm = () => {
         return (
           fileList.length > 0 &&
           name.trim() !== '' &&
+          city.trim() !== '' &&
           capacity.trim() !== '' &&
           Number(capacity) > 0 &&
           price.trim() !== '' &&
@@ -112,109 +110,104 @@ export const CreateTourForm = () => {
 
   const handleBack = () => setActiveStep((prev) => prev - 1);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isStepValid()) {
-      // Формируем данные для создания тура
-      const tourData = {
-        title: name,
-        description,
-        isAccommodation: true,
-        address: 'string',
-        duration: Number(duration),
-        city: 'string',
-        categoryIds: categories.map((_: any, i: number) => i),
-        flows: dateRanges.map(range => ({
-          startDate: range.start.toISOString(),
-          endDate: range.end.toISOString(),
-          participant: Number(capacity),
-          currentPrice: Number(price.replace(/\s/g, '')),
-        })),
-      };
-      dispatch(createTourRequest(tourData));
-    }
+  const resetForm = () => {
+    setActiveStep(0);
+    setName('');
+    setDescription('');
+    setCity('');
+    setDuration('');
+    setCapacity('');
+    setPrice('');
+    setCategories([]);
+    setDateRanges([]);
+    setFileList([]);
   };
+
+
+const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!isStepValid()) return;
+
+  const formData = new FormData();
+
+  const cleanedCity = city.trim();
+
+  formData.append('title', name.trim());
+  formData.append('description', description.trim());
+  formData.append('isAccommodation', 'true');
+  formData.append('address', cleanedCity); // одно и то же
+  formData.append('city', cleanedCity);
+  formData.append('duration', String(Math.max(1, Number(duration)))); 
+
+  // Добавляем категории (замени на реальные ID)
+  categories.forEach((_, i) => {
+    formData.append('categoryIds', String(i));
+  });
+
+  // Добавляем потоки
+  const flows = dateRanges.map(range => ({
+    startDate: range.start.toISOString(),
+    endDate: range.end.toISOString(),
+    participant: Number(capacity),
+    currentPrice: Number(price.replace(/\s/g, '')),
+  }));
+  formData.append('flows', JSON.stringify(flows));
+
+  // Добавляем фото
+  fileList.forEach(file => {
+    if (file.originFileObj) {
+      formData.append('photos', file.originFileObj);
+    }
+  });
+
+  dispatch(createTourRequest(formData));
+  resetForm();
+};
+
 
   const formatText = (format: 'title' | 'subtitle' | 'list') => {
     const textarea = descriptionRef.current;
     if (!textarea) return;
-
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const selectedText = description.substring(start, end);
-    const textBefore = description.substring(0, start);
-    const textAfter = description.substring(end);
-    
-    // Проверяем, находится ли текст уже на отдельной строке
-    const isOnNewLine = (text: string) => {
-      const lastChar = text[text.length - 1];
-      return lastChar === '\n' || text.length === 0;
-    };
-    
-    const needsNewLineBefore = !isOnNewLine(textBefore);
-    const needsNewLineAfter = textAfter.length > 0 && textAfter[0] !== '\n';
+    const lineStart = description.lastIndexOf('\n', start - 1) + 1;
+    const lineEnd = description.indexOf('\n', end);
+    const currentLine = description.substring(lineStart, lineEnd === -1 ? description.length : lineEnd);
+    const prefix = format === 'title' ? '***' : format === 'subtitle' ? '**' : '· ';
+    const suffix = format === 'list' ? '' : prefix;
+    const beforeSel = currentLine.substring(0, start - lineStart);
+    const afterSel = currentLine.substring(end - lineStart);
+    let newLines: string[] = [];
 
-    let newText = '';
-    const beforeNewLine = needsNewLineBefore ? '\n' : '';
-    const afterNewLine = needsNewLineAfter ? '\n' : '';
-
-    if (format === 'title' || format === 'subtitle') {
-      // Если выделена не вся строка, переносим остаток на новую строку без пробелов
-      const beforeNewLine = needsNewLineBefore ? '\n' : '';
-      const afterNewLine = needsNewLineAfter ? '\n' : '';
-      let formatted = '';
-      if (start !== end && selectedText.indexOf('\n') === -1) {
-        const lineStart = description.lastIndexOf('\n', start - 1) + 1;
-        const lineEnd = description.indexOf('\n', end);
-        const fullLine = description.substring(lineStart, lineEnd === -1 ? description.length : lineEnd);
-        const beforeSel = fullLine.substring(0, start - lineStart);
-        const afterSel = fullLine.substring(end - lineStart);
-        formatted =
-          textBefore.substring(0, lineStart) +
-          beforeSel +
-          (format === 'title' ? '***' : '**') + selectedText.trim() + (format === 'title' ? '***' : '**') +
-          '\n' +
-          afterSel.trimStart() +
-          textAfter.substring(lineEnd === -1 ? description.length : lineEnd);
-      } else {
-        formatted = textBefore + beforeNewLine + (format === 'title' ? '***' : '**') + selectedText.trim() + (format === 'title' ? '***' : '**') + afterNewLine + textAfter;
-      }
-      newText = formatted;
-    } else if (format === 'list') {
-      // Аналогичная логика для списка
-      if (start !== end && selectedText.indexOf('\n') === -1) {
-        const lineStart = description.lastIndexOf('\n', start - 1) + 1;
-        const lineEnd = description.indexOf('\n', end);
-        const fullLine = description.substring(lineStart, lineEnd === -1 ? description.length : lineEnd);
-        const beforeSel = fullLine.substring(0, start - lineStart);
-        const afterSel = fullLine.substring(end - lineStart);
-        newText =
-          textBefore.substring(0, lineStart) +
-          beforeSel +
-          '· ' + selectedText.trim() +
-          '\n' +
-          afterSel.trimStart() +
-          textAfter.substring(lineEnd === -1 ? description.length : lineEnd);
-      } else {
-        const lines = selectedText.split('\n');
-        const formattedLines = lines.map(line => '· ' + line.trim()).join('\n');
-        newText = textBefore + beforeNewLine + formattedLines + afterNewLine + textAfter;
-      }
+    if (start === lineStart && end === lineEnd) {
+      newLines.push(`${prefix}${selectedText.trim()}${suffix}`);
+    } else if (start === lineStart) {
+      newLines.push(`${prefix}${selectedText.trim()}${suffix}`);
+      newLines.push(afterSel.trimStart());
+    } else if (end === lineEnd || lineEnd === -1) {
+      newLines.push(beforeSel.trimEnd());
+      newLines.push(`${prefix}${selectedText.trim()}${suffix}`);
+    } else {
+      newLines.push(beforeSel.trimEnd());
+      newLines.push(`${prefix}${selectedText.trim()}${suffix}`);
+      newLines.push(afterSel.trimStart());
     }
 
-    setDescription(newText);
+    const result =
+      description.substring(0, lineStart) +
+      newLines.join('\n') +
+      (lineEnd === -1 ? '' : description.substring(lineEnd));
+
+    setDescription(result);
   };
 
   const formatPrice = (value: string) => {
-    // Удаляем все нецифровые символы
     const numericValue = value.replace(/\D/g, '');
-    // Если первая цифра 0, удаляем её
     const cleanValue = numericValue.startsWith('0') ? numericValue.slice(1) : numericValue;
-    // Форматируем число с разделителями разрядов
     return new Intl.NumberFormat('ru-RU').format(Number(cleanValue));
   };
 
-  // Данные для автоселектов
   const cuisineOptions = [
     'Итальянская', 'Французская', 'Японская', 'Грузинская', 'Русская', 'Тайская', 'Мексиканская', 'Китайская', 'Индийская', 'Испанская',
   ];
@@ -243,7 +236,6 @@ export const CreateTourForm = () => {
         </Stepper>
       </Box>
       <Box sx={styles.mainBox}>
-        {/* Step 1: Main info */}
         {activeStep === 0 && (
           <Box sx={styles.stepBox}>
             <Box sx={styles.photoUploadRow}>
@@ -264,7 +256,7 @@ export const CreateTourForm = () => {
               </Box>
             </Box>
             <Box sx={styles.formColumns}>
-              <Box sx={{ ...styles.formColumn, ...styles.formColumnCentered}}>
+              <Box sx={{ ...styles.formColumn, ...styles.formColumnCentered }}>
                 <TextField
                   label="Название тура"
                   name="name"
@@ -273,6 +265,14 @@ export const CreateTourForm = () => {
                   value={name}
                   onChange={e => setName(e.target.value)}
                 />
+                <TextField
+                  label="Город"
+                  name="city"
+                  fullWidth
+                  sx={{ ...styles.input, ...styles.inputAdaptive }}
+                  value={city}
+                  onChange={e => setCity(e.target.value)}
+                />
                 <Box sx={styles.textFieldContainer}>
                   <TextField
                     label="Кол-во участников"
@@ -280,11 +280,7 @@ export const CreateTourForm = () => {
                     type="text"
                     value={capacity}
                     onChange={handleCapacityChange}
-                    inputProps={{
-                      inputMode: 'numeric',
-                      pattern: '[0-9]*',
-                      style: { appearance: 'textfield' }
-                    }}
+                    inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', style: { appearance: 'textfield' } }}
                     sx={{ ...styles.textFieldLeft }}
                   />
                   <TextField
@@ -296,11 +292,7 @@ export const CreateTourForm = () => {
                     InputProps={{
                       endAdornment: <InputAdornment position="end">₽</InputAdornment>,
                     }}
-                    inputProps={{
-                      inputMode: 'numeric',
-                      pattern: '[0-9]*',
-                      style: { appearance: 'textfield' }
-                    }}
+                    inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', style: { appearance: 'textfield' } }}
                     sx={{ ...styles.textFieldRight }}
                   />
                 </Box>
@@ -345,6 +337,7 @@ export const CreateTourForm = () => {
             </Box>
           </Box>
         )}
+
         {/* Step 2: Description */}
         {activeStep === 1 && (
           <Box sx={styles.stepBox}>

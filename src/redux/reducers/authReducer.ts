@@ -1,4 +1,5 @@
 import { AuthInformation, InitialStateTypes } from '../../types/auth/types';
+import { USER_UPDATE_FAILURE, USER_UPDATE_REQUEST, USER_UPDATE_SUCCESS } from '../actions/auth';
 
 import {
   AUTH_LOGOUT,
@@ -17,6 +18,8 @@ import {
   AUTH_VERIFY_EMAIL_REQUEST,
   AUTH_VERIFY_EMAIL_SUCCESS,
   AUTH_VERIFY_EMAIL_FAILURE,
+  GET_ORGANIZER_STATUS_SUCCESS,
+  POST_ORGANIZER_REQUEST,
 } from '../actionTypes';
 
 interface AuthAction {
@@ -29,6 +32,7 @@ const initialState: InitialStateTypes & {
   isGeneratingCode?: boolean;
   isVerifying?: boolean;
   verificationError?: string | null;
+  applicationStatus?: string;
 } = {
   authUser: null,
   isLogged: Boolean(localStorage.getItem('authToken')),
@@ -69,6 +73,7 @@ export default function authReducer(state = initialState, action: AuthAction) {
         authUser: null,
         error: action.error,
       };
+    case USER_UPDATE_REQUEST:
     case AUTH_LOGIN_REQUEST:
     case AUTH_REGISTER_REQUEST:
       return {
@@ -82,7 +87,7 @@ export default function authReducer(state = initialState, action: AuthAction) {
         ...state,
         isLoading: false,
         isLogged: true,
-        authUser: action.payload,
+        authUser: action.payload.user,
         error: null,
       };
     case AUTH_LOGIN_FAILURE:
@@ -131,6 +136,29 @@ export default function authReducer(state = initialState, action: AuthAction) {
         ...state,
         isVerifying: false,
         verificationError: action.error,
+      };
+    case USER_UPDATE_FAILURE: 
+          return {
+        ...state,
+        isLoading: false,
+        error: action.error,
+      };
+    case USER_UPDATE_SUCCESS: 
+      return {
+        ...state,
+        isLoading: false,
+        authUser: { ...state.authUser, ...action.payload } ,
+        error: null,
+      };
+    case POST_ORGANIZER_REQUEST: 
+      return {
+        ...state,
+        applicationStatus: 'pending',
+      };
+    case GET_ORGANIZER_STATUS_SUCCESS: 
+      return {
+        ...state,
+        applicationStatus: (action.payload as any)[0].adminApprove,
       };
     default:
       return state;

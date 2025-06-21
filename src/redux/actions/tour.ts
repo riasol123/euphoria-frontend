@@ -13,6 +13,12 @@ import {
   SET_TOURS,
   SET_TOURS_ERROR,
   SET_TOURS_LOADING,
+  GET_TOUR_SUCCESS,
+  GET_TOUR_FAILURE,
+  GET_TOUR_REQUEST,
+  POST_BOOKINGS_REQUEST,
+  POST_BOOKINGS_SUCCESS,
+  POST_BOOKINGS_FAILURE,
 } from '../actionTypes';
 
 export const setTours = (tours: Tour[]) => ({
@@ -30,17 +36,32 @@ export const setToursError = (error: string) => ({
   payload: error,
 });
 
-export const fetchToursRequest = (payload?: any) => ({
+export const getTourRequest = (payload?: any) => ({
+  type: GET_TOUR_REQUEST,
+  payload,
+});
+
+export const getTourSuccess = (tours: Tour[]) => ({
+  type: GET_TOUR_SUCCESS,
+  payload: tours,
+});
+
+export const getTourFailure = (error: string) => ({
+  type: GET_TOUR_FAILURE,
+  payload: error,
+});
+
+export const getToursRequest = (payload?: any) => ({
   type: GET_TOURS_REQUEST,
   payload,
 });
 
-export const fetchToursSuccess = (tours: Tour[]) => ({
+export const getToursSuccess = (tours: Tour[]) => ({
   type: GET_TOURS_SUCCESS,
   payload: tours,
 });
 
-export const fetchToursFailure = (error: string) => ({
+export const getToursFailure = (error: string) => ({
   type: GET_TOURS_FAILURE,
   payload: error,
 });
@@ -71,6 +92,20 @@ export const fetchBookingsSuccess = (bookings: any[]) => ({
 
 export const fetchBookingsFailure = (error: string) => ({
   type: FETCH_BOOKINGS_FAILURE,
+  payload: error,
+});
+
+export const postBookingsRequest = (payload: any) => ({
+  type: POST_BOOKINGS_REQUEST,
+  payload,
+});
+
+export const postBookingsSuccess = () => ({
+  type: POST_BOOKINGS_SUCCESS,
+});
+
+export const postBookingsFailure = (error: string) => ({
+  type: POST_BOOKINGS_FAILURE,
   payload: error,
 });
 

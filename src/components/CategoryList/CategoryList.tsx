@@ -3,12 +3,12 @@ import { Box, IconButton, Skeleton, Card, CardHeader, CardContent } from '@mui/m
 import { useDispatch, useSelector } from 'react-redux';
 import { categoryListStyles } from './CategoryListStyle';
 import { CategoryListItem } from '../CategoryListItem/CategoryListItem';
-import { RootState } from '../../types/rootState';
 import { getCategoriesRequest } from '../../redux/actions/categories';
 import { Category } from '../../types/category';
 import arrowLeft from '../../assets/arrow_left.svg';
 import arrowRight from '../../assets/arrow_right.svg';
 import { itemStyles } from '../CategoryListItem/CategoryListStyleItem';
+import { RootState } from '../../hooks/getTypedSelector';
 
 const ITEMS_PER_PAGE = 4;
 const ITEM_WIDTH = 290; // 270px width + 20px gap
@@ -79,7 +79,7 @@ export const CategoryList = () => {
             <CategoryListItem
               key={category.id}
               icon={category.iconPath || ''}
-              title={category.title}
+                title={category.title}
               description={category.description}
             />
           ))}

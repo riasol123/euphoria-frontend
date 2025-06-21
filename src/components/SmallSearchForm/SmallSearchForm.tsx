@@ -2,7 +2,7 @@ import { ChangeEvent, useState } from 'react';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputAdornment from '@mui/material/InputAdornment';
 import FormControl from '@mui/material/FormControl';
-import { Box, Typography, Button, Tooltip } from '@mui/material';
+import { Box, Typography, Button } from '@mui/material';
 import { ConfigProvider, DatePicker } from 'antd';
 import ruRU from 'antd/locale/ru_RU';
 import dayjs from 'dayjs';
@@ -24,7 +24,6 @@ export const SmallSearchForm = () => {
 
   const [city, setCity] = useState('');
   const [dateRange, setDateRange] = useState<any>(null);
-  const [showTooltip, setShowTooltip] = useState(false);
 
   // Только буквы (русские, латинские), пробелы и дефисы
   const allowedPattern = /^[a-zA-Zа-яА-ЯёЁ\-\s]*$/;
@@ -33,9 +32,6 @@ export const SmallSearchForm = () => {
     const value = event.target.value;
     if (allowedPattern.test(value)) {
       setCity(value);
-      if (value.trim()) {
-        setShowTooltip(false);
-      }
     }
   };
 
@@ -44,16 +40,10 @@ export const SmallSearchForm = () => {
   };
 
   const handleSearch = () => {
-    if (!city.trim()) {
-      setShowTooltip(true);
-      return;
-    }
-    setShowTooltip(false);
     dispatch(setSearchData({ 
       city, 
       dateRange,
-      adults: 2,
-      children: 0
+      people: 2,
     }));
     navigate('/search');
   };
@@ -66,12 +56,6 @@ export const SmallSearchForm = () => {
       </Box>
       <Box sx={searchStyles.inputContainer}>
         <FormControl sx={searchStyles.formControl} variant="outlined">
-          <Tooltip
-            title={showTooltip ? 'Место не может быть пустым' : ''}
-            open={showTooltip}
-            arrow
-            placement="top"
-          >
             <OutlinedInput
               id="outlined-adornment-password"
               type='text'
@@ -85,7 +69,6 @@ export const SmallSearchForm = () => {
                 </InputAdornment>
               }
             />
-          </Tooltip>
         </FormControl>
         <ConfigProvider 
           locale={ruRU}

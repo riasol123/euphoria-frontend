@@ -34,12 +34,14 @@ export const authPageStyles = {
     },
   },
   input: {
-    width: '100%',
-    '& .MuiInputBase-root': {
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    width: '400px',
+    gap: '20px',
+    '& fieldset': {
       borderRadius: '20px',
     },
-    '& fieldset': {
-      border: '1px solid #FF5333',
+    '& .MuiInputBase-root': {
       borderRadius: '20px',
     },
     '& input': {

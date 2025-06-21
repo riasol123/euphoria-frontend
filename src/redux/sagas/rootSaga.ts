@@ -4,8 +4,8 @@ import { watchAuthLogin, watchAuthRegister } from './auth';
 import { watchFoodCategories } from './foodCategories';
 import { watchAuthGenerateVerifyCode, watchAuthVerifyEmail } from './verify';
 import { watchWhoami, watchUserUpdate, watchUserPasswordChange } from './user';
-import { toursSaga } from './tours';
-import { watchOrganizerRequest } from './organizer';
+import { watchTours } from './tours';
+import { watchOrganizer } from './organizer';
 import { watchCategories } from './categories';
 
 export function* rootSaga() {
@@ -17,9 +17,9 @@ export function* rootSaga() {
     watchCategories(),
     watchAuthVerifyEmail(),
     watchWhoami(),
-    toursSaga(),
+    watchTours(),
     watchUserUpdate(),
     watchUserPasswordChange(),
-    watchOrganizerRequest(),
+    watchOrganizer(),
   ]);
 }

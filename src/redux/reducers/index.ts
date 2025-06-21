@@ -4,6 +4,7 @@ import { searchReducer } from './searchReducer';
 import { tourReducer } from './tourReducer';
 import { categoriesReducer } from './categories';
 import { foodCategoriesReducer } from './foodCategories';
+import { modalReducer } from './modal';
 
 export const rootReducer = combineReducers({
   auth: authReducer,
@@ -11,4 +12,5 @@ export const rootReducer = combineReducers({
   tour: tourReducer,
   categories: categoriesReducer,
   foodCategories: foodCategoriesReducer,
+  modal: modalReducer,
 }); 

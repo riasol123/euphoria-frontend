@@ -1,53 +1,44 @@
 import { call, put, takeLatest } from 'redux-saga/effects';
 import api from '../api/api';
-import { CREATE_TOUR_REQUEST, FETCH_BOOKINGS_REQUEST, GET_TOURS_REQUEST } from '../actionTypes';
+import { CREATE_TOUR_REQUEST, FETCH_BOOKINGS_REQUEST, GET_TOUR_REQUEST, GET_TOURS_REQUEST, POST_BOOKINGS_REQUEST } from '../actionTypes';
 import {
-  fetchToursSuccess,
-  fetchToursFailure,
+  getToursSuccess,
+  getToursFailure,
   createTourSuccess,
   createTourFailure,
   fetchBookingsSuccess,
   fetchBookingsFailure,
+  getTourSuccess,
+  getTourFailure,
+  postBookingsSuccess,
+  postBookingsFailure,
 } from '../actions/tour';
+import { bookTour, createTour, getTour, getTours } from '../api/tours';
+import { openModal } from '../actions/modal';
+import { ModalType } from '../../types/modal/types';
 
-function* fetchTours(action: any): Generator<any, void, any> {
+function* getTourSaga(action: any): Generator<any, void, any> {
   try {
-    let url = '/tour';
-    const p = action.payload || {};
-    const params = new URLSearchParams();
-    params.append('page', p.page ?? 1);
-    params.append('limit', p.limit ?? 10);
-    params.append('title', p.title ?? '');
-    params.append('isAccommodation', String(p.isAccommodation ?? false));
-    params.append('categoryIds', p.categoryIds ?? '');
-    params.append('startDate', p.startDate ?? '');
-    params.append('endDate', p.endDate ?? '');
-    params.append('city', p.city ?? '');
-    params.append('durationFrom', p.durationFrom ?? 1);
-    params.append('durationTo', p.durationTo ?? 30);
-    url += `?${params.toString()}`;
-    const response = yield call(api.get, url);
-    yield put(fetchToursSuccess(response.data));
+    const response = yield call(getTours, action.payload);
+    yield put(getToursSuccess(response));
   } catch (error: any) {
-    yield put(fetchToursFailure(error.message));
+    yield put(getToursFailure(error.message));
+  }
+}
+
+function* getTourByIdSaga(action: any): Generator<any, void, any> {
+  try {
+    const response = yield call(getTour, action.payload);
+    yield put(getTourSuccess(response));
+  } catch (error: any) {
+    yield put(getTourFailure(error.message));
   }
 }
 
 function* createTourSaga(action: any): Generator<any, void, any> {
   try {
-    const token = localStorage.getItem('token');
-    const response = yield call(
-      api.post,
-      '/tour',
-      action.payload,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      }
-    );
-    yield put(createTourSuccess(response.data));
+    const response = yield call(createTour, action.payload)
+    yield put(createTourSuccess(response));
   } catch (error: any) {
     yield put(createTourFailure((error as any).message));
   }
@@ -62,8 +53,20 @@ function* fetchBookingsSaga(): Generator<any, void, any> {
   }
 }
 
-export function* toursSaga() {
-  yield takeLatest(GET_TOURS_REQUEST, fetchTours);
+function* postBookingsSaga(action: any): Generator<any, void, any> {
+  try {
+    yield call(bookTour, action.payload);
+    yield put(postBookingsSuccess());
+    yield put(openModal({ title: 'Готово!', description: 'Тур забронирован.', type: ModalType.success }));
+  } catch (error: any) {
+    yield put(postBookingsFailure(error.message));
+  }
+}
+
+export function* watchTours() {
+  yield takeLatest(GET_TOURS_REQUEST, getTourSaga);
   yield takeLatest(CREATE_TOUR_REQUEST, createTourSaga);
   yield takeLatest(FETCH_BOOKINGS_REQUEST, fetchBookingsSaga);
+  yield takeLatest(GET_TOUR_REQUEST, getTourByIdSaga);
+  yield takeLatest(POST_BOOKINGS_REQUEST, postBookingsSaga);
 } 

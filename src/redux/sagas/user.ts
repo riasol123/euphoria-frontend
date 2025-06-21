@@ -4,6 +4,9 @@ import { WHOAMI_REQUEST } from '../actionTypes';
 import { whoamiSuccess, whoamiFailure } from '../actions/auth';
 import { USER_UPDATE_REQUEST, userUpdateSuccess, userUpdateFailure } from '../actions/auth';
 import { USER_PASSWORD_CHANGE_REQUEST, userPasswordChangeSuccess, userPasswordChangeFailure } from '../actions/auth';
+import { userPasswordChange, userUpdate } from '../api/user';
+import { openModal } from '../actions/modal';
+import { ModalType } from '../../types/modal/types';
 
 function* whoamiSaga(): Generator<any, void, any> {
   try {
@@ -16,19 +19,10 @@ function* whoamiSaga(): Generator<any, void, any> {
 
 function* userUpdateSaga(action: any): Generator<any, void, any> {
   try {
-    const token = localStorage.getItem('token');
-    const response = yield call(
-      api.patch,
-      '/user/personal-info',
-      action.payload,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}`,
-        },
-      }
-    );
-    yield put(userUpdateSuccess(response.data));
+    const response = yield call(userUpdate, action.payload);
+
+    yield put(openModal({ title: 'Готово!', description: 'Вашы данные были успешно обновлены.', type: ModalType.success }));
+    yield put(userUpdateSuccess(response));
   } catch (error: any) {
     yield put(userUpdateFailure(error.message));
   }
@@ -36,18 +30,9 @@ function* userUpdateSaga(action: any): Generator<any, void, any> {
 
 function* userPasswordChangeSaga(action: any): Generator<any, void, any> {
   try {
-    const token = localStorage.getItem('token');
-    yield call(
-      api.patch,
-      '/user/password',
-      action.payload,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      }
-    );
+    yield call(userPasswordChange, action.payload);
+
+    yield put(openModal({ title: 'Готово!', description: 'Новый пароль установлен.', type: ModalType.success }));
     yield put(userPasswordChangeSuccess());
   } catch (error: any) {
     yield put(userPasswordChangeFailure(error.message));

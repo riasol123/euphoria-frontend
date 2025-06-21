@@ -160,7 +160,6 @@ export const OrganizerTours = () => {
   };
 
   const handleDelete = (tourId: string) => {
-    // TODO: Implement delete functionality
     console.log('Delete tour:', tourId);
   };
 

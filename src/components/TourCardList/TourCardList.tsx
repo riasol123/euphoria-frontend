@@ -2,6 +2,7 @@ import { Box } from '@mui/system';
 import { TourCard } from '../TourCard/TourCard';
 import { styles } from './TourCardListStyle';
 import { useSelector } from 'react-redux';
+import { getImageUrl } from '../../utils/getImageUrl';
 
 export const TourCardList = () => {
   const { tours } = useSelector((state: any) => state.tour);
@@ -21,8 +22,9 @@ export const TourCardList = () => {
           location={tour.city}
           duration={tour.duration}
           price={tour.flows?.[0]?.currentPrice || ''}
-          img={tour.photos?.[0] ? (process.env.VITE_API_BASE_URL + '/' + tour.photos[0]) : ''}
+          img={tour.photos?.[0] ? (getImageUrl(tour.photos[0])) : ''}
           rate={tour.rate || '—'}
+          tourData={tour}
         />
       ))}
     </Box>

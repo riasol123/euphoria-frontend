@@ -28,7 +28,13 @@ export const styles = {
   },
   title: {
     fontSize: '15px',
-    margin: '5px 0px'
+    margin: '5px 0px',
+        overflow: 'hidden',
+    display: '-webkit-box',
+    WebkitLineClamp: 1,
+    WebkitBoxOrient: 'vertical',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'normal',
   },
   description: {
     fontSize: '13px',
@@ -36,7 +42,7 @@ export const styles = {
     flexGrow: 1,
     overflow: 'hidden',
     display: '-webkit-box',
-    WebkitLineClamp: 2,
+    WebkitLineClamp: 3,
     WebkitBoxOrient: 'vertical',
     textOverflow: 'ellipsis',
     whiteSpace: 'normal',
