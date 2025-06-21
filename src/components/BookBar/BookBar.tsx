@@ -36,7 +36,7 @@ export function BookBar() {
     }
   }, [tour, selectedFlowId]);
 
-  const selectedFlow = tour?.flows?.find(flow => flow.id === selectedFlowId);
+  const selectedFlow = tour?.flows?.find((flow: any) => flow.id === selectedFlowId);
 
   // Загружаем брони по выбранному потоку и вычисляем свободные места
   useEffect(() => {
@@ -92,7 +92,7 @@ export function BookBar() {
           onChange={handleChange}
           sx={itemStyles.select}
         >
-          {tour.flows.map(flow => {
+          {tour.flows.map((flow: any) => {
             const start = new Date(flow.startDate);
             const end = new Date(flow.endDate);
             const formatter = new Intl.DateTimeFormat('ru-RU', {

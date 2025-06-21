@@ -48,11 +48,6 @@ const sortedTours = (tours || [])
     }));
   };
 
-  // Проверяем, что все картинки загрузились
-  const allImagesLoaded =
-    sortedTours.length > 0 &&
-    sortedTours.every((tour: Tour) => loadedImages[tour.id.toString()]);
-
   const skeletons = [0, 1, 2];
 
   if (loading || sortedTours.length === 0) {

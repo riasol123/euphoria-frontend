@@ -2,8 +2,6 @@ import { call, put, takeLatest } from 'redux-saga/effects';
 import { fetchOrganizerSuccess, fetchOrganizerFailure, getOrganizerStatusSuccess, getOrganizerStatusFailure } from '../actions/organizer';
 import { GET_ORGANIZER_STATUS_REQUEST, POST_ORGANIZER_REQUEST } from '../actionTypes';
 import { getApplicationStatus, postApplication } from '../api/organizer';
-import { openModal } from '../actions/modal';
-import { ModalType } from '../../types/modal/types';
 
 function* organizerRequestSaga(action: any): Generator<any, void, any> {
   try {
