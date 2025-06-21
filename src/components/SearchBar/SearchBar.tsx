@@ -23,12 +23,14 @@ dayjs.locale('ru');
 export const SearchBar = () => {
   const { RangePicker } = DatePicker;
 
-  // Получаем данные из Redux Store
-  const { city, dateRange } = useSelector((state: RootState) => state.search);
+  // Получаем данные из Redux Store, включая cuisineTypes и categoryTypes
+  const { city, dateRange, cuisineTypes, categoryTypes } = useSelector(
+    (state: RootState) => state.search
+  );
 
   // Локальные состояния для инпутов
-  const [placeInput, setPlace] = useState(city || '');  // Место
-  const [dateRangeInput, setDateRange] = useState(dateRange || null);  // Даты
+  const [placeInput, setPlace] = useState(city || ''); // Место
+  const [dateRangeInput, setDateRange] = useState(dateRange || null); // Даты
   const [participants, setParticipants] = useState(2);
 
   const dispatch = useDispatch();
@@ -41,10 +43,12 @@ export const SearchBar = () => {
     const value = event.target.value;
     if (allowedPattern.test(value)) {
       setPlace(value);
-      dispatch(setSearchData({ 
-        city: value,
-        dateRange,
-      }));
+      dispatch(
+        setSearchData({
+          city: value,
+          dateRange,
+        })
+      );
     }
     // Если не проходит по паттерну, не обновляем значение
   };
@@ -52,29 +56,44 @@ export const SearchBar = () => {
   // Обработчик изменения дат
   const handleDateChange = (dates: any) => {
     setDateRange(dates);
-    dispatch(setSearchData({ 
-      city: placeInput,
-      dateRange: dates,
-    }));
+    dispatch(
+      setSearchData({
+        city: placeInput,
+        dateRange: dates,
+      })
+    );
   };
 
   // Функция для отправки данных (например, в Redux Store или на сервер)
   const handleSearch = async () => {
-    try {
-      dispatch(getToursRequest({
-        isAccommodation: false,
-        categoryIds: '',
-        startDate: dateRangeInput?.[0]?.format ? dateRangeInput[0].format('YYYY-MM-DD') : '',
-        endDate: dateRangeInput?.[1]?.format ? dateRangeInput[1].format('YYYY-MM-DD') : '',
-        city: placeInput,
-        durationFrom: 1,
-        durationTo: 30,
-      }));
-    } catch (error) {
-      console.error('Ошибка при поиске:', error);
+  try {
+    // Формируем объект запроса с условным добавлением категорий
+    const requestPayload: any = {
+      isAccommodation: false,
+      startDate: dateRangeInput?.[0]?.format
+        ? dateRangeInput[0].format('YYYY-MM-DD')
+        : '',
+      endDate: dateRangeInput?.[1]?.format
+        ? dateRangeInput[1].format('YYYY-MM-DD')
+        : '',
+      city: placeInput,
+      durationFrom: 1,
+      durationTo: 30,
+    };
+
+    if (categoryTypes && categoryTypes.length > 0) {
+      requestPayload.categoryIds = categoryTypes.join(',');
     }
-  };
-  
+
+    if (cuisineTypes && cuisineTypes.length > 0) {
+      requestPayload.foodCategoryIds = cuisineTypes.join(',');
+    }
+
+    dispatch(getToursRequest(requestPayload));
+  } catch (error) {
+    console.error('Ошибка при поиске:', error);
+  }
+};
 
   const updateParticipants = (increment: boolean) => {
     setParticipants((prev: number) => Math.max(1, prev + (increment ? 1 : -1)));
@@ -89,26 +108,26 @@ export const SearchBar = () => {
       <Box sx={searchStyles.mainContainer}>
         {/* Поле для ввода места */}
         <FormControl variant="outlined" className="barItem">
-            <OutlinedInput
-              type="text"
-              placeholder="Место"
-              value={placeInput}
-              onChange={handlePlaceChange}
-              sx={{
-                ...searchStyles.input,
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  border: 'none',
-                },
-                '& .MuiOutlinedInput-notchedOutline': {
-                  border: 'none',
-                },
-              }}
-              startAdornment={
-                <InputAdornment position="start">
-                  <img src={SearchIcon} alt="search" />
-                </InputAdornment>
-              }
-            />
+          <OutlinedInput
+            type="text"
+            placeholder="Место"
+            value={placeInput}
+            onChange={handlePlaceChange}
+            sx={{
+              ...searchStyles.input,
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                border: 'none',
+              },
+              '& .MuiOutlinedInput-notchedOutline': {
+                border: 'none',
+              },
+            }}
+            startAdornment={
+              <InputAdornment position="start">
+                <img src={SearchIcon} alt="search" />
+              </InputAdornment>
+            }
+          />
         </FormControl>
 
         <Divider orientation="vertical" />
@@ -118,7 +137,9 @@ export const SearchBar = () => {
           <RangePicker
             format="dd, D MMM"
             placeholder={['Заезд', 'Отъезд']}
-            disabledDate={(current) => current && current < dayjs().startOf('day')}
+            disabledDate={(current) =>
+              current && current < dayjs().startOf('day')
+            }
             prefix={<img src={DateIcon} alt="date" />}
             suffixIcon={null}
             style={searchStyles.input}
@@ -133,10 +154,26 @@ export const SearchBar = () => {
 
         {/* Меню для выбора количества людей */}
         <Box sx={searchStyles.peopleWrapper} className="barItem">
-          <Typography sx={{ mr: 2, minWidth: '90px', alignContent: 'center' }}>Участники</Typography>
-          <IconButton size="small" aria-label="minus participants" onClick={() => updateParticipants(false)}><RemoveIcon /></IconButton>
-          <Typography component="span" sx={{ mx: 1, alignContent: 'center' }}>{participants}</Typography>
-          <IconButton size="small" aria-label="plus participants" onClick={() => updateParticipants(true)}><AddIcon /></IconButton>
+          <Typography sx={{ mr: 2, minWidth: '90px', alignContent: 'center' }}>
+            Участники
+          </Typography>
+          <IconButton
+            size="small"
+            aria-label="minus participants"
+            onClick={() => updateParticipants(false)}
+          >
+            <RemoveIcon />
+          </IconButton>
+          <Typography component="span" sx={{ mx: 1, alignContent: 'center' }}>
+            {participants}
+          </Typography>
+          <IconButton
+            size="small"
+            aria-label="plus participants"
+            onClick={() => updateParticipants(true)}
+          >
+            <AddIcon />
+          </IconButton>
         </Box>
 
         {/* Кнопка поиска */}
@@ -152,3 +189,19 @@ export const SearchBar = () => {
     </Box>
   );
 };
+
+export interface DateRange {
+  start: Date | null;
+  end: Date | null;
+}
+
+export interface SearchState {
+  city: string;
+  dateRange?: DateRange;
+  people?: number;
+  durationFrom?: number;
+  durationTo?: number;
+  isAccommodation?: boolean;
+  cuisineTypes?: number[];
+  categoryTypes?: number[];
+}

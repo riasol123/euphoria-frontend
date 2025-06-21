@@ -200,14 +200,14 @@ export function FilterBar() {
         disableCloseOnSelect
         value={selectedCuisines}
         onChange={handleCuisineChange}
-        getOptionLabel={(option) => option.title}
+        getOptionLabel={(option) => option.name}
         isOptionEqualToValue={(option, value) => option.id === value.id}
         sx={itemStyles.popper}
         popupIcon={<img src={DropDown} alt="dropdown" className="custom-dropdown-icon" style={{ width: 20, height: 20, opacity: 0.7, transition: 'transform 0.2s' }} />}
         renderOption={(props, option, { selected }) => (
           <li {...props}>
             <Checkbox checked={selected} />
-            {option.title}
+            {option.name}
           </li>
         )}
         renderInput={(params) => (
